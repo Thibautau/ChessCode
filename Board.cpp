@@ -52,8 +52,13 @@ Piece* Board::getPieceAt(const Coordinate& coord) const
     return m_tabtabpiBoard[coord.iRow][coord.iColumn];
 }
 
+Piece* Board::getPieceAt(int in_iRow, int in_iColumn) const
+{
+    return m_tabtabpiBoard[in_iRow][in_iColumn];
+}
+
 bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol) {
-    Piece* pPiece = m_tabtabpiBoard[in_iStartRow][in_iStartCol];
+    Piece* pPiece = getPieceAt(in_iStartRow, in_iStartCol);
     if(pPiece == nullptr) {
         return false;
     }

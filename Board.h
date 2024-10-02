@@ -19,6 +19,9 @@ public:
     Board();
     void initializeBoard();
     Piece* getPieceAt(const Coordinate& in_coord) const;
+
+    Piece* getPieceAt(int in_iRow, int in_iColumn) const;
+
     void placePiece(int in_iRow, int in_iCol, Piece* in_pPiece);
     bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol);
     bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol) const;
