@@ -22,9 +22,10 @@ public:
 
     int getScore() const;
     void setScore(int in_iScore);
-    Coordinate play();
+    std::pair<Coordinate, Coordinate> play();
     std::string getInput();
-    bool isInputValid(const std::string& in_sInput,int& out_iColumn, int& out_iRow);
+    bool isInputValid(const std::string& in_sInput, Coordinate& out_start, Coordinate& out_end);
+    bool isValidCoordinate(char col, char row);
 };
 
 #endif //PLAYER_H

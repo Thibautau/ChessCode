@@ -24,41 +24,53 @@ void Player::setScore(const int in_iScore) {
     m_iScore = in_iScore;
 }
 
-Coordinate Player::play() {
+std::pair<Coordinate, Coordinate> Player::play() {
     std::string input;
-    int column, row;
+    Coordinate start, end;
 
     do {
         input = getInput();
-    } while (!isInputValid(input, column, row));
+    } while (!isInputValid(input, start, end));
 
-    return {row, column};
+    return {start, end};
 }
 
 std::string Player::getInput() {
     std::string sInput;
-    std::cout << "Veuillez entrer votre move: ";
+    std::cout << "Veuillez entrer votre mouvement (ex: 'e2 e4'): ";
     std::getline(std::cin, sInput);
     return sInput;
 }
 
-bool Player::isInputValid(const std::string& in_sInput,int& out_iColumn, int& out_iRow) {
-    if (in_sInput.length() != 2) {
-        std::cout << "Erreur: L'entrée doit être au format '{lettre}{numero}'." << std::endl;
+bool Player::isInputValid(const std::string& in_sInput, Coordinate& out_start, Coordinate& out_end) {
+    if (in_sInput.length() != 5 || in_sInput[2] != ' ') {
+        std::cout << "Erreur: L'entrée doit être au format 'e2 e4'." << std::endl;
         return false;
     }
 
-    char columnChar = in_sInput[0];
-    char rowChar = in_sInput[1];
+    char startCol = in_sInput[0];
+    char startRow = in_sInput[1];
+    char endCol = in_sInput[3];
+    char endRow = in_sInput[4];
 
-    out_iColumn = columnChar - 'a';
-    if (out_iColumn < 0 || out_iColumn > 7) {
+    if (!isValidCoordinate(startCol, startRow) || !isValidCoordinate(endCol, endRow)) {
+        return false;
+    }
+
+    out_start = {startRow - '1', startCol - 'a'};
+    out_end = {endRow - '1', endCol - 'a'};
+
+    return true;
+}
+
+
+bool Player::isValidCoordinate(char col, char row) {
+    if (col < 'a' || col > 'h') {
         std::cout << "Erreur: La colonne doit être entre 'a' et 'h'." << std::endl;
         return false;
     }
 
-    out_iRow = rowChar - '1';
-    if (out_iRow < 0 || out_iRow > 7) {
+    if (row < '1' || row > '8') {
         std::cout << "Erreur: La ligne doit être entre '1' et '8'." << std::endl;
         return false;
     }

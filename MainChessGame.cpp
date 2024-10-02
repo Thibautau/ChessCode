@@ -27,8 +27,10 @@ void MainChessGame::playTurn()
 
     m_board->displayBoard();
 
-    Coordinate coordStart = m_currentPlayer->play();
-    Coordinate coorEnd = m_currentPlayer->play();
+    std::pair<Coordinate, Coordinate> move = m_currentPlayer->play();
+
+    Coordinate coordStart = move.first;
+    Coordinate coorEnd = move.second;
 
     m_board->displayBoard();
 
