@@ -39,7 +39,8 @@ add_executable(runTests Test/Test.cpp
         Test/Test.cpp
         Test/TestBoard.cpp
         Test/TestBoard.h
-        Test/TestBoard.cpp)
+        Test/TestBoard.cpp
+        Test/TestPiece.cpp)
 
 # Lier GoogleTest à l'exécutable de tests
 target_link_libraries(runTests gtest gtest_main)
