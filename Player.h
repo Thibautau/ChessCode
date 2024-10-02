@@ -18,13 +18,13 @@ protected:
 public:
     Player(Color color);
     Color getPlayerColor() const;
-    void setPlayerColor(Color color);
+    void setPlayerColor(Color Color);
 
     int getScore() const;
-    void setScore(int score);
+    void setScore(int in_iScore);
     Coordinate play();
     std::string getInput();
-    bool isInputValid(const std::string& input,int& column, int& row);
+    bool isInputValid(const std::string& in_sInput,int& out_iColumn, int& out_iRow);
 };
 
 #endif //PLAYER_H
