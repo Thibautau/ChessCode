@@ -27,6 +27,7 @@ public:
     bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol) const;
     std::vector<Move> listOfPossibleMoves(Color in_colColor) const;
     std::vector<Move> possibleMovesForPiece(const Coordinate& in_coordPiece) const;
+    void displayBoard() const;
 };
 
 #endif //BOARD_H

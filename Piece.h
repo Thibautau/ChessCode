@@ -16,6 +16,7 @@ public:
     Piece(TypePieces type, Color color);
     TypePieces getTypePiece() const;
     Color getColor() const;
+    char getDisplayChar() const;
 };
 
 #endif //PIECE_H

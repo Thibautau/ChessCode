@@ -83,3 +83,28 @@ std::vector<Move> Board::listOfPossibleMoves(Color in_colColor) const {
 std::vector<Move> Board::possibleMovesForPiece(const Coordinate& in_coordPiece) const {
     return {};
 }
+
+void Board::displayBoard() const {
+    for (int row = 7; row >= 0; --row) {
+        std::cout << row + 1 << " ";
+        for (int col = 0; col < 8; ++col) {
+            Piece* piece = m_tabtabpiBoard[row][col];
+            if (piece) {
+                char displayChar = piece->getDisplayChar();
+                // Vérifier la couleur de la pièce
+                if (piece->getColor() == Color::BLACK) {
+                    std::cout << static_cast<char>(toupper(displayChar)) << " ";
+                } else {
+                    std::cout << static_cast<char>(tolower(displayChar)) << " ";
+                }
+            } else {
+                std::cout << ". ";
+            }
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "  a b c d e f g h" << std::endl;
+}
+
+

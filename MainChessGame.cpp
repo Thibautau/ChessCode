@@ -22,8 +22,12 @@ void MainChessGame::initChessGame() {
 void MainChessGame::playTurn() {
     std::cout << "C'est au tour de " << (m_currentPlayer->getPlayerColor() == Color::WHITE ? "Blanc" : "Noir") << std::endl;
 
+    m_board->displayBoard();
+
     Coordinate start = m_currentPlayer->play();
     Coordinate end = m_currentPlayer->play();
+
+    m_board->displayBoard();
 
 
     if (m_board->isMoveValid(start.iRow, start.iColumn, end.iRow, end.iColumn)) {
