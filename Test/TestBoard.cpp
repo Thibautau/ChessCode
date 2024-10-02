@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include "Board.cpp"
-#include "Piece.cpp"
 // Test de l'initialisation du plateau
 TEST(BoardTest, Initialization) {
     Board* board = new Board();
@@ -70,11 +69,4 @@ TEST(BoardTest, IsMoveValid) {
 
     // Par exemple, vérifier que le mouvement est toujours valide (implémentation actuelle)
     EXPECT_TRUE(board->isMoveValid(1, 0, 2, 0));
-}
-
-
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    std::cout << "Démarrage des tests..." << std::endl;
-    return RUN_ALL_TESTS();
 }
