@@ -6,14 +6,15 @@ int main() {
     MainChessGame game;
     game.initChessGame();
 
-    while (!game.isGameOver()) {
+    while (!game.isGameOver())
+    {
         game.playTurn();
     }
 
-    Color winner = game.getWinner();
-    if (winner == Color::WHITE) {
+    Color colWinner = game.getColorWinner();
+    if (colWinner == Color::WHITE) {
         std::cout << "Les Blancs ont gagné !" << std::endl;
-    } else if (winner == Color::BLACK) {
+    } else if (colWinner == Color::BLACK) {
         std::cout << "Les Noirs ont gagné !" << std::endl;
     } else {
         std::cout << "Match nul !" << std::endl;

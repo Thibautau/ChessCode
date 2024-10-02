@@ -16,22 +16,22 @@ private:
     Player* m_waitingPlayer;
     Board* m_board;
     bool m_isGameOver;
-    Color m_winner;
+    Color m_colorWinner;
 
 public:
     MainChessGame();
 
-    void initChessGame();
+    void initChessGame() const;
     void playTurn();
     void changeCurrentPlayer();
 
-    bool isGameOver();
-    Color getWinner();
+    bool isGameOver() const;
+    Color getColorWinner() const;
 
-    Player& getCurrentPlayer();
-    Player& getWaitingPlayer();
+    Player* getCurrentPlayer() const;
+    Player* getWaitingPlayer() const;
 
-    Board& getBoard();
+    Board* getBoard() const;
 };
 
 #endif //MAINCHESSGAME_H

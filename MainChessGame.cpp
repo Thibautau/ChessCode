@@ -6,60 +6,69 @@
 #include "Player.h"
 #include <iostream>
 
-MainChessGame::MainChessGame() {
+MainChessGame::MainChessGame()
+{
     m_currentPlayer = new Player(Color::WHITE);
     m_waitingPlayer = new Player(Color::BLACK);
     m_board = new Board();
     m_isGameOver = false;
-    m_winner = Color::NONE;
+    m_colorWinner = Color::NONE;
 }
 
 
-void MainChessGame::initChessGame() {
+void MainChessGame::initChessGame() const
+{
     m_board->initializeBoard();
 }
 
-void MainChessGame::playTurn() {
+void MainChessGame::playTurn()
+{
     std::cout << "C'est au tour de " << (m_currentPlayer->getPlayerColor() == Color::WHITE ? "Blanc" : "Noir") << std::endl;
 
     m_board->displayBoard();
 
-    Coordinate start = m_currentPlayer->play();
-    Coordinate end = m_currentPlayer->play();
+    Coordinate coordStart = m_currentPlayer->play();
+    Coordinate coorEnd = m_currentPlayer->play();
 
     m_board->displayBoard();
 
 
-    if (m_board->isMoveValid(start.iRow, start.iColumn, end.iRow, end.iColumn)) {
-        m_board->movePiece(start.iRow, start.iColumn, end.iRow, end.iColumn);
+    if (m_board->isMoveValid(coordStart.iRow, coordStart.iColumn, coorEnd.iRow, coorEnd.iColumn)) {
+        m_board->movePiece(coordStart.iRow, coordStart.iColumn, coorEnd.iRow, coorEnd.iColumn);
         changeCurrentPlayer();
     } else {
         std::cout << "Mouvement invalide. Essayez encore." << std::endl;
     }
 }
 
-void MainChessGame::changeCurrentPlayer() {
+void MainChessGame::changeCurrentPlayer()
+{
     std::swap(m_currentPlayer, m_waitingPlayer);
 }
 
-bool MainChessGame::isGameOver() {
+bool MainChessGame::isGameOver() const
+{
     return m_isGameOver;
 }
 
-Color MainChessGame::getWinner() {
-    return m_winner;
+Color MainChessGame::getColorWinner() const
+{
+    return m_colorWinner;
 }
 
-Player& MainChessGame::getCurrentPlayer() {
-    return *m_currentPlayer;
+Player* MainChessGame::getCurrentPlayer() const
+{
+    return m_currentPlayer;
 }
 
-Player& MainChessGame::getWaitingPlayer() {
-    return *m_waitingPlayer;
+Player* MainChessGame::getWaitingPlayer() const
+{
+    return m_waitingPlayer;
 }
 
-Board& MainChessGame::getBoard() {
-    return *m_board;
+Board* MainChessGame::getBoard() const
+{
+    return m_board;
 }
 
 
