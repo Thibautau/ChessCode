@@ -28,6 +28,7 @@ add_executable(ChessCode
         Piece.cpp
         Board.cpp
         Board.cpp
+        MainChessGame.cpp
 )
 
 # Créer l'exécutable pour les tests

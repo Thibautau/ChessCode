@@ -6,7 +6,7 @@
 #define TYPE_H
 
 enum class TypePieces { PAWN, KING, QUEEN, ROOK, BISHOP, KNIGHT };
-enum class Color { WHITE, BLACK };
+enum class Color { WHITE, BLACK, NONE };
 
 struct Coordinate {
     int iRow;

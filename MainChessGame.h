@@ -10,23 +10,23 @@
 #include "Board.h"
 #include "Type.h"
 
-class ChessGame {
+class MainChessGame {
 private:
-    std::unique_ptr<Player> m_currentPlayer;
-    std::unique_ptr<Player> m_waitingPlayer;
-    Board m_board;
+    Player* m_currentPlayer;
+    Player* m_waitingPlayer;
+    Board* m_board;
     bool m_isGameOver;
     Color m_winner;
 
 public:
-    ChessGame(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2);
+    MainChessGame();
 
     void initChessGame();
     void playTurn();
     void changeCurrentPlayer();
 
-    bool isGameOver() const;
-    Color getWinner() const;
+    bool isGameOver();
+    Color getWinner();
 
     Player& getCurrentPlayer();
     Player& getWaitingPlayer();
