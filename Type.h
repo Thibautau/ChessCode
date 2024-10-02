@@ -31,4 +31,13 @@ struct Move {
     Coordinate coordEnd;
 };
 
+struct Vector {
+    int iRow;
+    int iColumn;
+    int iLength;
+
+    // Constructeur pour initialiser iRow et iColumn
+    Vector(int in_iRow, int in_iColumn, int in_iLength) : iRow(in_iRow), iColumn(in_iColumn), iLength(in_iLength) {}
+};
+
 #endif //TYPE_H
