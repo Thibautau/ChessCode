@@ -12,6 +12,6 @@ TypePieces Piece::getTypePiece() const {
     return m_tpTypePiece;
 }
 
-Color Piece::getCouleur() const {
+Color Piece::getColor() const {
     return m_colColorPiece;
 }

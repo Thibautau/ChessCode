@@ -15,7 +15,7 @@ private:
 public:
     Piece(TypePieces type, Color color);
     TypePieces getTypePiece() const;
-    Color getCouleur() const;
+    Color getColor() const;
 };
 
 #endif //PIECE_H
