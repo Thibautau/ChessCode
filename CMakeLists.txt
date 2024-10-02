@@ -18,8 +18,6 @@ enable_testing()
 
 # Créer l'exécutable principal
 add_executable(ChessGameIA
-        MM.cpp
-        MM.h
         main.cpp
         MainChessGame.h
         Board.h
