@@ -12,17 +12,18 @@
 
 class Board {
 private:
-    std::vector<std::vector<std::unique_ptr<Piece>>> m_tabTabPiBoard;
+    Piece* m_tabtabpiBoard[8][8]{};
+
 
 public:
     Board();
     void initializeBoard();
-    Piece* getPieceAt(const Coordinate& coord) const;
-    void placePiece(int row, int col, std::unique_ptr<Piece> piece);
-    bool movePiece(int startRow, int startCol, int endRow, int endCol);
-    bool isMoveValid(int startRow, int startCol, int endRow, int endCol) const;
+    Piece* getPieceAt(const Coordinate& in_coord) const;
+    void placePiece(int in_iRow, int in_iCol, Piece* in_pPiece);
+    bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol);
+    bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol) const;
     std::vector<Move> listOfPossibleMoves(Color in_colColor) const;
-    std::vector<Move> possibleMovesForPiece(const Coordinate& coordPiece) const;
+    std::vector<Move> possibleMovesForPiece(const Coordinate& in_coordPiece) const;
 };
 
 #endif //BOARD_H

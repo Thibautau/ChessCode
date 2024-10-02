@@ -5,7 +5,8 @@
 #include "Piece.h"
 
 Piece::Piece(const TypePieces type, const Color color)
-    : m_tpTypePiece(type), m_colColorPiece(color) {}
+    : m_tpTypePiece(type), m_colColorPiece(color) {
+}
 
 TypePieces Piece::getTypePiece() const {
     return m_tpTypePiece;

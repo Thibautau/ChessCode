@@ -11,7 +11,6 @@ class Piece {
 private:
     TypePieces m_tpTypePiece;
     Color m_colColorPiece;
-    Coordinate m_coordPiece;
 
 public:
     Piece(TypePieces type, Color color);

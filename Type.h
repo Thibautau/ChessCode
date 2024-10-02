@@ -9,26 +9,25 @@ enum class TypePieces { PAWN, KING, QUEEN, ROOK, BISHOP, KNIGHT };
 enum class Color { WHITE, BLACK };
 
 struct Coordinate {
-    int iLigne;
-    int iColonne;
+    int iRow;
+    int iColumn;
 
-    Coordinate(int in_iLigne = 0, int in_iColonne = 0)
-        : iLigne(in_iLigne), iColonne(in_iColonne) {}
+    // Constructeur pour initialiser iRow et iColumn
+    Coordinate(int in_iRow, int in_iColumn) : iRow(in_iRow), iColumn(in_iColumn) {}
 
-
-    int getLigne() const {
-        return iLigne;
+    int getRow() const {
+        return iRow;
     }
 
     // Accesseur pour iColonne
-    int getColonne() const {
-        return iColonne;
+    int getColumn() const {
+        return iColumn;
     }
 };
 
 struct Move {
-    Coordinate start;
-    Coordinate end;
+    Coordinate coordStart;
+    Coordinate coordEnd;
 };
 
 #endif //TYPE_H

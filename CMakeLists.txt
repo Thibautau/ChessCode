@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.29)
-project(ChessGameIA)
+project(ChessCode)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -17,7 +17,7 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 # Créer l'exécutable principal
-add_executable(ChessGameIA
+add_executable(ChessCode
         main.cpp
         MainChessGame.h
         Board.h
@@ -27,11 +27,16 @@ add_executable(ChessGameIA
         Player.cpp
         Piece.cpp
         Board.cpp
+        Board.cpp
 )
 
 # Créer l'exécutable pour les tests
 add_executable(runTests Test/Test.cpp
-        Test/TestPiece.cpp)
+        Test/Test.h
+        Test/Test.h
+        Test/Test.cpp
+        Test/Test.cpp
+        Test/Test.cpp)
 
 # Lier GoogleTest à l'exécutable de tests
 target_link_libraries(runTests gtest gtest_main)
