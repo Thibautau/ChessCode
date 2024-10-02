@@ -1,14 +1,11 @@
 #include <gtest/gtest.h>
-
-// Une fonction simple à tester
-int add(int a, int b) {
-    return a + b;
-}
+#include "Piece.cpp"
 
 // Définir un test Google Test
-TEST(AdditionTest, HandlesPositiveNumbers) {
-    EXPECT_EQ(add(2, 3), 5);
-    EXPECT_EQ(add(10, 5), 15);
+TEST(PieceTest, HandlesPositiveNumbers) {
+    Piece *piece = new Piece(TypePieces::PAWN, Color::WHITE);
+    EXPECT_EQ(piece->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(piece->getColor(), Color::WHITE);
 }
 
 int main(int argc, char **argv) {
