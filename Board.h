@@ -22,12 +22,14 @@ public:
 
     Piece* getPieceAt(int in_iRow, int in_iColumn) const;
 
-    void placePiece(int in_iRow, int in_iCol, Piece* in_pPiece);
+    bool placePiece(int in_iRow, int in_iCol, Piece* in_pPiece);
     bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol);
     bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol) const;
     std::vector<Move> listOfPossibleMoves(Color in_colColor) const;
-    std::vector<Move> possibleMovesForPiece(const Coordinate& in_coordPiece) const;
+    std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece) const;
     void displayBoard() const;
+
+    std::vector<Coordinate> getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove) const;
 };
 
 #endif //BOARD_H

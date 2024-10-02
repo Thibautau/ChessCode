@@ -25,6 +25,20 @@ void MainChessGame::playTurn()
 {
     std::cout << "C'est au tour de " << (m_currentPlayer->getPlayerColor() == Color::WHITE ? "Blanc" : "Noir") << std::endl;
 
+    //TODO DELETE DEBUG START HERE
+    // Puis dans ton code principal ou dans ta méthode
+    std::vector<Coordinate> moves = m_board->possibleMovesForPiece(Coordinate(0, 0));
+
+    std::cout << "---------------START DEBUG---------------\n";
+    std::cout << moves.size();
+    for (const auto& move : moves) {
+        move.print();  // Imprime chaque coordonnée
+        std::cout << " ";  // Pour ajouter un espace entre les coordonnées
+    }
+    std::cout << std::endl;  // Ligne à la fin pour le format
+    std::cout << "---------------END DEBUG----------------\n";
+    //TODO DELETE DEBUG END HERE
+
     m_board->displayBoard();
 
     std::pair<Coordinate, Coordinate> move = m_currentPlayer->play();
