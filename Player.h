@@ -9,6 +9,7 @@
 #include "Board.h"
 #include <string>
 
+
 class Player {
 protected:
     Color m_colPlayerColor;
@@ -23,7 +24,7 @@ public:
     void setScore(int score);
     Coordinate play();
     std::string getInput();
-    bool isInputValid(const std::string& input);
+    bool isInputValid(const std::string& input,int& column, int& row);
 };
 
 #endif //PLAYER_H
