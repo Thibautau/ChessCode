@@ -157,7 +157,7 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
 
         if(in_optionalCoordTargetPoint != nullptr) // (optional), If we want to know if the target coord is in the possible movements, we don't check for the others
         {
-            if(pPieceFound != nullptr || *in_optionalCoordTargetPoint == Coordinate(iNextRow, iNextCol))
+            if(*in_optionalCoordTargetPoint == Coordinate(iNextRow, iNextCol))
             {
                 // If it is the point we are looking for and the move is valid
                 if(colPieceToSeeValidMove != colPieceFound && typePieceFound != TypePieces::KING)
@@ -224,9 +224,6 @@ std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordP
     int iNbVector = 0;
     pPiece->getVectorOfDisplacement(&vectOfPiece, iNbVector);
 
-    std::cout << "Type: " << pPiece->getDisplayChar() << " , Color: " << pPiece->getColorAsChar() << std::endl;
-
-
     std::vector<Coordinate> vectCoordAllowToMovePiece;
     for (int iIndicesVector = 0; iIndicesVector < iNbVector; ++iIndicesVector)
     {
@@ -234,6 +231,8 @@ std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordP
 
         // Récupérer les mouvements possibles
         std::vector<Coordinate> vectCoordMovePossible = getMovementsPossibleWithVector(in_coordPiece.iRow, in_coordPiece.iColumn, vectPossible, in_optionalCoordTargetPoint);
+
+
 
         // Vérifier si le vecteur n'est pas vide avant de l'insérer
         if (!vectCoordMovePossible.empty())

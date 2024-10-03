@@ -54,8 +54,8 @@ int Piece::getRookVectorWithAdjustableLength(Vector* out_tabvectRookDisplacement
         return WRONG_PARAMETER;
     }
 
-    out_tabvectRookDisplacement[in_iIndicesStart] = Vector(1, 0, in_iLengthToAdjust); // To go down
-    out_tabvectRookDisplacement[in_iIndicesStart + 1] = Vector(-1, 0, in_iLengthToAdjust); // To go up
+    out_tabvectRookDisplacement[in_iIndicesStart] = Vector(1, 0, in_iLengthToAdjust); // To go up
+    out_tabvectRookDisplacement[in_iIndicesStart + 1] = Vector(-1, 0, in_iLengthToAdjust); // To go down
     out_tabvectRookDisplacement[in_iIndicesStart + 2] = Vector(0, -1, in_iLengthToAdjust); // To go left
     out_tabvectRookDisplacement[in_iIndicesStart + 3] = Vector(0, 1, in_iLengthToAdjust); // To go right
 
@@ -111,7 +111,6 @@ int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_
         case TypePieces::ROOK:
             vectorOfDisplacement = new Vector[4];
 
-            //TODO Problème HERE avec vectorOfDisplacement qui n'est pas prit comme un tableau
             iErrorCode = getRookVectorWithAdjustableLength(vectorOfDisplacement, 0, 7);
 
             out_tabSize = 4;
@@ -141,7 +140,7 @@ int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_
             *out_tabvectOfDisplacement = vectorOfDisplacement;
             break;
         case TypePieces::QUEEN:
-            // BISHOP + ROOK a tlength 7
+            // BISHOP + ROOK at length 7
             vectorOfDisplacement = new Vector[8];
 
             iErrorCode = getRookVectorWithAdjustableLength(vectorOfDisplacement, 0, 7);

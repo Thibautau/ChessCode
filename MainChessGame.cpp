@@ -10,7 +10,7 @@
 
 MainChessGame::MainChessGame()
 {
-    m_currentPlayer = new Bot(Color::WHITE);
+    m_currentPlayer = new PlayerHuman(Color::WHITE);//new Bot(Color::WHITE);
     m_waitingPlayer = new Bot(Color::BLACK);
     m_board = new Board();
     m_isGameOver = false;
