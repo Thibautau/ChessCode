@@ -15,6 +15,7 @@ class Piece {
 private:
     TypePieces m_tpTypePiece;
     Color m_colColorPiece;
+    bool m_alreadyMoved;
 
 public:
     Piece(TypePieces type, Color color);
@@ -23,6 +24,8 @@ public:
     char getDisplayChar() const;
     int getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_tabSize);
     char getColorAsChar() const;
+    bool hasAlreadyMoved() const;
+    void setAlreadyMoved(bool in_bMoved);
 
     /**
      *  Fill the tabVector with 4 movements of the rook

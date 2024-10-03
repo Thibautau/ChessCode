@@ -78,6 +78,7 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
     }
 
     if (isMoveValid(in_iStartRow, in_iStartCol, in_iEndRow, in_iEndCol)) {
+        pPiece->setAlreadyMoved(true);
         placePiece(in_iEndRow, in_iEndCol, pPiece);
         m_tabtabpiBoard[in_iStartRow][in_iStartCol] = nullptr;
         return true;

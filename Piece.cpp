@@ -5,8 +5,7 @@
 #include "Piece.h"
 
 Piece::Piece(const TypePieces type, const Color color)
-    : m_tpTypePiece(type), m_colColorPiece(color) {
-}
+    : m_tpTypePiece(type), m_colColorPiece(color){m_alreadyMoved = false;}
 
 TypePieces Piece::getTypePiece() const {
     return m_tpTypePiece;
@@ -14,6 +13,16 @@ TypePieces Piece::getTypePiece() const {
 
 Color Piece::getColor() const {
     return m_colColorPiece;
+}
+
+bool Piece::hasAlreadyMoved() const
+{
+    return m_alreadyMoved;
+}
+
+void Piece::setAlreadyMoved(bool in_bMoved)
+{
+    m_alreadyMoved = in_bMoved;
 }
 
 char Piece::getColorAsChar() const {
@@ -73,7 +82,7 @@ int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_
     Vector* vectorOfDisplacement = nullptr;
     int iErrorCode = NO_ERROR;
     int iRow;
-
+    int iLengthToAdjust;
 
     switch (m_tpTypePiece) {
         // The pawn can only move forward
@@ -88,8 +97,14 @@ int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_
                 iRow = 1;
             }
 
+            iLengthToAdjust = 1;
+            if(m_alreadyMoved == false)
+            {
+                iLengthToAdjust = 2;
+            }
+
             // Moving forward
-            vectorOfDisplacement[0] = Vector(iRow, 0, 1);
+            vectorOfDisplacement[0] = Vector(iRow, 0, iLengthToAdjust);
             out_tabSize = 1;
             *out_tabvectOfDisplacement = vectorOfDisplacement;
             break;
