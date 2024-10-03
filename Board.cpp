@@ -80,9 +80,10 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
     if (isMoveValid(in_iStartRow, in_iStartCol, in_iEndRow, in_iEndCol)) {
         placePiece(in_iEndRow, in_iEndCol, pPiece);
         m_tabtabpiBoard[in_iStartRow][in_iStartCol] = nullptr;
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol) const
@@ -248,7 +249,6 @@ void Board::displayBoard() const {
             Piece* piece = m_tabtabpiBoard[row][col];
             if (piece) {
                 char displayChar = piece->getDisplayChar();
-                // Vérifier la couleur de la pièce
                 if (piece->getColor() == Color::BLACK) {
                     std::cout << static_cast<char>(toupper(displayChar)) << " ";
                 } else {
