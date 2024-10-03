@@ -25,20 +25,6 @@ void MainChessGame::playTurn()
 {
     std::cout << "C'est au tour de " << (m_currentPlayer->getPlayerColor() == Color::WHITE ? "Blanc" : "Noir") << std::endl;
 
-    //TODO DELETE DEBUG START HERE
-    // Puis dans ton code principal ou dans ta méthode
-    /*std::vector<Coordinate> moves = m_board->possibleMovesForPiece(Coordinate(1, 0));
-
-    std::cout << "---------------START DEBUG---------------\n";
-    std::cout << moves.size();
-    for (const auto& move : moves) {
-        move.print();  // Imprime chaque coordonnée
-        std::cout << " ";  // Pour ajouter un espace entre les coordonnées
-    }
-    std::cout << std::endl;  // Ligne à la fin pour le format
-    std::cout << "---------------END DEBUG----------------\n";*/
-    //TODO DELETE DEBUG END HERE
-
     m_board->displayBoard();
 
     std::pair<Coordinate, Coordinate> move = m_currentPlayer->play();
@@ -49,8 +35,8 @@ void MainChessGame::playTurn()
     m_board->displayBoard();
 
 
-    if (m_board->isMoveValid(coordStart.iRow, coordStart.iColumn, coorEnd.iRow, coorEnd.iColumn)) {
-        m_board->movePiece(coordStart.iRow, coordStart.iColumn, coorEnd.iRow, coorEnd.iColumn);
+    if (m_board->isMoveValid(coordStart.iRow, coordStart.iColumn, coorEnd.iRow, coorEnd.iColumn, m_currentPlayer->getPlayerColor())) {
+        m_board->movePiece(coordStart.iRow, coordStart.iColumn, coorEnd.iRow, coorEnd.iColumn, m_currentPlayer->getPlayerColor());
         changeCurrentPlayer();
     } else {
         std::cout << "Mouvement invalide. Essayez encore." << std::endl;

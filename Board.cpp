@@ -70,14 +70,15 @@ Piece* Board::getPieceAt(int in_iRow, int in_iColumn) const
     return m_tabtabpiBoard[in_iRow][in_iColumn];
 }
 
-bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol)
+bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer)
 {
     Piece* pPiece = getPieceAt(in_iStartRow, in_iStartCol);
-    if(pPiece == nullptr) {
+    if(pPiece == nullptr || pPiece->getColor() != in_colPlayer) //If the player try to move a piece of another color, return false
+    {
         return false;
     }
 
-    if (isMoveValid(in_iStartRow, in_iStartCol, in_iEndRow, in_iEndCol)) {
+    if (isMoveValid(in_iStartRow, in_iStartCol, in_iEndRow, in_iEndCol, in_colPlayer)) {
         pPiece->setAlreadyMoved(true);
         placePiece(in_iEndRow, in_iEndCol, pPiece);
         m_tabtabpiBoard[in_iStartRow][in_iStartCol] = nullptr;
@@ -87,10 +88,16 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
     return false;
 }
 
-bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol) const
+bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer) const
 {
     if(in_iStartRow >= 8 || in_iStartCol >= 8 || in_iStartRow < 0 || in_iStartCol < 0
         || in_iEndRow >= 8 || in_iEndCol >= 8 || in_iEndRow < 0 || in_iEndCol < 0)
+    {
+        return false;
+    }
+
+    Piece* pPieceToMove = getPieceAt(in_iStartRow, in_iStartCol);
+    if(pPieceToMove == nullptr || pPieceToMove->getColor() != in_colPlayer) //If the player try to move a piece of another color, return false
     {
         return false;
     }
