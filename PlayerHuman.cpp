@@ -1,30 +1,29 @@
-//
 // Created by Peter on 02/10/2024.
-//
-#include "Player.h"
+
+#include "PlayerHuman.h"
 #include <iostream>
 #include <string>
 
-Player::Player(const Color color)
+PlayerHuman::PlayerHuman(Color color)
     : m_colPlayerColor(color), m_iScore(0) {}
 
-Color Player::getPlayerColor() const {
+Color PlayerHuman::getPlayerColor() const {
     return m_colPlayerColor;
 }
 
-void Player::setPlayerColor(const Color color) {
+void PlayerHuman::setPlayerColor(Color color) {
     m_colPlayerColor = color;
 }
 
-int Player::getScore() const {
+int PlayerHuman::getScore() const {
     return m_iScore;
 }
 
-void Player::setScore(const int in_iScore) {
+void PlayerHuman::setScore(int in_iScore) {
     m_iScore = in_iScore;
 }
 
-std::pair<Coordinate, Coordinate> Player::play() {
+std::pair<Coordinate, Coordinate> PlayerHuman::play(Board& board) {
     std::string input;
     Coordinate start, end;
 
@@ -35,14 +34,14 @@ std::pair<Coordinate, Coordinate> Player::play() {
     return {start, end};
 }
 
-std::string Player::getInput() {
+std::string PlayerHuman::getInput() {
     std::string sInput;
     std::cout << "Veuillez entrer votre mouvement (ex: 'e2 e4'): ";
     std::getline(std::cin, sInput);
     return sInput;
 }
 
-bool Player::isInputValid(const std::string& in_sInput, Coordinate& out_start, Coordinate& out_end) {
+bool PlayerHuman::isInputValid(const std::string& in_sInput, Coordinate& out_start, Coordinate& out_end) {
     if (in_sInput.length() != 5 || in_sInput[2] != ' ') {
         std::cout << "Erreur: L'entrée doit être au format 'e2 e4'." << std::endl;
         return false;
@@ -63,8 +62,7 @@ bool Player::isInputValid(const std::string& in_sInput, Coordinate& out_start, C
     return true;
 }
 
-
-bool Player::isValidCoordinate(char col, char row) {
+bool PlayerHuman::isValidCoordinate(char col, char row) {
     if (col < 'a' || col > 'h') {
         std::cout << "Erreur: La colonne doit être entre 'a' et 'h'." << std::endl;
         return false;
@@ -77,4 +75,3 @@ bool Player::isValidCoordinate(char col, char row) {
 
     return true;
 }
-

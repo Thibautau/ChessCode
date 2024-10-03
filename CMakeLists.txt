@@ -23,14 +23,15 @@ add_executable(ChessCode
         Board.h
         Piece.h
         Type.h
-        Player.h
-        Player.cpp
+        PlayerHuman.h
+        PlayerHuman.cpp
         Piece.cpp
         Board.cpp
         Board.cpp
         MainChessGame.cpp
         Bot.h
         Bot.cpp
+        Player.h
 )
 
 # Créer l'exécutable pour les tests

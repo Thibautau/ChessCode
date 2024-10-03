@@ -194,7 +194,22 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
 // Ajoutez des méthodes pour lister les mouvements possibles
 std::vector<Move> Board::listOfPossibleMoves(Color in_colColor) const
 {
-    return {};
+    std::vector<Move> possibleMoves;
+
+    for (int row = 0; row < 8; ++row) {
+        for (int col = 0; col < 8; ++col) {
+            Piece* piece = getPieceAt(row, col);
+            if (piece != nullptr && piece->getColor() == in_colColor) {
+                Coordinate pieceCoord(row, col);
+                std::vector<Coordinate> moves = possibleMovesForPiece(pieceCoord);
+                for (const Coordinate& move : moves) {
+                    possibleMoves.emplace_back(Move{pieceCoord, move});
+                }
+            }
+        }
+    }
+
+    return possibleMoves;
 }
 
 std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordPiece, const Coordinate* in_optionalCoordTargetPoint) const

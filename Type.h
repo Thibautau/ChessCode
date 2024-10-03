@@ -9,6 +9,8 @@
 
 enum class TypePieces { PAWN, KING, QUEEN, ROOK, BISHOP, KNIGHT, NONE };
 enum class Color { WHITE, BLACK, NONE };
+enum class PlayerType {HUMAN,BOT};
+enum class GameMode {JVJ, JVB, BVB};
 
 struct Coordinate {
     int iRow;

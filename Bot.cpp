@@ -5,17 +5,19 @@
 #include "Bot.h"
 #include <cstdlib>
 
-Bot::Bot(Color color) {
-    m_color = color;
+Bot::Bot(Color color) : m_color(color) {}
+
+Color Bot::getPlayerColor() const {
+    return m_color;
 }
 
-Coordinate Bot::playRandomMove(Board &board) {
+std::pair<Coordinate, Coordinate> Bot::play(Board &board) {
     std::vector<Move> possibleMoves = board.listOfPossibleMoves(m_color);
     if (possibleMoves.empty()) {
-        // Pas de mouvements possibles
-        return {};
+        return {}; // Pas de mouvement possible
     }
     int randomIndex = rand() % possibleMoves.size();
-    return possibleMoves[randomIndex].coordStart;
+    return {possibleMoves[randomIndex].coordStart, possibleMoves[randomIndex].coordEnd};
 }
+
 

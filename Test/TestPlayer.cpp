@@ -1,16 +1,16 @@
 #include <gtest/gtest.h>
-#include "Player.cpp"
+#include "PlayerHuman.cpp"
 #include "Type.h"
 
 TEST(PlayerTest, PlayerInitialisation) {
-    Player* player = new Player(Color::WHITE);
+    PlayerHuman* player = new PlayerHuman(Color::WHITE);
     player->setScore(3);
     EXPECT_EQ(player->getPlayerColor(), Color::WHITE);
     EXPECT_EQ(player->getScore(), 3);
 }
 
 TEST(PlayerTest, ValideInput) {
-    Player* player = new Player(Color::WHITE);
+    PlayerHuman* player = new PlayerHuman(Color::WHITE);
     std::string input = "e2 e4";
     Coordinate start = Coordinate(1, 4);
     Coordinate end = Coordinate(3, 4);
@@ -20,7 +20,7 @@ TEST(PlayerTest, ValideInput) {
 }
 
 TEST(PlayerTest, ValideCoordinate) {
-    Player* player = new Player(Color::WHITE);
+    PlayerHuman* player = new PlayerHuman(Color::WHITE);
     EXPECT_EQ(player->isValidCoordinate('e', '4'), true);
     EXPECT_EQ(player->isValidCoordinate('i', '4'), false);
     EXPECT_EQ(player->isValidCoordinate('e', '9'), false);

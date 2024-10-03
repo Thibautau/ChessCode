@@ -7,14 +7,16 @@
 
 #include "Type.h"
 #include "Board.h"
+#include "Player.h"
 
-class Bot {
+class Bot : public Player {
 private:
     Color m_color;
 
 public:
     Bot(Color color);
-    Coordinate playRandomMove(Board& board);
+    std::pair<Coordinate, Coordinate> play(Board& board);
+    Color getPlayerColor() const;
 };
 
 #endif //BOT_H

@@ -4,12 +4,14 @@
 
 #include "MainChessGame.h"
 #include "Player.h"
+#include "PlayerHuman.h"
+#include "Bot.h"
 #include <iostream>
 
 MainChessGame::MainChessGame()
 {
-    m_currentPlayer = new Player(Color::WHITE);
-    m_waitingPlayer = new Player(Color::BLACK);
+    m_currentPlayer = new Bot(Color::WHITE);
+    m_waitingPlayer = new Bot(Color::BLACK);
     m_board = new Board();
     m_isGameOver = false;
     m_colorWinner = Color::NONE;
@@ -27,12 +29,10 @@ void MainChessGame::playTurn()
 
     m_board->displayBoard();
 
-    std::pair<Coordinate, Coordinate> move = m_currentPlayer->play();
+    std::pair<Coordinate, Coordinate> move = m_currentPlayer->play(*m_board);
 
     Coordinate coordStart = move.first;
     Coordinate coorEnd = move.second;
-
-    m_board->displayBoard();
 
 
     if (m_board->isMoveValid(coordStart.iRow, coordStart.iColumn, coorEnd.iRow, coorEnd.iColumn, m_currentPlayer->getPlayerColor())) {
