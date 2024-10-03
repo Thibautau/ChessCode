@@ -234,3 +234,74 @@ TEST_F(BoardTest, InvalidRookMove) {
     EXPECT_EQ(board.getPieceAt(0, 0)->getTypePiece(), TypePieces::ROOK);
     EXPECT_EQ(board.getPieceAt(1, 1), nullptr);
 }
+
+// Test de mouvement valide pour un cavalier (b1 -> c3)
+TEST_F(BoardTest, ValidKnightMoveToC3) {
+    // Le cavalier fait un mouvement en "L" vers c3
+    bool result = board.movePiece(0, 1, 2, 2);
+    EXPECT_TRUE(result); // Mouvement valide
+    EXPECT_EQ(board.getPieceAt(2, 2)->getTypePiece(), TypePieces::KNIGHT); // Le cavalier doit être en c3
+    EXPECT_EQ(board.getPieceAt(0, 1), nullptr); // La case de départ doit être vide
+}
+
+// Test de mouvement invalide pour un cavalier (b1 -> b3)
+TEST_F(BoardTest, InvalidKnightMoveToB3) {
+    // Mouvement invalide car un cavalier ne peut pas se déplacer en ligne droite
+    bool result = board.movePiece(0, 1, 2, 1);
+    EXPECT_FALSE(result); // Mouvement invalide
+    EXPECT_EQ(board.getPieceAt(0, 1)->getTypePiece(), TypePieces::KNIGHT); // Le cavalier reste en b1
+    EXPECT_EQ(board.getPieceAt(2, 1), nullptr); // La case b3 doit être vide
+}
+
+// Test de mouvement valide pour un cavalier (b1 -> a3)
+TEST_F(BoardTest, ValidKnightMoveToA3) {
+    // Mouvement en "L" vers a3
+    bool result = board.movePiece(0, 1, 2, 0);
+    EXPECT_TRUE(result); // Mouvement valide
+    EXPECT_EQ(board.getPieceAt(2, 0)->getTypePiece(), TypePieces::KNIGHT); // Le cavalier doit être en a3
+    EXPECT_EQ(board.getPieceAt(0, 1), nullptr); // La case de départ doit être vide
+}
+
+// Test de mouvement valide pour une Reine (d1 -> d4)
+TEST_F(BoardTest, ValidQueenMoveToD4) {
+    // Le pion devant la reine est déplacé pour libérer le chemin
+    board.movePiece(1, 3, 3, 3); // Pion blanc d2 -> d4
+    // Déplacer la reine de d1 à d4
+    bool result = board.movePiece(0, 3, 3, 3);
+    EXPECT_TRUE(result); // Mouvement valide
+    EXPECT_EQ(board.getPieceAt(3, 3)->getTypePiece(), TypePieces::QUEEN); // La reine doit être en d4
+    EXPECT_EQ(board.getPieceAt(0, 3), nullptr); // La case de départ doit être vide
+}
+
+// Test de mouvement valide pour une Reine (d1 -> h5 en diagonale)
+TEST_F(BoardTest, ValidQueenDiagonalMove) {
+    // Le pion devant la reine est déplacé pour libérer le chemin
+    board.movePiece(1, 3, 2, 3); // Pion blanc d2 -> d3
+    // Déplacer la reine de d1 à h5 en diagonale
+    bool result = board.movePiece(0, 3, 4, 7);
+    EXPECT_TRUE(result); // Mouvement valide
+    EXPECT_EQ(board.getPieceAt(4, 7)->getTypePiece(), TypePieces::QUEEN); // La reine doit être en h5
+    EXPECT_EQ(board.getPieceAt(0, 3), nullptr); // La case de départ doit être vide
+}
+
+// Test de mouvement invalide pour une Reine (d1 -> d5 avec un pion sur le chemin)
+TEST_F(BoardTest, InvalidQueenMoveBlockedByPiece) {
+    // La reine essaie de se déplacer à travers un pion
+    bool result = board.movePiece(0, 3, 4, 3); // Tentative de mouvement de la reine de d1 à d5
+    EXPECT_FALSE(result); // Mouvement invalide car bloqué
+    EXPECT_EQ(board.getPieceAt(0, 3)->getTypePiece(), TypePieces::QUEEN); // La reine reste en d1
+    EXPECT_EQ(board.getPieceAt(4, 3), nullptr); // La case d5 doit être vide
+}
+
+// Test de capture valide avec la Reine (d1 -> f3)
+TEST_F(BoardTest, QueenCapturesPiece) {
+    // Placer un pion noir sur f3
+    board.placePiece(2, 5, new Piece(TypePieces::PAWN, Color::BLACK));
+    // Le pion devant la reine est déplacé pour libérer le chemin
+    board.movePiece(1, 3, 2, 3); // Pion blanc d2 -> d3
+    // Déplacer la reine pour capturer le pion noir en f3
+    bool result = board.movePiece(0, 3, 2, 5);
+    EXPECT_TRUE(result); // Mouvement valide
+    EXPECT_EQ(board.getPieceAt(2, 5)->getTypePiece(), TypePieces::QUEEN); // La reine doit être en f3 après la capture
+    EXPECT_EQ(board.getPieceAt(0, 3), nullptr); // La case de départ doit être vide
+}
