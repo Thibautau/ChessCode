@@ -107,26 +107,6 @@ bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int 
         Coordinate coordPossibleMoves = vectPossibleMoves[0];
         return coordTargetPoint == coordPossibleMoves;
     }
-
-    /*
-    Piece* pPieceToMove = getPieceAt(in_iStartRow, in_iStartCol);
-    if(pPieceToMove == nullptr) // If we didn't found the piece to move
-    {
-        return false;
-    }
-
-    Piece* pPieceToEndPoint = getPieceAt(in_iEndRow, in_iEndCol);
-    if(pPieceToEndPoint == nullptr) // If the end point is free, we can move
-    {
-        return true;
-    }
-    else if(pPieceToMove->getColor() == pPieceToEndPoint->getColor() || pPieceToEndPoint->getTypePiece() == TypePieces::KING) // If the color are the same, we can't eat, so we can't move. We can't eat a king
-    {
-        return false;
-    }
-
-
-    return true;*/
 }
 
 std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove, const Coordinate* in_optionalCoordTargetPoint) const
@@ -170,12 +150,21 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
 
         if(in_optionalCoordTargetPoint != nullptr) // (optional), If we want to know if the target coord is in the possible movements, we don't check for the others
         {
-            // If it is the point we are looking for and the move is valid
-            if(*in_optionalCoordTargetPoint == Coordinate(iNextRow, iNextCol) && colPieceToSeeValidMove != colPieceFound && typePieceFound != TypePieces::KING)
+            if(pPieceFound != nullptr || *in_optionalCoordTargetPoint == Coordinate(iNextRow, iNextCol))
+            {
+                // If it is the point we are looking for and the move is valid
+                if(colPieceToSeeValidMove != colPieceFound && typePieceFound != TypePieces::KING)
+                {
+                    vectMovePossible.insert(vectMovePossible.end(), Coordinate(iNextRow, iNextCol));
+                }
+                break;
+            }
+
+            /*if(*in_optionalCoordTargetPoint == Coordinate(iNextRow, iNextCol) && colPieceToSeeValidMove != colPieceFound && typePieceFound != TypePieces::KING)
             {
                 vectMovePossible.insert(vectMovePossible.end(), Coordinate(iNextRow, iNextCol));
                 break;
-            }
+            }*/
         }
         else {
             if(pPieceFound != nullptr) // If there is a piece

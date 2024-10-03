@@ -205,7 +205,7 @@ TEST_F(BoardTest, ValidKnightMove) {
 TEST_F(BoardTest, ValidKnightMove2) {
     bool result = board.movePiece(0, 1, 2, 0);
     EXPECT_TRUE(result);
-    EXPECT_EQ(board.getPieceAt(2, 2)->getTypePiece(), TypePieces::KNIGHT);
+    EXPECT_EQ(board.getPieceAt(2, 0)->getTypePiece(), TypePieces::KNIGHT);
     EXPECT_EQ(board.getPieceAt(0, 1), nullptr);
 }
 
