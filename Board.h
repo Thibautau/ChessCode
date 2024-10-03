@@ -22,8 +22,8 @@ public:
     Piece* getPieceAt(int in_iRow, int in_iColumn) const;
 
     bool placePiece(int in_iRow, int in_iCol, Piece* in_pPiece);
-    bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer);
-    bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer) const;
+    bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
+    bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE) const;
     std::vector<Move> listOfPossibleMoves(Color in_colColor) const;
     std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece, const Coordinate* in_optionalCoordTargetPoint = nullptr) const;
     void displayBoard() const;

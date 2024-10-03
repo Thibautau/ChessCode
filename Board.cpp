@@ -166,12 +166,6 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
                 }
                 break;
             }
-
-            /*if(*in_optionalCoordTargetPoint == Coordinate(iNextRow, iNextCol) && colPieceToSeeValidMove != colPieceFound && typePieceFound != TypePieces::KING)
-            {
-                vectMovePossible.insert(vectMovePossible.end(), Coordinate(iNextRow, iNextCol));
-                break;
-            }*/
         }
         else {
             if(pPieceFound != nullptr) // If there is a piece
