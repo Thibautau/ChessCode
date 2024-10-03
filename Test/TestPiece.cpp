@@ -21,7 +21,7 @@ TEST(PieceTest, PieceInitialisation) {
 
 //Deplacement Pion valide
 TEST_F(BoardTest, ValidPawnMove) {
-    bool result = board.movePiece(1, 4, 3, 4);
+    bool result = board.movePiece(1, 4, 3, 4);//Pion blanc e2->e4
     EXPECT_TRUE(result);
     EXPECT_EQ(board.getPieceAt(3, 4)->getTypePiece(), TypePieces::PAWN);
     EXPECT_EQ(board.getPieceAt(1, 4), nullptr);
@@ -29,7 +29,7 @@ TEST_F(BoardTest, ValidPawnMove) {
 
 //Deplacement Pion Invalide
 TEST_F(BoardTest, InvalidPawnMove) {
-    bool result = board.movePiece(1, 4, 4, 4);
+    bool result = board.movePiece(1, 4, 4, 4);//Pion blanc e2->e5
     EXPECT_FALSE(result);
     EXPECT_EQ(board.getPieceAt(1, 4)->getTypePiece(), TypePieces::PAWN);
     EXPECT_EQ(board.getPieceAt(4, 4), nullptr);
@@ -200,6 +200,7 @@ TEST_F(BoardTest, ValidKnightMove) {
     EXPECT_EQ(board.getPieceAt(0, 1), nullptr);
 }
 
+//@TODO Marche pas
 // Test de mouvement valide pour un cavalier (b1 -> a3)
 TEST_F(BoardTest, ValidKnightMove2) {
     bool result = board.movePiece(0, 1, 2, 0);
@@ -241,15 +242,15 @@ TEST_F(BoardTest, InvalidRookMove) {
 
 // Test de mouvement valide pour un fou (c1 -> e3)
 TEST_F(BoardTest, ValidBishopMove) {
-    board.movePiece(1, 2, 3, 2); // Pion blanc c2->c4
+    board.movePiece(1, 3, 3, 3); // Pion blanc d2->d4
     bool result = board.movePiece(0, 2, 2, 4); // Bishop blanc c1->e3
     EXPECT_TRUE(result);
     EXPECT_EQ(board.getPieceAt(2, 4)->getTypePiece(), TypePieces::BISHOP);
     EXPECT_EQ(board.getPieceAt(0, 2), nullptr);
 
-    bool result2 = board.movePiece(2, 4, 6, 2); // Bishop blanc e3->g5
+    bool result2 = board.movePiece(2, 4, 4, 6); // Bishop blanc e3->g5
     EXPECT_TRUE(result2);
-    EXPECT_EQ(board.getPieceAt(6, 2)->getTypePiece(), TypePieces::BISHOP);
+    EXPECT_EQ(board.getPieceAt(4, 6)->getTypePiece(), TypePieces::BISHOP);
     EXPECT_EQ(board.getPieceAt(2, 4), nullptr);
 }
 
@@ -293,7 +294,7 @@ TEST_F(BoardTest, ValidQueenMoveToD4) {
     board.movePiece(1, 3, 3, 3); // Pion blanc d2 -> d4
     bool result = board.movePiece(0, 3, 2, 3); //Queen blanc d1->d3
     EXPECT_TRUE(result);
-    EXPECT_EQ(board.getPieceAt(3, 3)->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt(2, 3)->getTypePiece(), TypePieces::QUEEN);
     EXPECT_EQ(board.getPieceAt(0, 3), nullptr);
 }
 
