@@ -2,6 +2,7 @@
 #include "PlayerHuman.cpp"
 #include "Type.h"
 
+//Initialisation du joueur
 TEST(PlayerTest, PlayerInitialisation) {
     PlayerHuman* player = new PlayerHuman(Color::WHITE);
     player->setScore(3);
@@ -9,6 +10,7 @@ TEST(PlayerTest, PlayerInitialisation) {
     EXPECT_EQ(player->getScore(), 3);
 }
 
+//Verification de l'input
 TEST(PlayerTest, ValideInput) {
     PlayerHuman* player = new PlayerHuman(Color::WHITE);
     std::string input = "e2 e4";
@@ -17,8 +19,11 @@ TEST(PlayerTest, ValideInput) {
     EXPECT_EQ(player->isInputValid(input, start, end), true);
     input = "e2  e4";
     EXPECT_EQ(player->isInputValid(input, start, end), false);
+    input = "e2 e10";
+    EXPECT_EQ(player->isInputValid(input, start, end), false);
 }
 
+//Verification des coordonnées
 TEST(PlayerTest, ValideCoordinate) {
     PlayerHuman* player = new PlayerHuman(Color::WHITE);
     EXPECT_EQ(player->isValidCoordinate('e', '4'), true);
