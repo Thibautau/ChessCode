@@ -8,7 +8,6 @@
 #include "Piece.h"
 #include "Type.h"
 #include <vector>
-#include <memory>
 
 class Board {
 private:
@@ -26,10 +25,10 @@ public:
     bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol);
     bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol) const;
     std::vector<Move> listOfPossibleMoves(Color in_colColor) const;
-    std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece) const;
+    std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece, const Coordinate* in_optionalCoordTargetPoint = nullptr) const;
     void displayBoard() const;
 
-    std::vector<Coordinate> getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove) const;
+    std::vector<Coordinate> getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove, const Coordinate* in_coordTargetPoint = nullptr) const;
 };
 
 #endif //BOARD_H

@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-enum class TypePieces { PAWN, KING, QUEEN, ROOK, BISHOP, KNIGHT };
+enum class TypePieces { PAWN, KING, QUEEN, ROOK, BISHOP, KNIGHT, NONE };
 enum class Color { WHITE, BLACK, NONE };
 
 struct Coordinate {
@@ -29,6 +29,11 @@ struct Coordinate {
 
     void print() const {
         std::cout << "(" << iRow << ", " << iColumn << ")";
+    }
+
+    // Surcharge de l'opérateur == pour comparer deux objets Coordinate
+    bool operator==(const Coordinate& in_other) const {
+        return iRow == in_other.iRow && iColumn == in_other.iColumn;
     }
 };
 

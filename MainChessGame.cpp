@@ -27,7 +27,7 @@ void MainChessGame::playTurn()
 
     //TODO DELETE DEBUG START HERE
     // Puis dans ton code principal ou dans ta méthode
-    std::vector<Coordinate> moves = m_board->possibleMovesForPiece(Coordinate(1, 0));
+    /*std::vector<Coordinate> moves = m_board->possibleMovesForPiece(Coordinate(1, 0));
 
     std::cout << "---------------START DEBUG---------------\n";
     std::cout << moves.size();
@@ -36,7 +36,7 @@ void MainChessGame::playTurn()
         std::cout << " ";  // Pour ajouter un espace entre les coordonnées
     }
     std::cout << std::endl;  // Ligne à la fin pour le format
-    std::cout << "---------------END DEBUG----------------\n";
+    std::cout << "---------------END DEBUG----------------\n";*/
     //TODO DELETE DEBUG END HERE
 
     m_board->displayBoard();
