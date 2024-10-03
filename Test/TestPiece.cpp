@@ -298,6 +298,20 @@ TEST_F(BoardTest, ValidQueenMoveToD4) {
     EXPECT_EQ(board.getPieceAt(0, 3), nullptr);
 }
 
+// Test de mouvement valide pour une Reine (d1 -> d4)
+TEST_F(BoardTest, ValidQueenMove2) {
+    board.movePiece(1, 4, 2, 4); // Pion blanc e2 -> e3
+    bool result = board.movePiece(0, 3, 4, 7); //Queen blanc d1->h5
+    EXPECT_TRUE(result);
+    EXPECT_EQ(board.getPieceAt(4, 7)->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt(0, 3), nullptr);
+
+    bool result2 = board.movePiece(4, 7, 4, 5); //Queen blanc h5->f5
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt(4, 5)->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt(4, 7), nullptr);
+}
+
 // Test de mouvement valide pour une Reine (d1 -> h5)
 TEST_F(BoardTest, ValidQueenDiagonalMove) {
     board.movePiece(1, 4, 2, 4); // Pion blanc e2 -> e3
