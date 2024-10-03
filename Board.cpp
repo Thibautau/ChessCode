@@ -78,8 +78,9 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
     }
 
     if (isMoveValid(in_iStartRow, in_iStartCol, in_iEndRow, in_iEndCol)) {
-        placePiece(in_iEndRow, in_iEndCol, pPiece);
         m_tabtabpiBoard[in_iStartRow][in_iStartCol] = nullptr;
+        placePiece(in_iEndRow, in_iEndCol, pPiece);
+        //m_tabtabpiBoard[in_iStartRow][in_iStartCol] = nullptr;
     }
 
     return true;
@@ -93,6 +94,18 @@ bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int 
         return false;
     }
 
+    Coordinate coordTargetPoint = Coordinate(in_iEndRow, in_iEndCol);
+    // We get the piece to move
+    std::vector<Coordinate> vectPossibleMoves = possibleMovesForPiece(Coordinate(in_iStartRow, in_iStartCol));
+    if(vectPossibleMoves.empty())
+    {
+        return false;
+    }
+    else
+    {
+        //vectPossibleMoves
+    }
+
     Piece* pPieceToMove = getPieceAt(in_iStartRow, in_iStartCol);
     if(pPieceToMove == nullptr) // If we didn't found the piece to move
     {
@@ -104,7 +117,7 @@ bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int 
     {
         return true;
     }
-    else if(pPieceToMove->getColor() == pPieceToEndPoint->getColor()) // If the color are the same, we can't eat, so we can't move
+    else if(pPieceToMove->getColor() == pPieceToEndPoint->getColor() || pPieceToEndPoint->getTypePiece() == TypePieces::KING) // If the color are the same, we can't eat, so we can't move. We can't eat a king
     {
         return false;
     }
@@ -148,26 +161,26 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
         isNextRowValid = (iNextRow >= 0 && iNextRow < 8);
         isNextColValid = (iNextCol >= 0 && iNextCol < 8);
 
+        Piece* p = m_tabtabpiBoard[iNextRow][iNextCol];
+
         pPieceFound = getPieceAt(iNextRow, iNextCol);
         if(pPieceFound != nullptr)
         {
             Color colPieceFound = pPieceFound->getColor();
             // Si les 2 pièces ont la même couleur, elle ne peut pas aller plus loin. We can't eat the king
-            if(colPieceToSeeValidMove == colPieceFound || pPieceFound->getTypePiece() == TypePieces::KING)
+            // TODO /!\ Verify if the king is not moving and then put in check
+            if(colPieceToSeeValidMove != colPieceFound && pPieceFound->getTypePiece() != TypePieces::KING)
             {
-                iProgressionVector--; // -- because we can't reach the next case, we move back
-                vectMovePossible.insert(vectMovePossible.end(), Coordinate(in_iStartRow + (iRowVector * (iProgressionVector -1)), in_iStartCol + (iColVector * (iProgressionVector - 1))));
-            }
-            else // TODO /!\ Verify if the king is not moving and then put in check
-            {
-                // If we can eat, we add this move to those possible
                 vectMovePossible.insert(vectMovePossible.end(), Coordinate(iNextRow, iNextCol));
             }
             break; // We get out because we know the furthest case for this vector
         }
 
-        // If we can move, we add this to those possible
-        vectMovePossible.insert(vectMovePossible.end(), Coordinate(iNextRow, iNextCol));
+        if(isNextRowValid && isNextColValid)
+        {
+            // If we can move, we add this to those possible
+            vectMovePossible.insert(vectMovePossible.end(), Coordinate(iNextRow, iNextCol));
+        }
         iProgressionVector++;
     }while(iProgressionVector <= iLengthVector && isNextRowValid && isNextColValid);
 
@@ -209,6 +222,9 @@ std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordP
             vectCoordAllowToMovePiece.insert(vectCoordAllowToMovePiece.end(), vectCoordMovePossible.begin(), vectCoordMovePossible.end());
         }
     }
+    //Release memory
+    delete[] vectOfPiece;
+    vectOfPiece = nullptr;
 
     return vectCoordAllowToMovePiece;
 }

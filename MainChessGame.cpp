@@ -27,7 +27,7 @@ void MainChessGame::playTurn()
 
     //TODO DELETE DEBUG START HERE
     // Puis dans ton code principal ou dans ta méthode
-    std::vector<Coordinate> moves = m_board->possibleMovesForPiece(Coordinate(0, 0));
+    std::vector<Coordinate> moves = m_board->possibleMovesForPiece(Coordinate(1, 0));
 
     std::cout << "---------------START DEBUG---------------\n";
     std::cout << moves.size();

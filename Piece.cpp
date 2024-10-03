@@ -74,17 +74,18 @@ int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_
     int iErrorCode = NO_ERROR;
     int iRow;
 
+
     switch (m_tpTypePiece) {
         // The pawn can only move forward
         case TypePieces::PAWN:
             vectorOfDisplacement = new Vector[1];
 
             // 1 for the black because you want to go down
-            iRow = 1;
+            iRow = -1;
             if(m_colColorPiece == Color::WHITE)
             {
                 // -1 for the white to go up
-                iRow = -1;
+                iRow = 1;
             }
 
             // Moving forward
@@ -94,6 +95,7 @@ int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_
             break;
         case TypePieces::ROOK:
             vectorOfDisplacement = new Vector[4];
+
             //TODO Problème HERE avec vectorOfDisplacement qui n'est pas prit comme un tableau
             iErrorCode = getRookVectorWithAdjustableLength(vectorOfDisplacement, 0, 7);
 
