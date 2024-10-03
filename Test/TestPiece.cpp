@@ -224,6 +224,11 @@ TEST_F(BoardTest, ValidRookMove) {
     EXPECT_TRUE(result);
     EXPECT_EQ(board.getPieceAt(2, 0)->getTypePiece(), TypePieces::ROOK);
     EXPECT_EQ(board.getPieceAt(0, 0), nullptr);
+
+    bool result2 = board.movePiece(2, 0, 2, 1);// Rook blanc a3->b3
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt(2, 1)->getTypePiece(), TypePieces::ROOK);
+    EXPECT_EQ(board.getPieceAt(2, 0), nullptr);
 }
 
 // Test de mouvement invalide pour une tour (a1->b2)
@@ -234,6 +239,30 @@ TEST_F(BoardTest, InvalidRookMove) {
     EXPECT_EQ(board.getPieceAt(0, 0)->getTypePiece(), TypePieces::ROOK);
     EXPECT_EQ(board.getPieceAt(1, 1), nullptr);
 }
+
+// Test de mouvement valide pour un fou (c1 -> e3)
+TEST_F(BoardTest, ValidBishopMove) {
+    board.movePiece(1, 2, 3, 2); // Pion blanc c2->c4
+    bool result = board.movePiece(0, 2, 2, 4); // Bishop blanc c1->e3
+    EXPECT_TRUE(result);
+    EXPECT_EQ(board.getPieceAt(2, 4)->getTypePiece(), TypePieces::BISHOP);
+    EXPECT_EQ(board.getPieceAt(0, 2), nullptr);
+
+    bool result2 = board.movePiece(2, 4, 6, 2); // Bishop blanc e3->g5
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt(6, 2)->getTypePiece(), TypePieces::BISHOP);
+    EXPECT_EQ(board.getPieceAt(2, 4), nullptr);
+}
+
+// Test de mouvement invalide pour un fou (c1 -> c2)
+TEST_F(BoardTest, InvalidBishopMove) {
+    board.movePiece(1, 2, 3, 2); // Pion blanc c2->c4
+    bool result = board.movePiece(0, 2, 1, 2); // Bishop blanc c1->c2
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt(0, 2)->getTypePiece(), TypePieces::BISHOP);
+    EXPECT_EQ(board.getPieceAt(1, 2), nullptr);
+}
+
 
 // Test de mouvement valide pour un cavalier (b1 -> c3)
 TEST_F(BoardTest, ValidKnightMoveToC3) {
