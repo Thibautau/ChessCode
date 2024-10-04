@@ -104,22 +104,39 @@ bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int 
 
     Coordinate coordTargetPoint = Coordinate(in_iEndRow, in_iEndCol);
     // We get the piece to move
-    std::vector<Coordinate> vectPossibleMoves = possibleMovesForPiece(Coordinate(in_iStartRow, in_iStartCol), &coordTargetPoint);
+    std::vector<Coordinate> vectPossibleMoves = possibleMovesForPiece(Coordinate(in_iStartRow, in_iStartCol));
     if(vectPossibleMoves.empty()) // Means that the piece could not move
     {
         return false;
     }
     else
     {
-        Coordinate coordPossibleMoves = vectPossibleMoves[0];
-        return coordTargetPoint == coordPossibleMoves;
+        return isCoordinateInVector(coordTargetPoint, vectPossibleMoves);
     }
 }
 
-std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove, const Coordinate* in_optionalCoordTargetPoint) const
+bool Board::isCoordinateInVector(const Coordinate& coordTargetPoint, const std::vector<Coordinate>& vectPossibleMoves)
+{
+    for (const Coordinate& coord : vectPossibleMoves)
+    {
+        if (coord == coordTargetPoint)
+        {
+            return true; // Coordinate found in the vector
+        }
+    }
+    return false; // Coordinate not found
+}
+
+
+bool Board::respectBoardLength(int iRow ,int in_iColumn) const
+{
+    return iRow >= 0 && iRow < 8 && in_iColumn >= 0 && in_iColumn < 8;
+}
+
+std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove) const
 {
     //TODO Verify if moving cause the king to be check or not
-    if(in_iStartRow >= 8 || in_iStartCol >= 8 || in_iStartRow < 0 || in_iStartCol < 0)
+    if(! respectBoardLength(in_iStartRow, in_iStartCol))
     {
         return {};
     }
@@ -136,57 +153,38 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
     int iColVector = in_vectMove.iColumn;
     int iLengthVector = in_vectMove.iLength;
 
-    Piece* pPieceFound = nullptr; // The piece or nullptr on the path of the vector for an iteration
-    bool isNextRowValid, isNextColValid; // To know if the next row/col (vector applied) is in the board area (0-7, 0-7)
-
-    int iProgressionVector = 1; // Indice to multiply the vector onto
-
     std::vector<Coordinate> vectMovePossible; // We store all the movements possible
 
-    do // We visit all the cases between the start point and the furthest possible point
+    for (int iProgressionVector = 1; iProgressionVector <= iLengthVector; ++iProgressionVector)
     {
         int iNextRow = in_iStartRow + (iRowVector * iProgressionVector);  // The indices of the next row/col (vector applied)
         int iNextCol = in_iStartCol + (iColVector * iProgressionVector);
 
-        isNextRowValid = (iNextRow >= 0 && iNextRow < 8);
-        isNextColValid = (iNextCol >= 0 && iNextCol < 8);
+        bool isNextRowValid = (iNextRow >= 0 && iNextRow < 8);
+        bool isNextColValid = (iNextCol >= 0 && iNextCol < 8);
 
-        pPieceFound = getPieceAt(iNextRow, iNextCol);
-        Color colPieceFound = (pPieceFound != nullptr) ? pPieceFound->getColor() : Color::NONE; // Get the color, if it doesn't exist it aassigns Color::None
-        TypePieces typePieceFound = (pPieceFound != nullptr) ? pPieceFound->getTypePiece() : TypePieces::NONE; // Get the TypePieces, if doesn't exist it aassigns TypePieces::None
-
-        if(in_optionalCoordTargetPoint != nullptr) // (optional), If we want to know if the target coord is in the possible movements, we don't check for the others
+        if (!isNextRowValid || !isNextColValid) // If the next move is out of the board, we stop
         {
-            if(*in_optionalCoordTargetPoint == Coordinate(iNextRow, iNextCol))
-            {
-                // If it is the point we are looking for and the move is valid
-                if(colPieceToSeeValidMove != colPieceFound && typePieceFound != TypePieces::KING)
-                {
-                    vectMovePossible.insert(vectMovePossible.end(), Coordinate(iNextRow, iNextCol));
-                }
-                break;
-            }
+            break;
         }
-        else {
-            if(pPieceFound != nullptr) // If there is a piece
-            {
-                // Si les 2 pièces ont la même couleur, elle ne peut pas aller plus loin. We can't eat the king
-                // TODO /!\ Verify if the king is not moving and then put in check
-                if(colPieceToSeeValidMove != colPieceFound && typePieceFound != TypePieces::KING)
-                {
-                    vectMovePossible.insert(vectMovePossible.end(), Coordinate(iNextRow, iNextCol));
-                }
-                break; // We get out because we know the furthest case for this vector
-            }
 
-            if(isNextRowValid && isNextColValid) // If the move is valid, then we store it
+        Piece* pPieceFound = getPieceAt(iNextRow, iNextCol);
+
+        if (pPieceFound != nullptr) // If a piece is found
+        {
+            Color colPieceFound = pPieceFound->getColor();
+            TypePieces typePieceFound = pPieceFound->getTypePiece();
+
+            // TODO /!\ Verify if the king is not moving and then put in check
+            if (colPieceToSeeValidMove != colPieceFound && typePieceFound != TypePieces::KING) // We can't eat the same Color or eat a King
             {
-                // If we can move, we add this to those possible
-                vectMovePossible.insert(vectMovePossible.end(), Coordinate(iNextRow, iNextCol));
+                vectMovePossible.push_back(Coordinate(iNextRow, iNextCol));
             }
+            break; // Stop since we hit a piece
         }
-        iProgressionVector++;
-    }while(iProgressionVector <= iLengthVector && isNextRowValid && isNextColValid);
+
+        vectMovePossible.push_back(Coordinate(iNextRow, iNextCol)); // Possible to move, we store this position
+    }
 
     return vectMovePossible;
 }
@@ -212,7 +210,7 @@ std::vector<Move> Board::listOfPossibleMoves(Color in_colColor) const
     return possibleMoves;
 }
 
-std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordPiece, const Coordinate* in_optionalCoordTargetPoint) const
+std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordPiece) const
 {
     Piece* pPiece = getPieceAt(in_coordPiece);
     if(pPiece == nullptr)
@@ -230,7 +228,7 @@ std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordP
         Vector vectPossible = vectOfPiece[iIndicesVector];
 
         // Récupérer les mouvements possibles
-        std::vector<Coordinate> vectCoordMovePossible = getMovementsPossibleWithVector(in_coordPiece.iRow, in_coordPiece.iColumn, vectPossible, in_optionalCoordTargetPoint);
+        std::vector<Coordinate> vectCoordMovePossible = getMovementsPossibleWithVector(in_coordPiece.iRow, in_coordPiece.iColumn, vectPossible);
 
 
 
