@@ -12,6 +12,7 @@
 class Board {
 private:
     Piece* m_tabtabpiBoard[8][8]{};
+    Coordinate m_enPassantPosition;
 
     bool respectBoardLength(int in_iRow, int in_iColumn) const;
     static bool isCoordinateInVector(const Coordinate& coordTargetPoint, const std::vector<Coordinate>& vectPossibleMoves);

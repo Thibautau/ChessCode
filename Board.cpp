@@ -5,7 +5,7 @@
 #include "Board.h"
 #include <iostream>
 
-Board::Board()
+Board::Board(): m_enPassantPosition{-1, -1}
 {
     for(int iIndiceRow = 0; iIndiceRow < 8; iIndiceRow++ )
     {
@@ -79,9 +79,27 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
     }
 
     if (isMoveValid(in_iStartRow, in_iStartCol, in_iEndRow, in_iEndCol, in_colPlayer)) {
+        bool wasEnPassant = false;
+        if (pPiece->getTypePiece() == TypePieces::PAWN) {
+            int direction = (in_colPlayer == Color::WHITE) ? 1 : -1;
+            if (m_enPassantPosition.getRow()+direction == in_iEndRow && m_enPassantPosition.getColumn() == in_iEndCol) {
+                m_tabtabpiBoard[m_enPassantPosition.getRow()+direction][in_iEndCol] = nullptr;
+                m_enPassantPosition = Coordinate{-1, -1};
+            }
+            else if (std::abs(in_iStartRow - in_iEndRow) == 2 && in_iStartCol == in_iEndCol) {
+                wasEnPassant= true;
+                m_enPassantPosition = Coordinate(in_iEndRow, in_iEndCol);
+            }
+        }
+
         pPiece->setAlreadyMoved(true);
         placePiece(in_iEndRow, in_iEndCol, pPiece);
         m_tabtabpiBoard[in_iStartRow][in_iStartCol] = nullptr;
+
+        if (!wasEnPassant) {
+            m_enPassantPosition = Coordinate{-1, -1};
+        }
+
         return true;
     }
 
@@ -100,6 +118,13 @@ bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int 
     if(pPieceToMove == nullptr || pPieceToMove->getColor() != in_colPlayer) //If the player try to move a piece of another color, return false
     {
         return false;
+    }
+
+    if (pPieceToMove->getTypePiece() == TypePieces::PAWN) {
+        int direction = (in_colPlayer == Color::WHITE) ? 1 : -1;
+        if (m_enPassantPosition.getRow()+direction == in_iEndRow && m_enPassantPosition.getColumn() == in_iEndCol) {
+            return true;
+        }
     }
 
     Coordinate coordTargetPoint = Coordinate(in_iEndRow, in_iEndCol);
