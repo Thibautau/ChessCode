@@ -171,15 +171,15 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
 
         Piece* pPieceFound = getPieceAt(iNextRow, iNextCol);
         if (typePieceToSeeValidMove == TypePieces::PAWN){
-            if (iColVector == 0 && pPieceFound == nullptr)
-            {
+            if (iColVector == 0 && pPieceFound == nullptr) {
                 vectMovePossible.emplace_back(iNextRow, iNextCol);
             }
-            else if (pPieceFound != nullptr && pPieceFound->getColor() != colPieceToSeeValidMove)
-            {
+            else if (iColVector != 0 && pPieceFound != nullptr && pPieceFound->getColor() != colPieceToSeeValidMove) {
                 vectMovePossible.emplace_back(iNextRow, iNextCol);
             }
-            continue;
+            else {
+                break;
+            }
         }
         else if (pPieceFound != nullptr) // If a piece is found
         {
@@ -191,6 +191,7 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
             {
                 vectMovePossible.push_back(Coordinate(iNextRow, iNextCol));
             }
+            iProgressionVector = iLengthVector+1;
             break; // Stop since we hit a piece
         }
 

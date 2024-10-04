@@ -51,7 +51,7 @@ TEST_F(BoardTest, PawnSecondMove) {
 TEST_F(BoardTest, EnPassantCapture) {
     board.movePiece(1, 4, 3, 4);// Pion blanc e2->e4
     board.movePiece(3, 4, 4, 4);// Pion blanc e4->e5
-    board.movePiece(6, 5, 4, 5);// Pion noir f7->f5
+    board.movePiece(6, 5, 4, 5, Color::BLACK);// Pion noir f7->f5
 
     // Pion blanc de e5 capture en passant f6
     bool result = board.movePiece(4, 4, 5, 5);
