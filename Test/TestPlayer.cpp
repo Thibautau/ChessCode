@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "PlayerHuman.cpp"
-#include "Type.h"
+#include "Piece.cpp"
 
 //Initialisation du joueur
 TEST(PlayerTest, PlayerInitialisation) {

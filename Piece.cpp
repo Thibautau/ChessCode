@@ -87,13 +87,13 @@ int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_
     switch (m_tpTypePiece) {
         // The pawn can only move forward
         case TypePieces::PAWN:
-            vectorOfDisplacement = new Vector[1];
+            vectorOfDisplacement = new Vector[3];
 
-            // 1 for the black because you want to go down
+            // -1 for the black because you want to go down
             iRow = -1;
             if(m_colColorPiece == Color::WHITE)
             {
-                // -1 for the white to go up
+                // 1 for the white to go up
                 iRow = 1;
             }
 
@@ -105,7 +105,9 @@ int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_
 
             // Moving forward
             vectorOfDisplacement[0] = Vector(iRow, 0, iLengthToAdjust);
-            out_tabSize = 1;
+            vectorOfDisplacement[1] = Vector(iRow, -1, 1);
+            vectorOfDisplacement[2] = Vector(iRow, 1, 1);
+            out_tabSize = 3;
             *out_tabvectOfDisplacement = vectorOfDisplacement;
             break;
         case TypePieces::ROOK:
@@ -153,7 +155,10 @@ int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_
             // BISHOP + ROOK at length 1
             vectorOfDisplacement = new Vector[8];
 
-            iErrorCode = getRookVectorWithAdjustableLength(vectorOfDisplacement, 0, 1);
+            vectorOfDisplacement[0] = Vector(1, 0, 1); // To go up
+            vectorOfDisplacement[1] = Vector(-1, 0, 1); // To go down
+            vectorOfDisplacement[2] = Vector(0, -1, 2); // To go left. Length at 2 for the rock
+            vectorOfDisplacement[3] = Vector(0, 1, 2); // To go right. Length at 2 for the rock
             iErrorCode = getBishopVectorWithAdjustableLength(vectorOfDisplacement, 4, 1);
 
             out_tabSize = 8;
