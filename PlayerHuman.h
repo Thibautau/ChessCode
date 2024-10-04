@@ -23,9 +23,9 @@ public:
     int getScore() const;
     void setScore(int in_iScore);
     void play(Board& board, Coordinate& start, Coordinate& end) override;
-    std::string getInput();
+    static void getInput(std::string& input);
     bool isInputValid(const std::string& in_sInput, Coordinate& out_start, Coordinate& out_end);
-    bool isValidCoordinate(char col, char row);
+    static bool isValidCoordinate(char col, char row);
 };
 
 #endif // PLAYERHUMAN_H
