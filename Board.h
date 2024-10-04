@@ -33,7 +33,6 @@ public:
     void displayBoard() const;
 
     std::vector<Coordinate> getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove) const;
-    std::vector<Coordinate> getMovementsPossibleWithVectors(int in_iStartRow, int in_iStartCol, Vector& in_vectMove, const Coordinate* in_coordTargetPoint = nullptr) const;
 };
 
 #endif //BOARD_H
