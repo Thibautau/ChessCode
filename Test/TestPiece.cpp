@@ -63,7 +63,7 @@ TEST_F(BoardTest, EnPassantCapture) {
 //Capture de Pion
 TEST_F(BoardTest, CapturePion) {
     board.movePiece(1, 4, 3, 4); // Pion blanc e2 -> e4
-    board.movePiece(6, 5, 4, 5); // Pion noir f7 -> f5
+    board.movePiece(6, 5, 4, 5, Color::BLACK); // Pion noir f7 -> f5
     //Capture du pion en f5
     bool result = board.movePiece(3, 4, 4, 5);
     EXPECT_TRUE(result);
