@@ -11,13 +11,17 @@ Color Bot::getPlayerColor() const {
     return m_color;
 }
 
-std::pair<Coordinate, Coordinate> Bot::play(Board &board) {
+void Bot::play(Board& board, Coordinate& start, Coordinate& end) {
     std::vector<Move> possibleMoves = board.listOfPossibleMoves(m_color);
+
     if (possibleMoves.empty()) {
-        return {}; // Pas de mouvement possible
+        return;
     }
+
     int randomIndex = rand() % possibleMoves.size();
-    return {possibleMoves[randomIndex].coordStart, possibleMoves[randomIndex].coordEnd};
+
+    start = possibleMoves[randomIndex].coordStart;
+    end = possibleMoves[randomIndex].coordEnd;
 }
 
 

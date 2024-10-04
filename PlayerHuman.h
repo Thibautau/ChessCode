@@ -22,7 +22,7 @@ public:
     void setPlayerColor(Color color);
     int getScore() const;
     void setScore(int in_iScore);
-    std::pair<Coordinate, Coordinate> play(Board& board);
+    void play(Board& board, Coordinate& start, Coordinate& end) override;
     std::string getInput();
     bool isInputValid(const std::string& in_sInput, Coordinate& out_start, Coordinate& out_end);
     bool isValidCoordinate(char col, char row);

@@ -15,7 +15,7 @@ private:
 
 public:
     Bot(Color color);
-    std::pair<Coordinate, Coordinate> play(Board& board);
+    void play(Board& board, Coordinate& start, Coordinate& end) override;
     Color getPlayerColor() const;
 };
 

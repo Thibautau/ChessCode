@@ -28,15 +28,14 @@ void MainChessGame::playTurn()
     std::cout << "C'est au tour de " << (m_currentPlayer->getPlayerColor() == Color::WHITE ? "Blanc" : "Noir") << std::endl;
 
     m_board->displayBoard();
+    Coordinate coordStart;
+    Coordinate coordEnd;
 
-    std::pair<Coordinate, Coordinate> move = m_currentPlayer->play(*m_board);
-
-    Coordinate coordStart = move.first;
-    Coordinate coorEnd = move.second;
+    m_currentPlayer->play(*m_board, coordStart, coordEnd);
 
 
-    if (m_board->isMoveValid(coordStart.iRow, coordStart.iColumn, coorEnd.iRow, coorEnd.iColumn, m_currentPlayer->getPlayerColor())) {
-        m_board->movePiece(coordStart.iRow, coordStart.iColumn, coorEnd.iRow, coorEnd.iColumn, m_currentPlayer->getPlayerColor());
+    if (m_board->isMoveValid(coordStart.iRow, coordStart.iColumn, coordEnd.iRow, coordEnd.iColumn, m_currentPlayer->getPlayerColor())) {
+        m_board->movePiece(coordStart.iRow, coordStart.iColumn, coordEnd.iRow, coordEnd.iColumn, m_currentPlayer->getPlayerColor());
         changeCurrentPlayer();
     } else {
         std::cout << "Mouvement invalide. Essayez encore." << std::endl;
