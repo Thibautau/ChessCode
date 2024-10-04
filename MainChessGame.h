@@ -19,7 +19,8 @@ private:
     Color m_colorWinner;
 
 public:
-    MainChessGame();
+    explicit MainChessGame(GameMode mode);
+    ~MainChessGame();
 
     void initChessGame() const;
     void playTurn();

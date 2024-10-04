@@ -23,22 +23,17 @@ void PlayerHuman::setScore(int in_iScore) {
     m_iScore = in_iScore;
 }
 
-std::pair<Coordinate, Coordinate> PlayerHuman::play(Board& board) {
+void PlayerHuman::play(Board& board,Coordinate& start, Coordinate& end) {
     std::string input;
-    Coordinate start, end;
 
     do {
-        input = getInput();
+        getInput(input);
     } while (!isInputValid(input, start, end));
-
-    return {start, end};
 }
 
-std::string PlayerHuman::getInput() {
-    std::string sInput;
+void PlayerHuman::getInput(std::string& input) {
     std::cout << "Veuillez entrer votre mouvement (ex: 'e2 e4'): ";
-    std::getline(std::cin, sInput);
-    return sInput;
+    std::getline(std::cin, input);
 }
 
 bool PlayerHuman::isInputValid(const std::string& in_sInput, Coordinate& out_start, Coordinate& out_end) {
