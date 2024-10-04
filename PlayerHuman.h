@@ -18,7 +18,7 @@ protected:
 
 public:
     PlayerHuman(Color color);
-    Color getPlayerColor() const;
+    Color getPlayerColor() const override;
     void setPlayerColor(Color color);
     int getScore() const;
     void setScore(int in_iScore);

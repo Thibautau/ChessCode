@@ -5,7 +5,6 @@
 #ifndef MAINCHESSGAME_H
 #define MAINCHESSGAME_H
 
-#include <memory>
 #include "PlayerHuman.h"
 #include "Board.h"
 #include "Type.h"

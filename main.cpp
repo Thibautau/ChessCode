@@ -4,7 +4,7 @@
 
 int main() {
     const GameMode mode = GameMode::JVJ;
-    auto* game = new MainChessGame(mode);
+    MainChessGame* game = new MainChessGame(mode);
     game->initChessGame();
 
     while (!game->isGameOver()) {

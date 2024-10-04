@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-#include "Piece.cpp"
 #include "Board.h"
 
 class BoardTest : public ::testing::Test {
