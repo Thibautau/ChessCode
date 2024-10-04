@@ -3,15 +3,15 @@
 #include <iostream>
 
 int main() {
-    MainChessGame game;
-    game.initChessGame();
+    const GameMode mode = GameMode::JVJ;
+    auto* game = new MainChessGame(mode);
+    game->initChessGame();
 
-    while (!game.isGameOver())
-    {
-        game.playTurn();
+    while (!game->isGameOver()) {
+        game->playTurn();
     }
 
-    Color colWinner = game.getColorWinner();
+    const Color colWinner = game->getColorWinner();
     if (colWinner == Color::WHITE) {
         std::cout << "Les Blancs ont gagné !" << std::endl;
     } else if (colWinner == Color::BLACK) {
@@ -19,6 +19,8 @@ int main() {
     } else {
         std::cout << "Match nul !" << std::endl;
     }
+
+    delete game;
 
     return 0;
 }

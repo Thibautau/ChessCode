@@ -8,10 +8,27 @@
 #include "Bot.h"
 #include <iostream>
 
-MainChessGame::MainChessGame()
+MainChessGame::MainChessGame(GameMode mode)
 {
-    m_currentPlayer = new PlayerHuman(Color::WHITE);
-    m_waitingPlayer = new Bot(Color::BLACK);
+    switch (mode) {
+        case GameMode::JVJ:
+            m_currentPlayer = new PlayerHuman(Color::WHITE);
+            m_waitingPlayer = new PlayerHuman(Color::BLACK);
+        break;
+
+        case GameMode::JVB:
+            m_currentPlayer = new PlayerHuman(Color::WHITE);
+            m_waitingPlayer = new Bot(Color::BLACK);
+        break;
+
+        case GameMode::BVB:
+            m_currentPlayer = new Bot(Color::WHITE);
+            m_waitingPlayer = new Bot(Color::BLACK);
+        break;
+
+        default:
+            throw std::invalid_argument("Mode de jeu invalide.");
+    }
     m_board = new Board();
     m_isGameOver = false;
     m_colorWinner = Color::NONE;
@@ -70,6 +87,12 @@ Player* MainChessGame::getWaitingPlayer() const
 Board* MainChessGame::getBoard() const
 {
     return m_board;
+}
+
+MainChessGame::~MainChessGame() {
+    delete m_currentPlayer;
+    delete m_waitingPlayer;
+    delete m_board;
 }
 
 
