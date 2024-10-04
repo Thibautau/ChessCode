@@ -93,6 +93,9 @@ MainChessGame::~MainChessGame() {
     delete m_currentPlayer;
     delete m_waitingPlayer;
     delete m_board;
+    m_currentPlayer= nullptr;
+    m_waitingPlayer= nullptr;
+    m_board= nullptr;
 }
 
 

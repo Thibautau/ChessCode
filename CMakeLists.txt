@@ -32,6 +32,7 @@ add_executable(ChessCode
         Bot.h
         Bot.cpp
         Player.h
+        Player.cpp
 )
 
 # Créer l'exécutable pour les tests
