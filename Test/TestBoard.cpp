@@ -70,3 +70,27 @@ TEST(BoardTest, IsMoveValid) {
     // Par exemple, vérifier que le mouvement est toujours valide (implémentation actuelle)
     EXPECT_TRUE(board->isMoveValid(1, 0, 2, 0));
 }
+
+//Test de vérification echec et mat pour roi noir
+TEST(TestBoard, isBlackKingCheckmated) {
+    Board* board = new Board();
+    board->initializeBoard();
+    board->movePiece(1,4,3,4,Color::WHITE);// pion blanc e2->e4
+    board->movePiece(0,5,3,2,Color::WHITE);// fou blanc f1->c4
+    board->movePiece(0,3,4,7,Color::WHITE);// dame blanche d1->h5
+    board->movePiece(4,7,6,5,Color::WHITE);// dame blanche capture pion f7
+    bool roiNoirEchec = board->isCheckmated(7,4,Color::BLACK);
+    EXPECT_TRUE(roiNoirEchec);
+}
+
+//Test de vérification echec et mat pour roi blanc
+TEST(TestBoard, isWhiteKingCheckmated) {
+    Board* board = new Board();
+    board->initializeBoard();
+    board->movePiece(1,5,2,5,Color::WHITE);// pion blanc f2->f3
+    board->movePiece(6,4,4,4,Color::BLACK);// pion noir e7->e5
+    board->movePiece(1,6,3,6,Color::WHITE);// pion blanc g2->g4
+    board->movePiece(7,3,3,7,Color::BLACK);// dame noire d8->h4
+    bool roiBlancEchec = board->isCheckmated(0,4,Color::WHITE);
+    EXPECT_TRUE(roiBlancEchec);
+}

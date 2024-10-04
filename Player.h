@@ -12,7 +12,7 @@ class Player {
 public:
     virtual void play(Board& board, Coordinate& start, Coordinate& end) = 0;
     virtual Color getPlayerColor() const = 0;
-    virtual ~Player();
+    //virtual ~Player();
 };
 
 #endif //PLAYER_H
