@@ -3,7 +3,7 @@
 #include <iostream>
 
 int main() {
-    const GameMode mode = GameMode::JVJ;
+    const GameMode mode = GameMode::JVB;
     MainChessGame* game = new MainChessGame(mode);
     game->initChessGame();
 

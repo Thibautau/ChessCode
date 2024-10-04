@@ -171,18 +171,15 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
 
         Piece* pPieceFound = getPieceAt(iNextRow, iNextCol);
         if (typePieceToSeeValidMove == TypePieces::PAWN){
-            if (iColVector == 0)
+            if (iColVector == 0 && pPieceFound == nullptr)
             {
-                if (pPieceFound == nullptr) {
-                    vectMovePossible.emplace_back(iNextRow, iNextCol);
-                }
+                vectMovePossible.emplace_back(iNextRow, iNextCol);
             }
-            else
+            else if (pPieceFound != nullptr && pPieceFound->getColor() != colPieceToSeeValidMove)
             {
-                if (pPieceFound != nullptr && pPieceFound->getColor() != colPieceToSeeValidMove) {
-                    vectMovePossible.emplace_back(iNextRow, iNextCol);
-                }
+                vectMovePossible.emplace_back(iNextRow, iNextCol);
             }
+            continue;
         }
         else if (pPieceFound != nullptr) // If a piece is found
         {
