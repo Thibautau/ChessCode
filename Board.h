@@ -13,6 +13,8 @@ class Board {
 private:
     Piece* m_tabtabpiBoard[8][8]{};
     Coordinate m_enPassantPosition;
+    bool isWhiteKingChecked;
+    bool isBlackKingChecked;
 
     bool respectBoardLength(int in_iRow, int in_iColumn) const;
     static bool isCoordinateInVector(const Coordinate& coordTargetPoint, const std::vector<Coordinate>& vectPossibleMoves);
@@ -29,6 +31,7 @@ public:
     bool placePiece(int in_iRow, int in_iCol, Piece* in_pPiece);
     bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE) const;
+    bool isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer);
     std::vector<Move> listOfPossibleMoves(Color in_colColor) const;
     std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece) const;
     void displayBoard() const;

@@ -160,6 +160,25 @@ bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int 
     }
 }
 
+bool Board::isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer) {
+    isWhiteKingChecked = true;
+    if(in_colPlayer == Color::WHITE) {
+        if(isWhiteKingChecked == false) {
+            return false;
+        }
+    }
+    else if(in_colPlayer == Color::BLACK) {
+        if(isBlackKingChecked == false) {
+            return false;
+        }
+    }
+    std::vector<Coordinate> vectPossibleMovesForKing = possibleMovesForPiece(Coordinate(in_iStartRow, in_iStartCol));
+    if(!vectPossibleMovesForKing.empty()) {
+        return false;
+    }
+    return true;
+}
+
 bool Board::isCoordinateInVector(const Coordinate& coordTargetPoint, const std::vector<Coordinate>& vectPossibleMoves)
 {
     for (const Coordinate& coord : vectPossibleMoves)
