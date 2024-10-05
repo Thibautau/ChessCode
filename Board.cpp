@@ -83,8 +83,7 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
         if (pPiece->getTypePiece() == TypePieces::PAWN) {
             int direction = (in_colPlayer == Color::WHITE) ? 1 : -1;
             if (m_enPassantPosition.getRow()+direction == in_iEndRow && m_enPassantPosition.getColumn() == in_iEndCol) {
-                m_tabtabpiBoard[m_enPassantPosition.getRow()+direction][in_iEndCol] = nullptr;
-                m_enPassantPosition = Coordinate{-1, -1};
+                m_tabtabpiBoard[m_enPassantPosition.getRow()][in_iEndCol] = nullptr;
             }
             else if (std::abs(in_iStartRow - in_iEndRow) == 2 && in_iStartCol == in_iEndCol) {
                 wasEnPassant= true;
