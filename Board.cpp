@@ -4,7 +4,7 @@
 
 #include "Board.h"
 #include <iostream>
-
+//TODO faire en sorte de stocker à chaque coup quelle pièce attaque quelle case pour plus d'opti
 Board::Board(): m_enPassantPosition{-1, -1}
 {
     for(int iIndiceRow = 0; iIndiceRow < 8; iIndiceRow++ )
@@ -91,6 +91,27 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
             }
         }
 
+        bool bKingWentRightForRock = in_iEndCol - in_iStartCol == 2;
+        bool bKingWentLeftForRock = in_iEndCol - in_iStartCol == -2;
+
+        if(pPiece->getTypePiece() == TypePieces::KING) // If the king rocked (move of length 2, we move the rook)
+        {
+            Piece* pRookForRock = nullptr;
+            if(bKingWentRightForRock)
+            {
+                pRookForRock = getPieceAt(in_iStartRow, 7);
+                pRookForRock->setAlreadyMoved(true);
+                placePiece(in_iStartRow, 5, pRookForRock);
+                m_tabtabpiBoard[in_iStartRow][5] = nullptr;
+            }
+            else if(bKingWentLeftForRock)
+            {
+                pRookForRock = getPieceAt(in_iStartRow, 0);
+                pRookForRock->setAlreadyMoved(true);
+                placePiece(in_iStartRow, 3, pRookForRock);
+                m_tabtabpiBoard[in_iStartRow][3] = nullptr;}
+        }
+
         pPiece->setAlreadyMoved(true);
         placePiece(in_iEndRow, in_iEndCol, pPiece);
         m_tabtabpiBoard[in_iStartRow][in_iStartCol] = nullptr;
@@ -157,6 +178,151 @@ bool Board::respectBoardLength(int iRow ,int in_iColumn) const
     return iRow >= 0 && iRow < 8 && in_iColumn >= 0 && in_iColumn < 8;
 }
 
+bool Board::doesPieceHaveGoodTypeOfAttack(Piece* in_pPieceToVerifyAttack, TypeOfPieceAttack in_typeOfAttack)
+{
+    if(in_pPieceToVerifyAttack == nullptr)
+    {
+        return false;
+    }
+
+    bool bGoodTypeOfAttackResearched = false;
+    if(in_typeOfAttack == TypeOfPieceAttack::STRAIGHT)
+    {
+        bGoodTypeOfAttackResearched = in_pPieceToVerifyAttack->attackStraight();
+    }
+    else if(in_typeOfAttack == TypeOfPieceAttack::DIAGONAL)
+    {
+        bGoodTypeOfAttackResearched = in_pPieceToVerifyAttack->attackDiagonal();
+    }
+    else if(in_typeOfAttack == TypeOfPieceAttack::L)
+    {
+        bGoodTypeOfAttackResearched = in_pPieceToVerifyAttack->attackKnight();
+    }
+    return bGoodTypeOfAttackResearched;
+}
+
+bool Board::isVectorsProjectionsAttackingCase(int in_iRow, int in_iColumn, Color in_colorToFindAttack, const Vector* in_tabVectorOfPiece, int in_iNbVector, TypeOfPieceAttack in_typeOfAttackOfTheVector) const
+{
+    if(!respectBoardLength(in_iRow, in_iColumn) || in_tabVectorOfPiece == nullptr || in_iNbVector <= 0)
+    {
+        return false;
+    }
+
+    int iIndicePieceFound = 0;
+
+    for (int iIndicesVector = 0; iIndicesVector < in_iNbVector; ++iIndicesVector)
+    {
+        Vector vectPossible = in_tabVectorOfPiece[iIndicesVector];
+
+        Piece* pPieceFound = findFirstPieceOnVector(in_iRow, in_iColumn, vectPossible, iIndicePieceFound);
+
+        if(pPieceFound != nullptr)
+        {
+            TypeOfPieceAttack typeOfAttackPieceFound = pPieceFound->typeOfAttack();
+
+            bool bGoodTypeOfAttackResearched = doesPieceHaveGoodTypeOfAttack(pPieceFound, in_typeOfAttackOfTheVector);
+
+            if(pPieceFound->getColor() == in_colorToFindAttack && bGoodTypeOfAttackResearched)
+            {
+                if(pPieceFound->getTypePiece() == TypePieces::PAWN || pPieceFound->getTypePiece() == TypePieces::KING) {
+                    return iIndicePieceFound == 1; // Le pion et le roi ne peuvent attaquer qu'à 1 de distance
+                }
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+Piece* Board::findFirstPieceOnVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove, int& in_iIndicePieceFound) const {
+    if(! respectBoardLength(in_iStartRow, in_iStartCol))
+    {
+        return nullptr;
+    }
+
+    int iRowVector = in_vectMove.iRow;
+    int iColVector = in_vectMove.iColumn;
+    int iLengthVector = in_vectMove.iLength;
+
+    for (int iProgressionVector = 1; iProgressionVector <= iLengthVector; ++iProgressionVector)
+    {
+        int iNextRow = in_iStartRow + (iRowVector * iProgressionVector);  // The indices of the next row/col (vector applied)
+        int iNextCol = in_iStartCol + (iColVector * iProgressionVector);
+
+        bool isNextRowValid = (iNextRow >= 0 && iNextRow < 8);
+        bool isNextColValid = (iNextCol >= 0 && iNextCol < 8);
+
+        if (!isNextRowValid || !isNextColValid) // If the next move is out of the board, we stop
+        {
+            break;
+        }
+
+        Piece* pPieceFound = getPieceAt(iNextRow, iNextCol);
+        if(pPieceFound != nullptr)
+        {
+            in_iIndicePieceFound = iProgressionVector;
+            return pPieceFound;
+        }
+    }
+
+    in_iIndicePieceFound = 0;
+    return nullptr;
+}
+
+bool Board::isCaseAttackedByColor(int in_iRow, int in_iCol, Color in_colorToFindAttack) const
+{
+    if(! respectBoardLength(in_iRow, in_iCol))
+    {
+        return false;
+    }
+
+    // Rook movement
+    Vector* vectOfRook = new Vector[4];
+    int iNbRookVector = 4;
+    Piece::getRookVectorWithAdjustableLength(vectOfRook, 0, 7);
+
+    bool bIsCaseAttackedStraight = isVectorsProjectionsAttackingCase(in_iRow, in_iCol, in_colorToFindAttack, vectOfRook, iNbRookVector, TypeOfPieceAttack::STRAIGHT);
+    delete[] vectOfRook;
+
+
+    // Bishop movement
+    Vector* vectOfBishop = new Vector[4];
+    int iNbBishopVector = 4;
+    Piece::getBishopVectorWithAdjustableLength(vectOfBishop, 0, 7);
+
+    bool bIsCaseAttackedDiagonal = isVectorsProjectionsAttackingCase(in_iRow, in_iCol, in_colorToFindAttack, vectOfBishop, iNbBishopVector, TypeOfPieceAttack::DIAGONAL);
+    delete[] vectOfBishop;
+
+
+    // Knight movement
+    Vector* vectOfKnight = new Vector[8];
+    int iNbKnightVector = 8;
+    Piece::getKnightVectorWithAdjustableLength(vectOfKnight, 0, 1);
+
+    bool bIsCaseAttackedL = isVectorsProjectionsAttackingCase(in_iRow, in_iCol, in_colorToFindAttack, vectOfKnight, iNbKnightVector, TypeOfPieceAttack::L);
+    delete[] vectOfKnight;
+
+    return bIsCaseAttackedStraight || bIsCaseAttackedDiagonal || bIsCaseAttackedL;
+}
+
+bool Board::isTherePiecesBetweenKingAndRookNotMoving(Vector& in_vect, int in_iRowStart, int in_iColumnStart) const
+{
+    if(! respectBoardLength(in_iRowStart, in_iColumnStart))
+    {
+        return false;
+    }
+
+    int iUseless = 0;
+    Piece* pPieceFound = findFirstPieceOnVector(in_iRowStart, in_iColumnStart, in_vect, iUseless);
+
+    if(pPieceFound != nullptr && pPieceFound->getTypePiece() == TypePieces::ROOK && pPieceFound->hasAlreadyMoved() == false) // If it is a Rook that has never moved
+    {
+        return true;
+    }
+    return false;
+}
+
 std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove) const
 {
     //TODO Verify if moving cause the king to be check or not
@@ -171,6 +337,7 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
         return {};
     }
 
+    Color colEnemyPieces = pPieceToSeeValidMove->getEnemyColor();
     Color colPieceToSeeValidMove = pPieceToSeeValidMove->getColor();
     TypePieces typePieceToSeeValidMove = pPieceToSeeValidMove->getTypePiece();
 
@@ -194,12 +361,44 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
         }
 
         Piece* pPieceFound = getPieceAt(iNextRow, iNextCol);
-        if (typePieceToSeeValidMove == TypePieces::PAWN){
-            if (iColVector == 0 && pPieceFound == nullptr) {
+        if (typePieceToSeeValidMove == TypePieces::PAWN)
+        {
+            if (iColVector == 0 && pPieceFound == nullptr)
+            {
                 vectMovePossible.emplace_back(iNextRow, iNextCol);
             }
-            else if (iColVector != 0 && pPieceFound != nullptr && pPieceFound->getColor() != colPieceToSeeValidMove) {
+            else if (iColVector != 0 && pPieceFound != nullptr && pPieceFound->getColor() != colPieceToSeeValidMove)
+            {
                 vectMovePossible.emplace_back(iNextRow, iNextCol);
+            }
+            else
+            {
+                break;
+            }
+        }
+        else if(typePieceToSeeValidMove == TypePieces::KING)
+        {
+            if(pPieceFound != nullptr && pPieceFound->getColor() != colPieceToSeeValidMove) // If the is a piece he can eat
+            {
+                if(! isCaseAttackedByColor(iNextRow, iNextCol, colEnemyPieces)) // If that piece does not put the king in check
+                {
+                    vectMovePossible.emplace_back(iNextRow, iNextCol);
+                }
+            }
+            else if(pPieceFound == nullptr && ! isCaseAttackedByColor(iNextRow, iNextCol, colEnemyPieces)) // If the case is empty and If the move does not put the king in check
+            {
+                if(iProgressionVector == 1)
+                {
+                    vectMovePossible.emplace_back(iNextRow, iNextCol);
+                }
+                else if(iProgressionVector == 2 && ! pPieceToSeeValidMove->hasAlreadyMoved() && isTherePiecesBetweenKingAndRookNotMoving(in_vectMove, iNextRow, iNextCol)) // For the rock
+                {
+                    vectMovePossible.emplace_back(iNextRow, iNextCol);
+                }
+                else
+                {
+                    break;
+                }
             }
             else {
                 break;
@@ -266,17 +465,15 @@ std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordP
         // Récupérer les mouvements possibles
         std::vector<Coordinate> vectCoordMovePossible = getMovementsPossibleWithVector(in_coordPiece.iRow, in_coordPiece.iColumn, vectPossible);
 
-
-
         // Vérifier si le vecteur n'est pas vide avant de l'insérer
         if (!vectCoordMovePossible.empty())
         {
             vectCoordAllowToMovePiece.insert(vectCoordAllowToMovePiece.end(), vectCoordMovePossible.begin(), vectCoordMovePossible.end());
         }
     }
-    //Release memory
-    //delete[] vectOfPiece;
-    //vectOfPiece = nullptr;
+
+    delete[] vectOfPiece; // Properly deallocate memory
+    vectOfPiece = nullptr;
 
     return vectCoordAllowToMovePiece;
 }

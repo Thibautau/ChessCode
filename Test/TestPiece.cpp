@@ -343,8 +343,12 @@ TEST_F(BoardTest, ValidKingMove) {
     board.movePiece(1, 4, 3, 4);//Pion blanc e2->e4
     bool result = board.movePiece(0, 4, 1, 4); // Roi blanc e1->e2
     EXPECT_TRUE(result);
+
+    //Piece* p = board.getPieceAt(0,4);
     EXPECT_EQ(board.getPieceAt(1, 4)->getTypePiece(), TypePieces::KING);
     EXPECT_EQ(board.getPieceAt(0, 4), nullptr);
+
+    bool b = true;
 }
 
 // Test de mouvement valide pour le roi (e1->d2)
@@ -363,4 +367,16 @@ TEST_F(BoardTest, invalidKingMove) {
     EXPECT_FALSE(result);
     EXPECT_EQ(board.getPieceAt(0, 4)->getTypePiece(), TypePieces::KING);
     EXPECT_EQ(board.getPieceAt(2, 4), nullptr);
+}
+
+//Le roi en échec s'il bouge (e3->f4)
+TEST_F(BoardTest, invalidKingMove2) {
+    board.movePiece(1, 4, 3, 4);//Pion blanc e2->e4
+    board.movePiece(6, 4, 4, 4, Color::BLACK);//Pion noir e2->e4
+    board.movePiece(0, 4, 1, 4); // Roi blanc e1->e2
+    board.movePiece(1, 4, 2, 4); // Roi blanc e2->e3
+    bool result = board.movePiece(2, 4, 3, 5); // Roi blanc e3->f4
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt(2, 4)->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt(3, 5), nullptr);
 }

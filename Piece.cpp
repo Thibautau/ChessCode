@@ -25,6 +25,19 @@ void Piece::setAlreadyMoved(bool in_bMoved)
     m_alreadyMoved = in_bMoved;
 }
 
+Color Piece::getEnemyColor() const
+{
+    switch (m_colColorPiece)
+    {
+        case Color::WHITE:
+            return Color::BLACK;
+        case Color::BLACK:
+            return Color::WHITE;
+        default:
+            return Color::NONE;
+    }
+}
+
 char Piece::getColorAsChar() const {
     switch (m_colColorPiece) {
         case Color::WHITE:
@@ -46,6 +59,26 @@ char Piece::getDisplayChar() const{
         case TypePieces::KING: return 'k';
         default: return '?';
     }
+}
+
+int Piece::getColumnOfRookAfterRock(int in_iColumn)
+{
+    if(in_iColumn < 0 || in_iColumn >= 8)
+    {
+        return -1;
+    }
+
+
+    if(in_iColumn == 0)
+    {
+        return 3;
+    }
+    else if(in_iColumn == 7)
+    {
+        return 5;
+    }
+
+    return -1;
 }
 
 int Piece::getRookVectorWithAdjustableLength(Vector* out_tabvectRookDisplacement, int in_iIndicesStart, int in_iLengthToAdjust)
@@ -76,6 +109,62 @@ int Piece::getBishopVectorWithAdjustableLength(Vector* out_tabvectBishopDisplace
     return NO_ERROR;
 }
 
+int Piece::getKnightVectorWithAdjustableLength(Vector* out_tabvectKnightDisplacement, int in_iIndicesStart, int in_iLengthToAdjust)
+{
+    if(in_iIndicesStart < 0 || in_iLengthToAdjust > 8 || in_iLengthToAdjust < 0){
+        return WRONG_PARAMETER;
+    }
+
+    out_tabvectKnightDisplacement[in_iIndicesStart] = Vector(-2, -1, in_iLengthToAdjust);
+    out_tabvectKnightDisplacement[in_iIndicesStart + 1] = Vector(-1, 1, in_iLengthToAdjust);
+    out_tabvectKnightDisplacement[in_iIndicesStart + 2] = Vector(-1, 2, in_iLengthToAdjust);
+    out_tabvectKnightDisplacement[in_iIndicesStart + 3] = Vector(1, 2, in_iLengthToAdjust);
+    out_tabvectKnightDisplacement[in_iIndicesStart + 4] = Vector(2, 1, in_iLengthToAdjust);
+    out_tabvectKnightDisplacement[in_iIndicesStart + 5] = Vector(2, -1, in_iLengthToAdjust);
+    out_tabvectKnightDisplacement[in_iIndicesStart + 6] = Vector(1, -2, in_iLengthToAdjust);
+    out_tabvectKnightDisplacement[in_iIndicesStart + 7] = Vector(-1, -2, in_iLengthToAdjust);
+
+    return NO_ERROR;
+}
+
+TypeOfPieceAttack Piece::typeOfAttack() const
+{
+    switch (m_tpTypePiece) {
+        case TypePieces::PAWN:
+            return TypeOfPieceAttack::DIAGONAL;
+        case TypePieces::ROOK:
+            return TypeOfPieceAttack::STRAIGHT;
+        case TypePieces::KNIGHT:
+            return TypeOfPieceAttack::L;
+        case TypePieces::BISHOP:
+            return TypeOfPieceAttack::DIAGONAL;
+        case TypePieces::QUEEN:
+            return TypeOfPieceAttack::STRAIGHT_AND_DIAGONAL;
+        case TypePieces::KING:
+            return  TypeOfPieceAttack::STRAIGHT_AND_DIAGONAL;
+        default:
+            return TypeOfPieceAttack::STRAIGHT;
+    }
+}
+
+bool Piece::attackStraight() const
+{
+    TypeOfPieceAttack typeAttack = typeOfAttack();
+    return typeAttack == TypeOfPieceAttack::STRAIGHT || typeAttack == TypeOfPieceAttack::STRAIGHT_AND_DIAGONAL;
+}
+
+bool Piece::attackDiagonal() const
+{
+    TypeOfPieceAttack typeAttack = typeOfAttack();
+    return typeAttack == TypeOfPieceAttack::DIAGONAL || typeAttack == TypeOfPieceAttack::STRAIGHT_AND_DIAGONAL;
+}
+
+bool Piece::attackKnight() const
+{
+    TypeOfPieceAttack typeAttack = typeOfAttack();
+    return typeAttack == TypeOfPieceAttack::L;
+}
+
 
 int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_tabSize)
 {
@@ -83,6 +172,7 @@ int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_
     int iErrorCode = NO_ERROR;
     int iRow;
     int iLengthToAdjust;
+    int iLengthToMoveLeftRight;
 
     switch (m_tpTypePiece) {
         // The pawn can only move forward
@@ -121,14 +211,7 @@ int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_
         case TypePieces::KNIGHT:
             vectorOfDisplacement = new Vector[8];
 
-            vectorOfDisplacement[0] = Vector(-2, -1, 1);
-            vectorOfDisplacement[1] = Vector(-1, 1, 1);
-            vectorOfDisplacement[2] = Vector(-1, 2, 1);
-            vectorOfDisplacement[3] = Vector(1, 2, 1);
-            vectorOfDisplacement[4] = Vector(2, 1, 1);
-            vectorOfDisplacement[5] = Vector(2, -1, 1);
-            vectorOfDisplacement[6] = Vector(1, -2, 1);
-            vectorOfDisplacement[7] = Vector(-1, -1, 1);
+            iErrorCode = getKnightVectorWithAdjustableLength(vectorOfDisplacement, 0, 1);
 
             out_tabSize = 8;
             *out_tabvectOfDisplacement = vectorOfDisplacement;
@@ -155,10 +238,16 @@ int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_
             // BISHOP + ROOK at length 1
             vectorOfDisplacement = new Vector[8];
 
+            iLengthToMoveLeftRight = 1;
+            if(m_alreadyMoved == false)
+            {
+                iLengthToMoveLeftRight = 2;
+            }
+
             vectorOfDisplacement[0] = Vector(1, 0, 1); // To go up
             vectorOfDisplacement[1] = Vector(-1, 0, 1); // To go down
-            vectorOfDisplacement[2] = Vector(0, -1, 2); // To go left. Length at 2 for the rock
-            vectorOfDisplacement[3] = Vector(0, 1, 2); // To go right. Length at 2 for the rock
+            vectorOfDisplacement[2] = Vector(0, -1, iLengthToMoveLeftRight); // To go left. Length at 2 for the rock
+            vectorOfDisplacement[3] = Vector(0, 1, iLengthToMoveLeftRight); // To go right. Length at 2 for the rock
             iErrorCode = getBishopVectorWithAdjustableLength(vectorOfDisplacement, 4, 1);
 
             out_tabSize = 8;

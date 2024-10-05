@@ -26,6 +26,12 @@ public:
     char getColorAsChar() const;
     bool hasAlreadyMoved() const;
     void setAlreadyMoved(bool in_bMoved);
+    TypeOfPieceAttack typeOfAttack() const;
+    Color getEnemyColor() const;
+    bool attackStraight() const;
+    bool attackDiagonal() const;
+    bool attackKnight() const;
+    static int getColumnOfRookAfterRock(int in_iColumn) ;
 
     /**
      *  Fill the tabVector with 4 movements of the rook
@@ -34,9 +40,11 @@ public:
      * @param in_iIndicesStart
      * @param in_iLengthToAdjust length max of the vector
      */
-    int getRookVectorWithAdjustableLength(Vector* out_tabvectRookDisplacement, int in_iIndicesStart, int in_iLengthToAdjust);
+    static int getRookVectorWithAdjustableLength(Vector* out_tabvectRookDisplacement, int in_iIndicesStart, int in_iLengthToAdjust);
 
-    int getBishopVectorWithAdjustableLength(Vector* out_tabvectBishopDisplacement, int in_iIndicesStart, int in_iLengthToAdjust);
+    static int getBishopVectorWithAdjustableLength(Vector* out_tabvectBishopDisplacement, int in_iIndicesStart, int in_iLengthToAdjust);
+
+    static int getKnightVectorWithAdjustableLength(Vector* out_tabvectBishopDisplacement, int in_iIndicesStart, int in_iLengthToAdjust);
 };
 
 #endif //PIECE_H
