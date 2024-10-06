@@ -45,6 +45,20 @@ void Board::initializeBoard()
     placePiece(7, 7, new Piece(TypePieces::ROOK, Color::BLACK));
 }
 
+void Board::clearBoard()
+{
+    for(int iIndiceRow = 0; iIndiceRow < 8; iIndiceRow++ )
+    {
+        for(int iIndicesColumn = 0; iIndicesColumn < 8; iIndicesColumn++ )
+        {
+            m_tabtabpiBoard[iIndiceRow][iIndicesColumn] = nullptr;
+        }
+    }
+
+    isWhiteKingChecked = false;
+    isBlackKingChecked = false;
+}
+
 bool Board::isWhiteKingCheck() const
 {
     return isWhiteKingChecked;
@@ -134,7 +148,7 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
         }
 
         Coordinate coordKingEnemy = findKing(pPiece->getEnemyColor());
-        if(isCaseAttackedByColor(coordKingEnemy.iRow, coordKingEnemy.iColumn, in_colPlayer))
+        if(isCaseAttackedByColor(coordKingEnemy.iRow, coordKingEnemy.iColumn, pPiece->getEnemyColor()))
         {
             if(in_colPlayer == Color::WHITE)
             {
@@ -152,7 +166,7 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
     return false;
 }
 
-bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer) const
+bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer)
 {
     if(in_iStartRow >= 8 || in_iStartCol >= 8 || in_iStartRow < 0 || in_iStartCol < 0
         || in_iEndRow >= 8 || in_iEndCol >= 8 || in_iEndRow < 0 || in_iEndCol < 0)
@@ -400,7 +414,27 @@ bool Board::isKingInCheck(Color in_kingColor) const
     return isBlackKingChecked;
 }
 
-std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove) const
+void Board::putNextMoveIfValid(Coordinate& in_coordKing, bool in_isKingInCheck, Coordinate& in_coordNextMove, Piece* in_pPieceToMove, Piece* pPieceFoundOnNextMove, std::vector<Coordinate>& in_vectMoveToFill)
+{
+    int iNextRow = in_coordNextMove.iRow;
+    int iNextCol = in_coordNextMove.iColumn;
+
+    //if(in_isKingInCheck)
+    //{
+        m_tabtabpiBoard[iNextRow][iNextCol] = in_pPieceToMove;
+        if(!isCaseAttackedByColor(in_coordKing.iRow, in_coordKing.iColumn, in_pPieceToMove->getEnemyColor()))
+        {
+            in_vectMoveToFill.emplace_back(iNextRow, iNextCol);
+        }
+        m_tabtabpiBoard[iNextRow][iNextCol] = pPieceFoundOnNextMove; // We put it back to normal
+    //}
+    /*else
+    {
+        in_vectMoveToFill.emplace_back(iNextRow, iNextCol);
+    }*/
+}
+
+std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove)
 {
     //TODO Verify if moving cause the king to be check or not
     if(! respectBoardLength(in_iStartRow, in_iStartCol))
@@ -422,12 +456,16 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
     int iColVector = in_vectMove.iColumn;
     int iLengthVector = in_vectMove.iLength;
 
+    bool isKingChecked = isKingInCheck(colPieceToSeeValidMove);
+    Coordinate coordKing = findKing(colPieceToSeeValidMove);
+
     std::vector<Coordinate> vectMovePossible; // We store all the movements possible
 
     for (int iProgressionVector = 1; iProgressionVector <= iLengthVector; ++iProgressionVector)
     {
         int iNextRow = in_iStartRow + (iRowVector * iProgressionVector);  // The indices of the next row/col (vector applied)
         int iNextCol = in_iStartCol + (iColVector * iProgressionVector);
+        Coordinate coordNextMove = Coordinate(iNextRow, iNextCol);
 
         bool isNextRowValid = (iNextRow >= 0 && iNextRow < 8);
         bool isNextColValid = (iNextCol >= 0 && iNextCol < 8);
@@ -438,15 +476,23 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
         }
 
         Piece* pPieceFound = getPieceAt(iNextRow, iNextCol);
+        //if(isKingChecked)
+        //{
+            m_tabtabpiBoard[in_iStartRow][in_iStartCol] = nullptr;
+        //}
         if (typePieceToSeeValidMove == TypePieces::PAWN)
         {
             if (iColVector == 0 && pPieceFound == nullptr)
             {
-                vectMovePossible.emplace_back(iNextRow, iNextCol);
+                //vectMovePossible.emplace_back(iNextRow, iNextCol);
+                putNextMoveIfValid(coordKing, isKingChecked, coordNextMove, pPieceToSeeValidMove, pPieceFound,vectMovePossible);
+                continue;
             }
             else if (iColVector != 0 && pPieceFound != nullptr && pPieceFound->getColor() != colPieceToSeeValidMove)
             {
-                vectMovePossible.emplace_back(iNextRow, iNextCol);
+                //vectMovePossible.emplace_back(iNextRow, iNextCol);
+                putNextMoveIfValid(coordKing, isKingChecked, coordNextMove, pPieceToSeeValidMove, pPieceFound,vectMovePossible);
+                continue;
             }
             else
             {
@@ -465,7 +511,7 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
                 {
                     vectMovePossible.emplace_back(iNextRow, iNextCol);
                 }
-                else if(iProgressionVector == 2 && ! pPieceToSeeValidMove->hasAlreadyMoved() && isTherePiecesBetweenKingAndRookNotMoving(in_vectMove, iNextRow, iNextCol) && ! isKingInCheck(colPieceToSeeValidMove)) // For the rock
+                else if(iProgressionVector == 2 && ! pPieceToSeeValidMove->hasAlreadyMoved() && isTherePiecesBetweenKingAndRookNotMoving(in_vectMove, iNextRow, iNextCol) && ! isKingChecked) // For the rock
                 {
                     vectMovePossible.emplace_back(iNextRow, iNextCol);
                 }
@@ -486,20 +532,27 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
             // TODO /!\ Verify if the king is not moving and then put in check
             if (colPieceToSeeValidMove != colPieceFound && typePieceFound != TypePieces::KING) // We can't eat the same Color or eat a King
             {
-                vectMovePossible.push_back(Coordinate(iNextRow, iNextCol));
+                //vectMovePossible.push_back(Coordinate(iNextRow, iNextCol));
+                putNextMoveIfValid(coordKing, isKingChecked, coordNextMove, pPieceToSeeValidMove, pPieceFound,vectMovePossible);
             }
-            iProgressionVector = iLengthVector+1;
+            iProgressionVector = iLengthVector+1; //TODO Réellement utile ?
             break; // Stop since we hit a piece
         }
 
-        vectMovePossible.push_back(Coordinate(iNextRow, iNextCol)); // Possible to move, we store this position
+        //vectMovePossible.push_back(Coordinate(iNextRow, iNextCol)); // Possible to move, we store this position
+        putNextMoveIfValid(coordKing, isKingChecked, coordNextMove, pPieceToSeeValidMove, pPieceFound,vectMovePossible);
     }
+
+    //if(isKingChecked)
+    //{
+        m_tabtabpiBoard[in_iStartRow][in_iStartCol] = pPieceToSeeValidMove; // We put it back because we erased it before
+    //}
 
     return vectMovePossible;
 }
 
 // Ajoutez des méthodes pour lister les mouvements possibles
-std::vector<Move> Board::listOfPossibleMoves(Color in_colColor) const
+std::vector<Move> Board::listOfPossibleMoves(Color in_colColor)
 {
     std::vector<Move> possibleMoves;
 
@@ -519,7 +572,7 @@ std::vector<Move> Board::listOfPossibleMoves(Color in_colColor) const
     return possibleMoves;
 }
 
-std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordPiece) const
+std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordPiece)
 {
     Piece* pPiece = getPieceAt(in_coordPiece);
     if(pPiece == nullptr)

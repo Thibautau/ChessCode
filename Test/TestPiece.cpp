@@ -391,3 +391,33 @@ TEST_F(BoardTest, invalidKingMove3) {
     EXPECT_EQ(board.getPieceAt(3, 1)->getTypePiece(), TypePieces::KING);
     EXPECT_EQ(board.getPieceAt(3, 2), nullptr);
 }
+
+//Le roi en échec si le fou bouge (b4->c5)
+TEST_F(BoardTest, kingInCheck) {
+    //board.clearBoard();
+
+    board.placePiece(3,0, new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noir en a4
+    board.placePiece(3,1, new Piece(TypePieces::BISHOP, Color::BLACK)); // Fou noir en b4
+    board.placePiece(3,2, new Piece(TypePieces::KING, Color::WHITE)); // Roi blanc en c4
+    bool result = board.movePiece(3, 1, 4, 2, Color::BLACK); // Fou noir b4->c5
+    bool result2 = board.isWhiteKingCheck();
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt(4, 2)->getTypePiece(), TypePieces::BISHOP);
+    EXPECT_EQ(board.getPieceAt(3, 1), nullptr);
+}
+
+//Le roi en échec le fou bouge (b4->c5)
+TEST_F(BoardTest, invalidKingInCheck) {
+    board.clearBoard();
+
+    board.placePiece(3,0, new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noir en a4
+    board.placePiece(3,1, new Piece(TypePieces::BISHOP, Color::WHITE)); // Fou blanc en b4
+    board.placePiece(3,2, new Piece(TypePieces::KING, Color::WHITE)); // Roi blanc en c4
+    bool result = board.movePiece(3, 1, 4, 2); // Fou blanc b4->c5
+    bool result2 = board.isWhiteKingCheck();
+    EXPECT_FALSE(result);
+    EXPECT_FALSE(result2);
+    EXPECT_EQ(board.getPieceAt(3, 1)->getTypePiece(), TypePieces::BISHOP);
+    EXPECT_EQ(board.getPieceAt(4, 2), nullptr);
+}

@@ -33,15 +33,17 @@ public:
 
     Piece* getPieceAt(int in_iRow, int in_iColumn) const;
 
+    void clearBoard();
+
     bool placePiece(int in_iRow, int in_iCol, Piece* in_pPiece);
     bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
-    bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE) const;
+    bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     bool isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer);
-    std::vector<Move> listOfPossibleMoves(Color in_colColor) const;
-    std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece) const;
+    std::vector<Move> listOfPossibleMoves(Color in_colColor);
+    std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece);
     void displayBoard() const;
 
-    std::vector<Coordinate> getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove) const;
+    std::vector<Coordinate> getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove);
 
     bool isCaseAttackedByColor(int in_iRow, int in_iCol, Color in_colorToFindAttack) const ;
     bool isVectorsProjectionsAttackingCase(int in_iRow, int in_iColumn, Color in_colorToFindAttack, const Vector* in_tabVectorOfPiece, int in_iNbVector, TypeOfPieceAttack in_typeOfAttackOfTheVector) const;
@@ -51,6 +53,7 @@ public:
     bool isKingInCheck(Color in_kingColor) const;
 
     Coordinate findKing(Color in_colorToFind) const;
+    void putNextMoveIfValid(Coordinate& in_coordKing, bool in_isKingInCheck, Coordinate& in_coordNextMove, Piece* in_pPieceToMove, Piece* pPieceFoundOnNextMove, std::vector<Coordinate>& in_vectMoveToFill);
 };
 
 #endif //BOARD_H
