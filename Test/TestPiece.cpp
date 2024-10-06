@@ -86,7 +86,7 @@ TEST_F(BoardTest, ValidCastling) {
     // Déplacer les pions pour libérer le chemin
     board.movePiece(1, 4, 2, 4); // Pion blanc e2 -> e3
     board.movePiece(0, 5, 3, 2); // Bishop blanc f1 -> c4
-    board.movePiece(0, 6, 2, 5); // Rook noir g7 -> f3
+    board.movePiece(0, 6, 2, 5); // Knight blanc  g1 -> f3
 
     //Castling roi côté droit (e1 -> g1)
     bool result = board.movePiece(0, 4, 0, 6);
@@ -101,8 +101,9 @@ TEST_F(BoardTest, ValidCastling) {
 TEST_F(BoardTest, InvalidCastlingInCheck) {
     board.movePiece(1, 4, 3, 4); // Pion blanc e2 -> e4
     board.movePiece(0, 5, 3, 2); // Bishop blanc f1 -> c4
-    board.movePiece(0, 6, 2, 5); // Rook noir g7 -> f3
-    board.placePiece(7, 4, new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noire en e8
+    board.movePiece(0, 6, 2, 5); // Knight blanc  g1 -> f3
+    board.placePiece(4, 4, new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noire en e5
+    board.movePiece(4, 4, 3, 4, Color::BLACK); // Tour noir  e5->e4, check
 
     // Essayer de castling roi côté roi (e1 -> g1) alors que le roi est en échec
     bool result = board.movePiece(0, 4, 0, 6);
@@ -126,8 +127,8 @@ TEST_F(BoardTest, CastlingAfterKingMoved) {
 
 // Test impossibilité de castling après avoir bougé la tour
 TEST_F(BoardTest, CastlingAfterRookMoved) {
-    board.movePiece(1, 7, 3, 7);// Pion blanc h2 -> h4
-    bool moveResult = board.movePiece(0, 7, 1, 7);//Rook blanc h1->h2
+    board.movePiece(1, 7, 3, 7); // Pion blanc h2 -> h4
+    bool moveResult = board.movePiece(0, 7, 1, 7); //Rook blanc h1->h2
     EXPECT_TRUE(moveResult);
     EXPECT_EQ(board.getPieceAt(1, 7)->getTypePiece(), TypePieces::ROOK);
     EXPECT_EQ(board.getPieceAt(0, 7), nullptr);

@@ -14,6 +14,9 @@ Board::Board(): m_enPassantPosition{-1, -1}
             m_tabtabpiBoard[iIndiceRow][iIndicesColumn] = nullptr;
         }
     }
+
+    isWhiteKingChecked = false;
+    isBlackKingChecked = false;
 }
 
 void Board::initializeBoard()
@@ -40,6 +43,16 @@ void Board::initializeBoard()
     placePiece(7, 5, new Piece(TypePieces::BISHOP, Color::BLACK));
     placePiece(7, 6, new Piece(TypePieces::KNIGHT, Color::BLACK));
     placePiece(7, 7, new Piece(TypePieces::ROOK, Color::BLACK));
+}
+
+bool Board::isWhiteKingCheck() const
+{
+    return isWhiteKingChecked;
+}
+
+bool Board::isBlackKingCheck() const
+{
+    return isBlackKingChecked;
 }
 
 bool Board::placePiece(int in_iRow, int in_iCol, Piece* in_pPiece)
@@ -102,14 +115,14 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
                 pRookForRock = getPieceAt(in_iStartRow, 7);
                 pRookForRock->setAlreadyMoved(true);
                 placePiece(in_iStartRow, 5, pRookForRock);
-                m_tabtabpiBoard[in_iStartRow][5] = nullptr;
+                m_tabtabpiBoard[in_iStartRow][7] = nullptr;
             }
             else if(bKingWentLeftForRock)
             {
                 pRookForRock = getPieceAt(in_iStartRow, 0);
                 pRookForRock->setAlreadyMoved(true);
                 placePiece(in_iStartRow, 3, pRookForRock);
-                m_tabtabpiBoard[in_iStartRow][3] = nullptr;}
+                m_tabtabpiBoard[in_iStartRow][0] = nullptr;}
         }
 
         pPiece->setAlreadyMoved(true);
@@ -118,6 +131,19 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
 
         if (!wasEnPassant) {
             m_enPassantPosition = Coordinate{-1, -1};
+        }
+
+        Coordinate coordKingEnemy = findKing(pPiece->getEnemyColor());
+        if(isCaseAttackedByColor(coordKingEnemy.iRow, coordKingEnemy.iColumn, in_colPlayer))
+        {
+            if(in_colPlayer == Color::WHITE)
+            {
+                isBlackKingChecked = true;
+            }
+            else
+            {
+                isWhiteKingChecked = true;
+            }
         }
 
         return true;
@@ -159,6 +185,29 @@ bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int 
         return isCoordinateInVector(coordTargetPoint, vectPossibleMoves);
     }
 }
+
+Coordinate Board::findKing(Color in_colorToFind) const
+{
+    // Parcours de chaque case
+    for(int iRow = 0; iRow < 8; ++iRow)
+    {
+        for(int iCol = 0; iCol < 8; ++iCol)
+        {
+            Piece* pPiece = m_tabtabpiBoard[iRow][iCol];
+
+            if(pPiece != nullptr && pPiece->getTypePiece() == TypePieces::KING)
+            {
+                if(pPiece->getColor() == in_colorToFind)
+                {
+                    return Coordinate(iRow, iCol); // Retourner le pointeur vers la pièce de type roi
+                }
+            }
+        }
+    }
+
+    return {};
+}
+
 
 bool Board::isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer) {
     isWhiteKingChecked = true;
@@ -342,6 +391,15 @@ bool Board::isTherePiecesBetweenKingAndRookNotMoving(Vector& in_vect, int in_iRo
     return false;
 }
 
+bool Board::isKingInCheck(Color in_kingColor) const
+{
+    if(in_kingColor == Color::WHITE)
+    {
+        return isWhiteKingChecked;
+    }
+    return isBlackKingChecked;
+}
+
 std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove) const
 {
     //TODO Verify if moving cause the king to be check or not
@@ -397,12 +455,9 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
         }
         else if(typePieceToSeeValidMove == TypePieces::KING)
         {
-            if(pPieceFound != nullptr && pPieceFound->getColor() != colPieceToSeeValidMove) // If the is a piece he can eat
+            if(pPieceFound != nullptr && pPieceFound->getColor() != colPieceToSeeValidMove && iProgressionVector == 1 && ! isCaseAttackedByColor(iNextRow, iNextCol, colEnemyPieces)) // If the is a piece he can eat, If that piece does not put the king in check
             {
-                if(! isCaseAttackedByColor(iNextRow, iNextCol, colEnemyPieces)) // If that piece does not put the king in check
-                {
-                    vectMovePossible.emplace_back(iNextRow, iNextCol);
-                }
+                vectMovePossible.emplace_back(iNextRow, iNextCol);
             }
             else if(pPieceFound == nullptr && ! isCaseAttackedByColor(iNextRow, iNextCol, colEnemyPieces)) // If the case is empty and If the move does not put the king in check
             {
@@ -410,7 +465,7 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
                 {
                     vectMovePossible.emplace_back(iNextRow, iNextCol);
                 }
-                else if(iProgressionVector == 2 && ! pPieceToSeeValidMove->hasAlreadyMoved() && isTherePiecesBetweenKingAndRookNotMoving(in_vectMove, iNextRow, iNextCol)) // For the rock
+                else if(iProgressionVector == 2 && ! pPieceToSeeValidMove->hasAlreadyMoved() && isTherePiecesBetweenKingAndRookNotMoving(in_vectMove, iNextRow, iNextCol) && ! isKingInCheck(colPieceToSeeValidMove)) // For the rock
                 {
                     vectMovePossible.emplace_back(iNextRow, iNextCol);
                 }

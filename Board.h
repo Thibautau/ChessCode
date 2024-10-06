@@ -13,8 +13,8 @@ class Board {
 private:
     Piece* m_tabtabpiBoard[8][8]{};
     Coordinate m_enPassantPosition;
-    bool isWhiteKingChecked;
-    bool isBlackKingChecked;
+    bool isWhiteKingChecked = false;
+    bool isBlackKingChecked = false;
 
     bool respectBoardLength(int in_iRow, int in_iColumn) const;
     static bool isCoordinateInVector(const Coordinate& coordTargetPoint, const std::vector<Coordinate>& vectPossibleMoves);
@@ -24,6 +24,11 @@ private:
 public:
     Board();
     void initializeBoard();
+
+    bool isWhiteKingCheck() const;
+
+    bool isBlackKingCheck() const;
+
     Piece* getPieceAt(const Coordinate& in_coord) const;
 
     Piece* getPieceAt(int in_iRow, int in_iColumn) const;
@@ -43,6 +48,9 @@ public:
     Piece* findFirstPieceOnVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove, int& in_iIndicePieceFound) const;
     static bool doesPieceHaveGoodTypeOfAttack(Piece* in_pPieceToVerifyAttack, TypeOfPieceAttack in_typeOfAttack) ;
     bool isTherePiecesBetweenKingAndRookNotMoving(Vector& in_vect, int in_iRowStart, int in_iColumnStart) const;
+    bool isKingInCheck(Color in_kingColor) const;
+
+    Coordinate findKing(Color in_colorToFind) const;
 };
 
 #endif //BOARD_H
