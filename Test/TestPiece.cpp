@@ -381,3 +381,13 @@ TEST_F(BoardTest, invalidKingMove2) {
     EXPECT_EQ(board.getPieceAt(2, 4)->getTypePiece(), TypePieces::KING);
     EXPECT_EQ(board.getPieceAt(3, 5), nullptr);
 }
+
+//Le roi en échec s'il bouge (b4->c4)
+TEST_F(BoardTest, invalidKingMove3) {
+    board.placePiece(3,0, new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noir en a4
+    board.placePiece(3,1, new Piece(TypePieces::KING, Color::WHITE)); // Roi blanc en b4
+    bool result = board.movePiece(3, 1, 3, 2); // Roi blanc b4->c4 (impossible car encore en échec)
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt(3, 1)->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt(3, 2), nullptr);
+}
