@@ -38,7 +38,7 @@ void PlayerHuman::getInput(std::string& input) {
 
 bool PlayerHuman::isInputValid(const std::string& in_sInput, Coordinate& out_start, Coordinate& out_end) {
     if (in_sInput.length() != 5 || in_sInput[2] != ' ') {
-        std::cout << "Erreur: L'entrée doit être au format 'e2 e4'." << std::endl;
+        std::cout << "Erreur: L'entree doit etre au format 'e2 e4'." << std::endl;
         return false;
     }
 
@@ -59,12 +59,12 @@ bool PlayerHuman::isInputValid(const std::string& in_sInput, Coordinate& out_sta
 
 bool PlayerHuman::isValidCoordinate(char col, char row) {
     if (col < 'a' || col > 'h') {
-        std::cout << "Erreur: La colonne doit être entre 'a' et 'h'." << std::endl;
+        std::cout << "Erreur: La colonne doit etre entre 'a' et 'h'." << std::endl;
         return false;
     }
 
     if (row < '1' || row > '8') {
-        std::cout << "Erreur: La ligne doit être entre '1' et '8'." << std::endl;
+        std::cout << "Erreur: La ligne doit etre entre '1' et '8'." << std::endl;
         return false;
     }
 

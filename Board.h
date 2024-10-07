@@ -53,6 +53,7 @@ public:
     bool isKingInCheck(Color in_kingColor) const;
 
     Coordinate findKing(Color in_colorToFind) const;
+    void promotePawn(int in_iEndRow, int in_iEndCol, Color in_colPlayer, Piece** ppPiece);
     void putNextMoveIfValid(Coordinate& in_coordKing, bool in_isKingInCheck, Coordinate& in_coordNextMove, Piece* in_pPieceToMove, Piece* pPieceFoundOnNextMove, std::vector<Coordinate>& in_vectMoveToFill);
 };
 
