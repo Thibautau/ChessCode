@@ -394,7 +394,7 @@ TEST_F(BoardTest, invalidKingMove3) {
 
 //Le roi en échec si le fou bouge (b4->c5)
 TEST_F(BoardTest, kingInCheck) {
-    //board.clearBoard();
+    board.clearBoard();
 
     board.placePiece(3,0, new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noir en a4
     board.placePiece(3,1, new Piece(TypePieces::BISHOP, Color::BLACK)); // Fou noir en b4

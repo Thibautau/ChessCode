@@ -148,7 +148,7 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
         }
 
         Coordinate coordKingEnemy = findKing(pPiece->getEnemyColor());
-        if(isCaseAttackedByColor(coordKingEnemy.iRow, coordKingEnemy.iColumn, pPiece->getEnemyColor()))
+        if(isCaseAttackedByColor(coordKingEnemy.iRow, coordKingEnemy.iColumn, in_colPlayer))
         {
             if(in_colPlayer == Color::WHITE)
             {
