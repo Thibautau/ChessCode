@@ -173,6 +173,7 @@ TEST_F(BoardTest, Checkmate2) {
 // Test de mise en échec et mat
 TEST_F(BoardTest, Checkmate3) {
     // Placer le King blanc en d5
+    // Placer le King blanc en d5
     board.placePiece(4, 3, new Piece(TypePieces::KING, Color::WHITE));
     // Placer la bishop blanche en e6
     board.placePiece(5, 4, new Piece(TypePieces::QUEEN, Color::WHITE));
@@ -420,4 +421,24 @@ TEST_F(BoardTest, invalidKingInCheck) {
     EXPECT_FALSE(result2);
     EXPECT_EQ(board.getPieceAt(3, 1)->getTypePiece(), TypePieces::BISHOP);
     EXPECT_EQ(board.getPieceAt(4, 2), nullptr);
+}
+
+TEST_F(BoardTest, PromotePawnToQueen) {
+    std::istringstream input("1\n");
+    std::cin.rdbuf(input.rdbuf());
+
+    Piece* pPiece = new Piece(TypePieces::PAWN, Color::WHITE);
+    board.placePiece(6, 0, pPiece);
+
+
+    bool result = board.movePiece(6, 0, 7, 1, Color::WHITE);
+
+    EXPECT_TRUE(result);
+
+    Piece* promotedPiece = board.getPieceAt(7, 1);
+    EXPECT_EQ(promotedPiece->getTypePiece(), TypePieces::QUEEN);
+
+    // Nettoyez si nécessaire
+    delete pPiece;
+    delete promotedPiece;
 }
