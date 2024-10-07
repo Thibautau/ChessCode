@@ -228,14 +228,13 @@ Coordinate Board::findKing(Color in_colorToFind) const
 
 
 bool Board::isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer) {
-    isWhiteKingChecked = true;
     if(in_colPlayer == Color::WHITE) {
-        if(isWhiteKingChecked == false) {
+        if(isWhiteKingCheck() == false) {
             return false;
         }
     }
     else if(in_colPlayer == Color::BLACK) {
-        if(isBlackKingChecked == false) {
+        if(isBlackKingCheck() == false) {
             return false;
         }
     }
@@ -245,6 +244,25 @@ bool Board::isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer)
     }
     return true;
 }
+
+bool Board::isPat(int in_iStartRow, int in_iStartCol, Color in_colPlayer) {
+    if(in_colPlayer == Color::WHITE) {
+        if(isWhiteKingCheck() == true) {
+            return false;
+        }
+    }
+    if(in_colPlayer == Color::BLACK) {
+        if(isBlackKingCheck() == true) {
+            return false;
+        }
+    }
+    std::vector<Coordinate> vectPossibleMovesForKing = possibleMovesForPiece(Coordinate(in_iStartRow, in_iStartCol));
+    if(!vectPossibleMovesForKing.empty()) {
+        return false;
+    }
+    return true;
+}
+
 
 bool Board::isCoordinateInVector(const Coordinate& coordTargetPoint, const std::vector<Coordinate>& vectPossibleMoves)
 {

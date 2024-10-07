@@ -39,6 +39,7 @@ public:
     bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     bool isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer);
+    bool isPat(int in_iStartRow, int in_iStartCol, Color in_colPlayer);
     std::vector<Move> listOfPossibleMoves(Color in_colColor);
     std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece);
     void displayBoard() const;
