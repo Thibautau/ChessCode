@@ -116,6 +116,10 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
                 wasEnPassant= true;
                 m_enPassantPosition = Coordinate(in_iEndRow, in_iEndCol);
             }
+            if(in_iEndRow == 0 || in_iEndRow==7) {
+                m_tabtabpiBoard[in_iEndRow][in_iEndCol] = nullptr;
+                promotePawn(in_iEndRow, in_iEndCol, in_colPlayer, &pPiece);
+            }
         }
 
         bool bKingWentRightForRock = in_iEndCol - in_iStartCol == 2;
@@ -605,9 +609,44 @@ std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordP
     return vectCoordAllowToMovePiece;
 }
 
+void Board::promotePawn(int in_iEndRow, int in_iEndCol, Color in_colPlayer, Piece** ppPiece) {
+    std::cout << "Felicitations ! Votre pion peut être promu. Choisissez parmi les options suivantes :\n";
+    std::cout << "1. Reine (Q)\n";
+    std::cout << "2. Tour (R)\n";
+    std::cout << "3. Fou (B)\n";
+    std::cout << "4. Cavalier (N)\n";
+
+    int choice;
+    std::cout << "Veuillez choisir (1,2,3 ou 4) : ";
+    std::cin >> choice;
+
+    switch (choice) {
+        case 1:
+            *ppPiece = new Piece(TypePieces::QUEEN, in_colPlayer);
+        std::cout << "Votre pion a ete promu en Reine !\n";
+        break;
+        case 2:
+            *ppPiece = new Piece(TypePieces::ROOK, in_colPlayer);
+        std::cout << "Votre pion a ete promu en Tour !\n";
+        break;
+        case 3:
+            *ppPiece = new Piece(TypePieces::BISHOP, in_colPlayer);
+        std::cout << "Votre pion a ete promu en Fou !\n";
+        break;
+        case 4:
+            *ppPiece = new Piece(TypePieces::KNIGHT, in_colPlayer);
+        std::cout << "Votre pion a ete promu en Cavalier !\n";
+        break;
+        default:
+            std::cout << "Choix invalide, promotion en Reine par défaut.\n";
+        *ppPiece = new Piece(TypePieces::QUEEN, in_colPlayer);
+        break;
+    }
+}
+
 void Board::displayBoard() const {
     for (int row = 7; row >= 0; --row) {
-        std::cout << row + 1 << " ";
+        std::cout << row + 1 << " | ";
         for (int col = 0; col < 8; ++col) {
             Piece* piece = m_tabtabpiBoard[row][col];
             if (piece) {
@@ -623,8 +662,8 @@ void Board::displayBoard() const {
         }
         std::cout << std::endl;
     }
-
-    std::cout << "  a b c d e f g h" << std::endl;
+    std::cout << "    ---------------" << std::endl;
+    std::cout << "    a b c d e f g h" << std::endl;
 }
 
 
