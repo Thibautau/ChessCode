@@ -34,18 +34,8 @@ public:
     void movePiece(Piece**, int newPosition, int oldPosition = 0);
     static bool isValidPosition(int position);
 
-    /**
-     *  Fill the tabVector with 4 movements of the rook
-     *  The difference between in_iIndicesStart and in_iIndicesEnd must be 4, either it returns WRONG_PARAMETER
-     * @param out_tabvectRookDisplacement
-     * @param in_iIndicesStart
-     * @param in_iLengthToAdjust length max of the vector
-     */
-    static int getRookVectorWithAdjustableLength(Vector* out_tabvectRookDisplacement, int in_iIndicesStart, int in_iLengthToAdjust);
-
-    static int getBishopVectorWithAdjustableLength(Vector* out_tabvectBishopDisplacement, int in_iIndicesStart, int in_iLengthToAdjust);
-
-    static int getKnightVectorWithAdjustableLength(Vector* out_tabvectBishopDisplacement, int in_iIndicesStart, int in_iLengthToAdjust);
+    void addRookMoves(Piece** board, int newPosition);
+    void addBishopMoves(Piece** board, int newPosition);
 };
 
 #endif //PIECE_H

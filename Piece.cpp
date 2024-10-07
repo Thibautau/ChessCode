@@ -139,67 +139,50 @@ void Piece::movePiece(Piece** board, int newPosition, int oldPosition) {
             break;
         }
         case TypePieces::ROOK: {
-            for (int i = 1; i < 8; ++i) {
-                // Haut
-                int upMove = newPosition + i * 8;
-                if (!isValidPosition(upMove)) break;
-                m_possibleMoves.push_back(upMove);
-                if (board[upMove] != nullptr) {
-                    if (board[upMove]->getColor() != m_colColorPiece) {
-                        m_possibleMoves.push_back(upMove);
-                    }
-                    break;
-                }
+            addRookMoves(board, newPosition);
+            break;
+        }
+        case TypePieces::KNIGHT: {
+            static const int knightMoves[8] = {
+                6,  10,  15,  17,
+               -6, -10, -15, -17
+            };
 
-                // Bas
-                int downMove = newPosition - i * 8;
-                if (!isValidPosition(downMove)) break;
-                m_possibleMoves.push_back(downMove);
-                if (board[downMove] != nullptr) {
-                    if (board[downMove]->getColor() != m_colColorPiece) {
-                        m_possibleMoves.push_back(downMove);
-                    }
-                    break;
-                }
-
-                // Droite
-                int rightMove = newPosition + i;
-                if (currentCol < 7 && isValidPosition(rightMove)) {
-                    m_possibleMoves.push_back(rightMove);
-                    if (board[rightMove] != nullptr) {
-                        if (board[rightMove]->getColor() != m_colColorPiece) {
-                            m_possibleMoves.push_back(rightMove);
-                        }
-                        break;
-                    }
-                }
-
-                // Gauche
-                int leftMove = newPosition - i;
-                if (currentCol > 0 && isValidPosition(leftMove)) {
-                    m_possibleMoves.push_back(leftMove);
-                    if (board[leftMove] != nullptr) {
-                        if (board[leftMove]->getColor() != m_colColorPiece) {
-                            m_possibleMoves.push_back(leftMove);
-                        }
-                        break;
+            for (const int& move : knightMoves) {
+                int knightPosition = newPosition + move;
+                if (isValidPosition(knightPosition)) {
+                    if (board[knightPosition] == nullptr || board[knightPosition]->getColor() != m_colColorPiece) {
+                        m_possibleMoves.push_back(knightPosition);
                     }
                 }
             }
             break;
         }
-        case TypePieces::KNIGHT:
-            // Add moves for the knight
-                break;
-        case TypePieces::BISHOP:
-            // Add moves for the bishop
-                break;
+        case TypePieces::BISHOP: {
+            addBishopMoves(board, newPosition);
+            break;
+        }
         case TypePieces::QUEEN:
-            // Add moves for the queen
-                break;
-        case TypePieces::KING:
-            // Add moves for the king
-                break;
+            addRookMoves(board, newPosition); // Mouvements de la tour
+            addBishopMoves(board, newPosition);
+            break;
+
+        case TypePieces::KING: {
+            static const int kingMoves[8] = {
+                -1, 1, -8, 8,
+                -7, -9, 7, 9
+            };
+
+            for (const int& move : kingMoves) {
+                int kingPosition = newPosition + move;
+                if (isValidPosition(kingPosition)) {
+                    if (board[kingPosition] == nullptr || board[kingPosition]->getColor() != m_colColorPiece) {
+                        m_possibleMoves.push_back(kingPosition);
+                    }
+                }
+            }
+            break;
+        }
         default:
             break;
     }
@@ -209,50 +192,122 @@ bool Piece::isValidPosition(int position) {
     return position >= 0 && position < 64;
 }
 
-
-int Piece::getRookVectorWithAdjustableLength(Vector* out_tabvectRookDisplacement, int in_iIndicesStart, int in_iLengthToAdjust)
-{
-    if(in_iIndicesStart < 0 || in_iIndicesStart >= 5 || in_iLengthToAdjust > 8 || in_iLengthToAdjust < 0){
-        return WRONG_PARAMETER;
+void Piece::addRookMoves(Piece** board, int newPosition) {
+    int currentCol = newPosition % 8;
+    for (int i = 1; i < 8; ++i) {
+        // Haut
+        int upMove = newPosition + i * 8;
+        if (!isValidPosition(upMove)) break;
+        m_possibleMoves.push_back(upMove);
+        if (board[upMove] != nullptr) {
+            if (board[upMove]->getColor() != m_colColorPiece) {
+                m_possibleMoves.push_back(upMove);
+            }
+            break;
+        }
     }
 
-    out_tabvectRookDisplacement[in_iIndicesStart] = Vector(1, 0, in_iLengthToAdjust); // To go up
-    out_tabvectRookDisplacement[in_iIndicesStart + 1] = Vector(-1, 0, in_iLengthToAdjust); // To go down
-    out_tabvectRookDisplacement[in_iIndicesStart + 2] = Vector(0, -1, in_iLengthToAdjust); // To go left
-    out_tabvectRookDisplacement[in_iIndicesStart + 3] = Vector(0, 1, in_iLengthToAdjust); // To go right
+    for (int i = 1; i < 8; ++i) {
+        // Bas
+        int downMove = newPosition - i * 8;
+        if (!isValidPosition(downMove)) break;
+        m_possibleMoves.push_back(downMove);
+        if (board[downMove] != nullptr) {
+            if (board[downMove]->getColor() != m_colColorPiece) {
+                m_possibleMoves.push_back(downMove);
+            }
+            break;
+        }
+    }
 
-    return NO_ERROR;
+    for (int i = 1; i < 8; ++i) {
+        // Droite
+        int rightMove = newPosition + i;
+        if (currentCol < 7 && isValidPosition(rightMove)) {
+            m_possibleMoves.push_back(rightMove);
+            if (board[rightMove] != nullptr) {
+                if (board[rightMove]->getColor() != m_colColorPiece) {
+                    m_possibleMoves.push_back(rightMove);
+                }
+                break;
+            }
+        }
+    }
+
+    for (int i = 1; i < 8; ++i) {
+        // Gauche
+        int leftMove = newPosition - i;
+        if (currentCol > 0 && isValidPosition(leftMove)) {
+            m_possibleMoves.push_back(leftMove);
+            if (board[leftMove] != nullptr) {
+                if (board[leftMove]->getColor() != m_colColorPiece) {
+                    m_possibleMoves.push_back(leftMove);
+                }
+                break;
+            }
+        }
+    }
 }
 
-int Piece::getBishopVectorWithAdjustableLength(Vector* out_tabvectBishopDisplacement, int in_iIndicesStart, int in_iLengthToAdjust)
-{
-    if(in_iIndicesStart < 0 || in_iIndicesStart >= 5 || in_iLengthToAdjust > 8 || in_iLengthToAdjust < 0){
-        return WRONG_PARAMETER;
+void Piece::addBishopMoves(Piece** board, int newPosition) {
+    for (int i = 1; i < 8; ++i) {
+        // Haut-Droite
+        int upRightMove = newPosition + i * 9;
+        if (!isValidPosition(upRightMove)) break;
+        if (board[upRightMove] == nullptr) {
+            m_possibleMoves.push_back(upRightMove);
+        }
+        else {
+            if (board[upRightMove]->getColor() != m_colColorPiece) {
+                m_possibleMoves.push_back(upRightMove);
+            }
+            break;
+        }
     }
 
-    out_tabvectBishopDisplacement[in_iIndicesStart] = Vector(-1, 1, in_iLengthToAdjust); // To go up to the right
-    out_tabvectBishopDisplacement[in_iIndicesStart + 1] = Vector(-1, -1, in_iLengthToAdjust); // To go up to the right
-    out_tabvectBishopDisplacement[in_iIndicesStart + 2] = Vector(1, 1, in_iLengthToAdjust); // To go down to the right
-    out_tabvectBishopDisplacement[in_iIndicesStart + 3] = Vector(1, -1, in_iLengthToAdjust); // To go down to the left
-
-    return NO_ERROR;
-}
-
-int Piece::getKnightVectorWithAdjustableLength(Vector* out_tabvectKnightDisplacement, int in_iIndicesStart, int in_iLengthToAdjust)
-{
-    if(in_iIndicesStart < 0 || in_iLengthToAdjust > 8 || in_iLengthToAdjust < 0){
-        return WRONG_PARAMETER;
+    for (int i = 1; i < 8; ++i) {
+        // Haut-Gauche
+        int upLeftMove = newPosition + i * 7; // 1 ligne en haut, 1 colonne à gauche
+        if (!isValidPosition(upLeftMove)) break;
+        if (board[upLeftMove] == nullptr) {
+            m_possibleMoves.push_back(upLeftMove);
+        }
+        else {
+            if (board[upLeftMove]->getColor() != m_colColorPiece) {
+                m_possibleMoves.push_back(upLeftMove);
+            }
+            break;
+        }
     }
 
-    out_tabvectKnightDisplacement[in_iIndicesStart] = Vector(-2, -1, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 1] = Vector(-1, 1, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 2] = Vector(-1, 2, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 3] = Vector(1, 2, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 4] = Vector(2, 1, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 5] = Vector(2, -1, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 6] = Vector(1, -2, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 7] = Vector(-1, -2, in_iLengthToAdjust);
+    for (int i = 1; i < 8; ++i) {
+        // Bas-Droite
+        int downRightMove = newPosition - i * 7; // 1 ligne en bas, 1 colonne à droite
+        if (!isValidPosition(downRightMove)) break;
+        if (board[downRightMove] == nullptr) {
+            m_possibleMoves.push_back(downRightMove);
+        }
+        else {
+            if (board[downRightMove]->getColor() != m_colColorPiece) {
+                m_possibleMoves.push_back(downRightMove);
+            }
+            break;
+        }
+    }
 
-    return NO_ERROR;
+    for (int i = 1; i < 8; ++i) {
+        // Bas-Gauche
+        int downLeftMove = newPosition - i * 9; // 1 ligne en bas, 1 colonne à gauche
+        if (!isValidPosition(downLeftMove)) break;
+        if (board[downLeftMove] == nullptr) {
+            m_possibleMoves.push_back(downLeftMove);
+        }
+        else {
+            if (board[downLeftMove]->getColor() != m_colColorPiece) {
+                m_possibleMoves.push_back(downLeftMove);
+            }
+            break;
+        }
+    }
 }
 
