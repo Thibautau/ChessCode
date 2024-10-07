@@ -15,23 +15,24 @@ class Piece {
 private:
     TypePieces m_tpTypePiece;
     Color m_colColorPiece;
-    bool m_alreadyMoved;
+    std::vector<int> m_possibleMoves;
 
 public:
     Piece(TypePieces type, Color color);
     TypePieces getTypePiece() const;
     Color getColor() const;
-    char getDisplayChar() const;
-    int getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_tabSize);
-    char getColorAsChar() const;
-    bool hasAlreadyMoved() const;
-    void setAlreadyMoved(bool in_bMoved);
-    TypeOfPieceAttack typeOfAttack() const;
     Color getEnemyColor() const;
+    char getColorAsChar() const;
+    char getDisplayChar() const;
+    static int getColumnOfRookAfterRock(int in_iColumn);
+    TypeOfPieceAttack typeOfAttack() const;
     bool attackStraight() const;
     bool attackDiagonal() const;
     bool attackKnight() const;
-    static int getColumnOfRookAfterRock(int in_iColumn) ;
+    const std::vector<int>& getPossibleMoves() const;
+
+    void movePiece(Piece**, int newPosition, int oldPosition = 0);
+    static bool isValidPosition(int position);
 
     /**
      *  Fill the tabVector with 4 movements of the rook
