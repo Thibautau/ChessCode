@@ -114,6 +114,11 @@ const std::vector<int>& Piece::getPossibleMoves() const {
     return m_possibleMoves;
 }
 
+void Piece::initializePiecePossibleMoves(Piece** board, int in_iPiecePosition)
+{
+    movePiece(board, in_iPiecePosition);
+}
+
 void Piece::movePiece(Piece** board, int newPosition, int oldPosition) {
     int currentRow = newPosition / 8;
     int currentCol = newPosition % 8;
@@ -143,7 +148,7 @@ void Piece::movePiece(Piece** board, int newPosition, int oldPosition) {
             break;
         }
         case TypePieces::KNIGHT: {
-            const int* knightMoves = getKnightMoves();
+            /*const int* knightMoves = getKnightMoves();
 
             for (const int& move : knightMoves) {
                 int knightPosition = newPosition + move;
@@ -153,7 +158,19 @@ void Piece::movePiece(Piece** board, int newPosition, int oldPosition) {
                     }
                 }
             }
-            break;
+            break;*/
+            const int* knightMoves = getKnightMoves();
+            int numMoves = 8;  // ou la taille appropriée selon tes mouvements de cavalier
+
+            for (int i = 0; i < numMoves; ++i) {
+                int knightPosition = newPosition + knightMoves[i];
+                if (isValidPosition(knightPosition)) {
+                    if (board[knightPosition] == nullptr || board[knightPosition]->getColor() != m_colColorPiece) {
+                        m_possibleMoves.push_back(knightPosition);
+                    }
+                }
+            }
+
         }
         case TypePieces::BISHOP: {
             addBishopMoves(board, newPosition);
@@ -165,7 +182,7 @@ void Piece::movePiece(Piece** board, int newPosition, int oldPosition) {
             break;
 
         case TypePieces::KING: {
-            const int* kingMoves = getKingMoves();
+            /*const int* kingMoves = getKingMoves();
 
             for (const int& move : kingMoves) {
                 int kingPosition = newPosition + move;
@@ -175,7 +192,20 @@ void Piece::movePiece(Piece** board, int newPosition, int oldPosition) {
                     }
                 }
             }
-            break;
+            break;*/
+
+            const int* kingMoves = getKingMoves();
+            int numMoves = 8;  // nombre de mouvements possibles pour le roi, à ajuster selon ton cas
+
+            for (int i = 0; i < numMoves; ++i) {
+                int kingPosition = newPosition + kingMoves[i];
+                if (isValidPosition(kingPosition)) {
+                    if (board[kingPosition] == nullptr || board[kingPosition]->getColor() != m_colColorPiece) {
+                        m_possibleMoves.push_back(kingPosition);
+                    }
+                }
+            }
+
         }
         default:
             break;

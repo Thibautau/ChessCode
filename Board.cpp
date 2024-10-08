@@ -7,67 +7,419 @@
 //TODO faire en sorte de stocker à chaque coup quelle pièce attaque quelle case pour plus d'opti
 Board::Board(): m_enPassantPosition{-1, -1}
 {
-    for(int iIndiceRow = 0; iIndiceRow < 8; iIndiceRow++ )
+    for(int iIndiceRow = 0; iIndiceRow < 64; iIndiceRow++ )
     {
-        for(int iIndicesColumn = 0; iIndicesColumn < 8; iIndicesColumn++ )
-        {
-            m_tabtabpiBoard[iIndiceRow][iIndicesColumn] = nullptr;
-        }
+        m_tabpiBoard[iIndiceRow] = nullptr;
     }
 
-    isWhiteKingChecked = false;
-    isBlackKingChecked = false;
+    m_isWhiteKingChecked = false;
+    m_isBlackKingChecked = false;
 }
 
 void Board::initializeBoard()
 {
-    for (int iIndicesCol = 0; iIndicesCol < 8; ++iIndicesCol) {
-        placePiece(1, iIndicesCol, new Piece(TypePieces::PAWN, Color::WHITE));
-        placePiece(6, iIndicesCol, new Piece(TypePieces::PAWN, Color::BLACK));
+    for (int iTabPosition = 8; iTabPosition < 16; ++iTabPosition) {
+        placePiece(iTabPosition, new Piece(TypePieces::PAWN, Color::WHITE));
+        placePiece(55 + (8 - iTabPosition), new Piece(TypePieces::PAWN, Color::BLACK));
     }
 
-    placePiece(0, 0, new Piece(TypePieces::ROOK, Color::WHITE));
-    placePiece(0, 1, new Piece(TypePieces::KNIGHT, Color::WHITE));
-    placePiece(0, 2, new Piece(TypePieces::BISHOP, Color::WHITE));
-    placePiece(0, 3, new Piece(TypePieces::QUEEN, Color::WHITE));
-    placePiece(0, 4, new Piece(TypePieces::KING, Color::WHITE));
-    placePiece(0, 5, new Piece(TypePieces::BISHOP, Color::WHITE));
-    placePiece(0, 6, new Piece(TypePieces::KNIGHT, Color::WHITE));
-    placePiece(0, 7, new Piece(TypePieces::ROOK, Color::WHITE));
+    placePiece(0, new Piece(TypePieces::ROOK, Color::WHITE));
+    placePiece(1, new Piece(TypePieces::KNIGHT, Color::WHITE));
+    placePiece(2, new Piece(TypePieces::BISHOP, Color::WHITE));
+    placePiece(3, new Piece(TypePieces::QUEEN, Color::WHITE));
+    placePiece(4, new Piece(TypePieces::KING, Color::WHITE));
+    placePiece(5, new Piece(TypePieces::BISHOP, Color::WHITE));
+    placePiece(6, new Piece(TypePieces::KNIGHT, Color::WHITE));
+    placePiece(7, new Piece(TypePieces::ROOK, Color::WHITE));
 
-    placePiece(7, 0, new Piece(TypePieces::ROOK, Color::BLACK));
-    placePiece(7, 1, new Piece(TypePieces::KNIGHT, Color::BLACK));
-    placePiece(7, 2, new Piece(TypePieces::BISHOP, Color::BLACK));
-    placePiece(7, 3, new Piece(TypePieces::QUEEN, Color::BLACK));
-    placePiece(7, 4, new Piece(TypePieces::KING, Color::BLACK));
-    placePiece(7, 5, new Piece(TypePieces::BISHOP, Color::BLACK));
-    placePiece(7, 6, new Piece(TypePieces::KNIGHT, Color::BLACK));
-    placePiece(7, 7, new Piece(TypePieces::ROOK, Color::BLACK));
+    placePiece(56, new Piece(TypePieces::ROOK, Color::BLACK));
+    placePiece(57, new Piece(TypePieces::KNIGHT, Color::BLACK));
+    placePiece(58, new Piece(TypePieces::BISHOP, Color::BLACK));
+    placePiece(59, new Piece(TypePieces::QUEEN, Color::BLACK));
+    placePiece(60, new Piece(TypePieces::KING, Color::BLACK));
+    placePiece(61, new Piece(TypePieces::BISHOP, Color::BLACK));
+    placePiece(62, new Piece(TypePieces::KNIGHT, Color::BLACK));
+    placePiece(63, new Piece(TypePieces::ROOK, Color::BLACK));
+
+
+    // ------- Initialize the differents move possible for the pieces -------
+
+
+    m_tabpiBoard[1]->movePiece(m_tabpiBoard, 1); // Left white knight
+    m_tabpiBoard[6]->movePiece(m_tabpiBoard, 6); // Right white knight
+    m_tabpiBoard[62]->movePiece(m_tabpiBoard, 62); // Left black knight
+    m_tabpiBoard[57]->movePiece(m_tabpiBoard, 57); // Right black knight
+
+    for (int iTabPosition = 8; iTabPosition < 16; ++iTabPosition) {
+        int iTabBlackPawnPosition = 55 + (8 - iTabPosition);
+        m_tabpiBoard[iTabPosition]->movePiece(m_tabpiBoard, iTabPosition);
+        m_tabpiBoard[iTabBlackPawnPosition]->movePiece(m_tabpiBoard, iTabBlackPawnPosition);
+    }
 }
 
 void Board::clearBoard()
 {
-    for(int iIndiceRow = 0; iIndiceRow < 8; iIndiceRow++ )
+    for(int iIndiceRow = 0; iIndiceRow < 64; iIndiceRow++ )
     {
-        for(int iIndicesColumn = 0; iIndicesColumn < 8; iIndicesColumn++ )
-        {
-            m_tabtabpiBoard[iIndiceRow][iIndicesColumn] = nullptr;
-        }
+        m_tabpiBoard[iIndiceRow] = nullptr;
     }
 
-    isWhiteKingChecked = false;
-    isBlackKingChecked = false;
+    m_isWhiteKingChecked = false;
+    m_isBlackKingChecked = false;
 }
 
 bool Board::isWhiteKingCheck() const
 {
-    return isWhiteKingChecked;
+    return m_isWhiteKingChecked;
 }
 
 bool Board::isBlackKingCheck() const
 {
-    return isBlackKingChecked;
+    return m_isBlackKingChecked;
 }
+
+bool Board::isValidPosition(int in_iPosition)
+{
+    return in_iPosition >= 0 && in_iPosition <= 63;
+}
+
+bool Board::placePiece(int in_iPositionPiece, Piece* in_pPiece)
+{
+    if(! isValidPosition(in_iPositionPiece))
+    {
+        return false;
+    }
+
+    m_tabpiBoard[in_iPositionPiece] = in_pPiece;
+    return true;
+}
+
+Piece* Board::getPieceAt(int in_iPositionPiece) const
+{
+    if(! isValidPosition(in_iPositionPiece))
+    {
+        return nullptr;
+    }
+
+    return m_tabpiBoard[in_iPositionPiece];
+}
+
+bool Board::isKingInCheck(Color in_kingColor) const
+{
+    if(in_kingColor == Color::WHITE)
+    {
+        return m_isWhiteKingChecked;
+    }
+    return m_isBlackKingChecked;
+}
+
+
+
+bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition) const
+{
+    if(! isValidPosition(in_iStartPosition) || ! isValidPosition(in_iTargetPosition))
+    {
+        return false;
+    }
+
+    Piece* pPieceToSeeValidMove = getPieceAt(in_iStartPosition);
+    Piece* pPieceAtTargetPosition = getPieceAt(in_iTargetPosition);
+    if(pPieceToSeeValidMove == nullptr)
+    {
+        return false;
+    }
+    if(pPieceAtTargetPosition != nullptr && pPieceAtTargetPosition->getColor() == pPieceToSeeValidMove->getColor()) // Si les 2 pièces ont la même couleur
+    {
+        return false;
+    }
+
+    std::vector<int> itabValidPositions = pPieceToSeeValidMove->getPossibleMoves();
+
+    for(int iIndiceValidPosition = 0; iIndiceValidPosition < itabValidPositions.size(); iIndiceValidPosition++)
+    {
+        if(itabValidPositions[iIndiceValidPosition] == in_iTargetPosition)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer)
+{
+    Piece* pPiece = getPieceAt(in_iStartPosition);
+    if(pPiece == nullptr || pPiece->getColor() != in_colPlayer) //If the player try to move a piece of another color, return false
+    {
+        return false;
+    }
+
+    if (isMovementPossible(in_iStartPosition,in_iEndPosition))
+    {
+
+        bool bKingWentRightForRock = in_iEndPosition - in_iStartPosition == 2;
+        bool bKingWentLeftForRock = in_iEndPosition - in_iStartPosition == -2;
+
+        if(pPiece->getTypePiece() == TypePieces::KING) // If the king rocked (move of length 2, we move the rook)
+        {
+            Piece* pRookForRock = nullptr;
+            if(bKingWentRightForRock)
+            {
+                int iLastPositionOnTheRow = in_iStartPosition + (7 - in_iStartPosition%8);
+                pRookForRock = getPieceAt(iLastPositionOnTheRow);
+
+                if(pRookForRock != nullptr)
+                {
+                    //pRookForRock->setAlreadyMoved(true);
+                    bool bCouldPLacePiece = placePiece(in_iStartPosition + 1, pRookForRock);
+                    if(! bCouldPLacePiece)
+                    {
+                        return false;
+                    }
+                    m_tabpiBoard[iLastPositionOnTheRow] = nullptr; // La dernière case de la ligne
+                }
+            }
+            else if(bKingWentLeftForRock)
+            {
+                int iFirstPositionOnTheRow = in_iStartPosition - in_iStartPosition%8;
+                pRookForRock = getPieceAt(in_iStartPosition);
+
+                if(pRookForRock != nullptr)
+                {
+                    //pRookForRock->setAlreadyMoved(true);
+                    bool bCouldPLacePiece = placePiece(in_iStartPosition - 1, pRookForRock);
+                    if(! bCouldPLacePiece)
+                    {
+                        return false;
+                    }
+                    m_tabpiBoard[iFirstPositionOnTheRow] = nullptr; // La première case de la ligne
+                }
+            }
+        }
+
+        //pPiece->setAlreadyMoved(true);
+        placePiece(in_iEndPosition, pPiece);
+        m_tabpiBoard[in_iStartPosition] = nullptr;
+
+        /*if (!wasEnPassant) {
+            m_enPassantPosition = Coordinate{-1, -1};
+        }*/
+
+        /*Coordinate coordKingEnemy = findKing(pPiece->getEnemyColor());
+        if(isCaseAttackedByColor(coordKingEnemy.iRow, coordKingEnemy.iColumn, in_colPlayer))
+        {
+            if(in_colPlayer == Color::WHITE)
+            {
+                m_isBlackKingChecked = true;
+            }
+            else
+            {
+                m_isWhiteKingChecked = true;
+            }
+        }*/
+
+        return true;
+    }
+
+    return false;
+}
+
+void Board::findFirstPiecesOnEachRookMovements(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
+{
+    if(! isValidPosition(in_iPosition))
+    {
+        return;
+    }
+
+    int currentCol = in_iPosition % 8;
+    for (int i = 1; i < 8; ++i) {
+        // Haut
+        int upMove = in_iPosition + i * 8;
+        if (!isValidPosition(upMove)) break;
+        if (m_tabpiBoard[upMove] != nullptr) {
+            in_vectPositionPieceFound.push_back(upMove);
+            break;
+        }
+    }
+
+    for (int i = 1; i < 8; ++i) {
+        // Bas
+        int downMove = in_iPosition - i * 8;
+        if (!isValidPosition(downMove)) break;
+        if (m_tabpiBoard[downMove] != nullptr) {
+            in_vectPositionPieceFound.push_back(downMove);
+            break;
+        }
+    }
+
+    for (int i = 1; i < 8; ++i) {
+        // Droite
+        int rightMove = in_iPosition + i;
+        if (currentCol+i < 7 && isValidPosition(rightMove)) {
+            if (m_tabpiBoard[rightMove] != nullptr) {
+                in_vectPositionPieceFound.push_back(rightMove);
+                break;
+            }
+        }
+    }
+
+    for (int i = 1; i < 8; ++i) {
+        // Gauche
+        int leftMove = in_iPosition - i;
+        if (currentCol-i > 0 && isValidPosition(leftMove)) {
+            if (m_tabpiBoard[leftMove] != nullptr) {
+                in_vectPositionPieceFound.push_back(leftMove);
+                break;
+            }
+        }
+    }
+}
+
+void Board::findFirstPiecesOnEachBishopMovements(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
+{
+    if(! isValidPosition(in_iPosition))
+    {
+        return;
+    }
+
+    int currentCol = in_iPosition % 8;
+    for (int i = 1; i < 8; ++i)
+    {
+        // Haut-Droite
+        int upRightMove = in_iPosition + i * 9;
+        if (currentCol+i<7 || !isValidPosition(upRightMove)) break;
+        if (m_tabpiBoard[upRightMove] != nullptr)
+        {
+            in_vectPositionPieceFound.push_back(upRightMove);
+            break;
+        }
+    }
+
+    for (int i = 1; i < 8; ++i) {
+        // Haut-Gauche
+        int upLeftMove = in_iPosition + i * 7; // 1 ligne en haut, 1 colonne à gauche
+        if (currentCol-i>0 || !isValidPosition(upLeftMove)) break;
+        if (m_tabpiBoard[upLeftMove] != nullptr)
+        {
+            in_vectPositionPieceFound.push_back(upLeftMove);
+            break;
+        }
+    }
+
+    for (int i = 1; i < 8; ++i) {
+        // Bas-Droite
+        int downRightMove = in_iPosition - i * 7; // 1 ligne en bas, 1 colonne à droite
+        if (currentCol+i<7 || !isValidPosition(downRightMove)) break;
+        if (m_tabpiBoard[downRightMove] != nullptr)
+        {
+            in_vectPositionPieceFound.push_back(downRightMove);
+            break;
+        }
+    }
+
+    for (int i = 1; i < 8; ++i) {
+        // Bas-Gauche
+        int downLeftMove = in_iPosition - i * 9; // 1 ligne en bas, 1 colonne à gauche
+        if (currentCol-i>0 || !isValidPosition(downLeftMove)) break;
+        if (m_tabpiBoard[downLeftMove] != nullptr)
+        {
+            in_vectPositionPieceFound.push_back(downLeftMove);
+            break;
+        }
+    }
+}
+
+void Board::findFirstPiecesOnEachKnightMovements(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
+{
+    if(! isValidPosition(in_iPosition))
+    {
+        return;
+    }
+
+    /*const int* knightMoves = Piece::getKnightMoves();
+
+    for (const int& move : knightMoves) {
+        int knightPosition = in_iPosition + move;
+        if (isValidPosition(knightPosition)) {
+            if (m_tabpiBoard[knightPosition] == nullptr) {
+                in_vectPositionPieceFound.push_back(knightPosition);
+            }
+        }
+    }*/
+    const int* knightMoves = Piece::getKnightMoves();
+    int numMoves = 8;  // Définir le nombre de mouvements possibles pour le cavalier (à ajuster selon la taille du tableau)
+
+    for (int i = 0; i < numMoves; ++i) {
+        int knightPosition = in_iPosition + knightMoves[i];
+        if (isValidPosition(knightPosition)) {
+            if (m_tabpiBoard[knightPosition] == nullptr) {
+                in_vectPositionPieceFound.push_back(knightPosition);
+            }
+        }
+    }
+
+}
+
+bool Board::isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
+{
+    if(! isValidPosition(in_iPosition))
+    {
+        return false;
+    }
+
+    findFirstPiecesOnEachKnightMovements(in_iPosition, in_vectPositionPieceFound);
+    findFirstPiecesOnEachBishopMovements(in_iPosition, in_vectPositionPieceFound);
+    findFirstPiecesOnEachRookMovements(in_iPosition, in_vectPositionPieceFound);
+
+    if(in_vectPositionPieceFound.empty()) {
+        return false;
+    }
+    return true;
+}
+
+
+
+bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound) const
+{
+    if(! isValidPosition(in_iPosition))
+    {
+        return false;
+    }
+
+    bool bCaseAttacked = isCaseAttackedByAnyColor(in_iPosition, in_vectPositionPieceFound);
+    if(! bCaseAttacked) // If it is not attacked
+    {
+        return false;
+    }
+
+    for (int iPositionPieceFound: in_vectPositionPieceFound)
+    {
+        Piece* pPieceFound = getPieceAt(iPositionPieceFound);
+        if(pPieceFound != nullptr)
+        {
+            if(pPieceFound->getColor() == in_colorToFindAttack)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+
+
+
+
+
+
+
+/*
+ *
+ *-------------------------------------------------------------------------------- OLD CODE BELOW /!\ ------------------------------------------------------------------------------------------------------------------------------------------
+ *
+ */
 
 bool Board::placePiece(int in_iRow, int in_iCol, Piece* in_pPiece)
 {
@@ -131,19 +483,19 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
             if(bKingWentRightForRock)
             {
                 pRookForRock = getPieceAt(in_iStartRow, 7);
-                pRookForRock->setAlreadyMoved(true);
+                //pRookForRock->setAlreadyMoved(true);
                 placePiece(in_iStartRow, 5, pRookForRock);
                 m_tabtabpiBoard[in_iStartRow][7] = nullptr;
             }
             else if(bKingWentLeftForRock)
             {
                 pRookForRock = getPieceAt(in_iStartRow, 0);
-                pRookForRock->setAlreadyMoved(true);
+               // pRookForRock->setAlreadyMoved(true);
                 placePiece(in_iStartRow, 3, pRookForRock);
                 m_tabtabpiBoard[in_iStartRow][0] = nullptr;}
         }
 
-        pPiece->setAlreadyMoved(true);
+        //pPiece->setAlreadyMoved(true);
         placePiece(in_iEndRow, in_iEndCol, pPiece);
         m_tabtabpiBoard[in_iStartRow][in_iStartCol] = nullptr;
 
@@ -156,11 +508,11 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
         {
             if(in_colPlayer == Color::WHITE)
             {
-                isBlackKingChecked = true;
+                m_isBlackKingChecked = true;
             }
             else
             {
-                isWhiteKingChecked = true;
+                m_isWhiteKingChecked = true;
             }
         }
 
@@ -228,14 +580,14 @@ Coordinate Board::findKing(Color in_colorToFind) const
 
 
 bool Board::isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer) {
-    isWhiteKingChecked = true;
+    m_isWhiteKingChecked = true;
     if(in_colPlayer == Color::WHITE) {
-        if(isWhiteKingChecked == false) {
+        if(m_isWhiteKingChecked == false) {
             return false;
         }
     }
     else if(in_colPlayer == Color::BLACK) {
-        if(isBlackKingChecked == false) {
+        if(m_isBlackKingChecked == false) {
             return false;
         }
     }
@@ -366,7 +718,7 @@ bool Board::isCaseAttackedByColor(int in_iRow, int in_iCol, Color in_colorToFind
     // Rook movement
     Vector* vectOfRook = new Vector[4];
     int iNbRookVector = 4;
-    Piece::getRookVectorWithAdjustableLength(vectOfRook, 0, 7);
+    //Piece::getRookVectorWithAdjustableLength(vectOfRook, 0, 7);
 
     bool bIsCaseAttackedStraight = isVectorsProjectionsAttackingCase(in_iRow, in_iCol, in_colorToFindAttack, vectOfRook, iNbRookVector, TypeOfPieceAttack::STRAIGHT);
     delete[] vectOfRook;
@@ -375,7 +727,7 @@ bool Board::isCaseAttackedByColor(int in_iRow, int in_iCol, Color in_colorToFind
     // Bishop movement
     Vector* vectOfBishop = new Vector[4];
     int iNbBishopVector = 4;
-    Piece::getBishopVectorWithAdjustableLength(vectOfBishop, 0, 7);
+    //Piece::getBishopVectorWithAdjustableLength(vectOfBishop, 0, 7);
 
     bool bIsCaseAttackedDiagonal = isVectorsProjectionsAttackingCase(in_iRow, in_iCol, in_colorToFindAttack, vectOfBishop, iNbBishopVector, TypeOfPieceAttack::DIAGONAL);
     delete[] vectOfBishop;
@@ -384,7 +736,7 @@ bool Board::isCaseAttackedByColor(int in_iRow, int in_iCol, Color in_colorToFind
     // Knight movement
     Vector* vectOfKnight = new Vector[8];
     int iNbKnightVector = 8;
-    Piece::getKnightVectorWithAdjustableLength(vectOfKnight, 0, 1);
+    //Piece::getKnightVectorWithAdjustableLength(vectOfKnight, 0, 1);
 
     bool bIsCaseAttackedL = isVectorsProjectionsAttackingCase(in_iRow, in_iCol, in_colorToFindAttack, vectOfKnight, iNbKnightVector, TypeOfPieceAttack::L);
     delete[] vectOfKnight;
@@ -402,21 +754,14 @@ bool Board::isTherePiecesBetweenKingAndRookNotMoving(Vector& in_vect, int in_iRo
     int iUseless = 0;
     Piece* pPieceFound = findFirstPieceOnVector(in_iRowStart, in_iColumnStart, in_vect, iUseless);
 
-    if(pPieceFound != nullptr && pPieceFound->getTypePiece() == TypePieces::ROOK && pPieceFound->hasAlreadyMoved() == false) // If it is a Rook that has never moved
+    if(pPieceFound != nullptr && pPieceFound->getTypePiece() == TypePieces::ROOK /*&& pPieceFound->hasAlreadyMoved() == false*/) // If it is a Rook that has never moved
     {
         return true;
     }
     return false;
 }
 
-bool Board::isKingInCheck(Color in_kingColor) const
-{
-    if(in_kingColor == Color::WHITE)
-    {
-        return isWhiteKingChecked;
-    }
-    return isBlackKingChecked;
-}
+
 
 void Board::putNextMoveIfValid(Coordinate& in_coordKing, bool in_isKingInCheck, Coordinate& in_coordNextMove, Piece* in_pPieceToMove, Piece* pPieceFoundOnNextMove, std::vector<Coordinate>& in_vectMoveToFill)
 {
@@ -515,7 +860,7 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
                 {
                     vectMovePossible.emplace_back(iNextRow, iNextCol);
                 }
-                else if(iProgressionVector == 2 && ! pPieceToSeeValidMove->hasAlreadyMoved() && isTherePiecesBetweenKingAndRookNotMoving(in_vectMove, iNextRow, iNextCol) && ! isKingChecked) // For the rock
+                else if(iProgressionVector == 2 && /*! pPieceToSeeValidMove->hasAlreadyMoved() &&*/ isTherePiecesBetweenKingAndRookNotMoving(in_vectMove, iNextRow, iNextCol) && ! isKingChecked) // For the rock
                 {
                     vectMovePossible.emplace_back(iNextRow, iNextCol);
                 }
@@ -586,7 +931,7 @@ std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordP
 
     Vector* vectOfPiece = nullptr;
     int iNbVector = 0;
-    pPiece->getVectorOfDisplacement(&vectOfPiece, iNbVector);
+    //pPiece->getVectorOfDisplacement(&vectOfPiece, iNbVector);
 
     std::vector<Coordinate> vectCoordAllowToMovePiece;
     for (int iIndicesVector = 0; iIndicesVector < iNbVector; ++iIndicesVector)
@@ -648,7 +993,7 @@ void Board::displayBoard() const {
     for (int row = 7; row >= 0; --row) {
         std::cout << row + 1 << " | ";
         for (int col = 0; col < 8; ++col) {
-            Piece* piece = m_tabtabpiBoard[row][col];
+            Piece* piece = m_tabpiBoard[(row * 8) + col];
             if (piece) {
                 char displayChar = piece->getDisplayChar();
                 if (piece->getColor() == Color::BLACK) {

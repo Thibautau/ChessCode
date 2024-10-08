@@ -40,6 +40,7 @@ public:
 
     void addRookMoves(Piece** board, int newPosition);
     void addBishopMoves(Piece** board, int newPosition);
+    void initializePiecePossibleMoves(Piece** board, int in_iPiecePosition);
 };
 
 #endif //PIECE_H

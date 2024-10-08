@@ -51,10 +51,12 @@ void MainChessGame::playTurn()
     m_currentPlayer->play(*m_board, coordStart, coordEnd);
 
 
-    if (m_board->isMoveValid(coordStart, coordEnd, m_currentPlayer->getPlayerColor())) {
-        m_board->movePiece(coordStart, coordEnd, m_currentPlayer->getPlayerColor());
+    if (m_board->movePiece(coordStart, coordEnd, m_currentPlayer->getPlayerColor()))
+    {
         changeCurrentPlayer();
-    } else {
+    }
+    else
+    {
         std::cout << "Mouvement invalide. Essayez encore." << std::endl;
     }
 }
