@@ -143,10 +143,7 @@ void Piece::movePiece(Piece** board, int newPosition, int oldPosition) {
             break;
         }
         case TypePieces::KNIGHT: {
-            static const int knightMoves[8] = {
-                6,  10,  15,  17,
-               -6, -10, -15, -17
-            };
+            const int* knightMoves = getKnightMoves();
 
             for (const int& move : knightMoves) {
                 int knightPosition = newPosition + move;
@@ -168,10 +165,7 @@ void Piece::movePiece(Piece** board, int newPosition, int oldPosition) {
             break;
 
         case TypePieces::KING: {
-            static const int kingMoves[8] = {
-                -1, 1, -8, 8,
-                -7, -9, 7, 9
-            };
+            const int* kingMoves = getKingMoves();
 
             for (const int& move : kingMoves) {
                 int kingPosition = newPosition + move;
@@ -187,6 +181,24 @@ void Piece::movePiece(Piece** board, int newPosition, int oldPosition) {
             break;
     }
 }
+
+const int* Piece::getKingMoves() {
+    static const int kingMoves[8] = {
+        -1, 1, -8, 8,
+        -7, -9, 7, 9
+    };
+    return kingMoves;
+}
+
+const int* Piece::getKnightMoves() {
+    static const int knightMoves[8] = {
+        -1, 1, -8, 8,
+        -7, -9, 7, 9
+    };
+    return knightMoves;
+}
+
+
 
 bool Piece::isValidPosition(int position) {
     return position >= 0 && position < 64;

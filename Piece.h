@@ -33,6 +33,9 @@ public:
     const std::vector<int>& getPossibleMoves() const;
 
     void movePiece(Piece**, int newPosition, int oldPosition = 0);
+    static const int* getKingMoves() ;
+    static const int* getKnightMoves() ;
+
     static bool isValidPosition(int position);
 
     void addRookMoves(Piece** board, int newPosition);
