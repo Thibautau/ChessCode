@@ -197,8 +197,10 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
             }
         }
 
-        //pPiece->setAlreadyMoved(true);
         placePiece(in_iEndPosition, pPiece);
+        //Mise à jour du cache de la pièce concerné
+        pPiece->movePiece(m_tabpiBoard, in_iEndPosition);
+        //@TODO Mise à jour de toutes les pièce impactées par ce mouvement
         m_tabpiBoard[in_iStartPosition] = nullptr;
 
         /*if (!wasEnPassant) {
