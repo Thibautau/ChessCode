@@ -22,9 +22,9 @@ public:
     void setPlayerColor(Color color);
     int getScore() const;
     void setScore(int in_iScore);
-    void play(Board& board, Coordinate& start, Coordinate& end) override;
+    void play(Board& board, int& start, int& end) override;
     static void getInput(std::string& input);
-    bool isInputValid(const std::string& in_sInput, Coordinate& out_start, Coordinate& out_end);
+    bool isInputValid(const std::string& in_sInput, int& out_start, int& out_end);
     static bool isValidCoordinate(char col, char row);
 };
 

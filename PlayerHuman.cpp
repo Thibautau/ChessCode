@@ -23,7 +23,7 @@ void PlayerHuman::setScore(int in_iScore) {
     m_iScore = in_iScore;
 }
 
-void PlayerHuman::play(Board& board,Coordinate& start, Coordinate& end) {
+void PlayerHuman::play(Board& board,int& start, int& end) {
     std::string input;
 
     do {
@@ -36,7 +36,7 @@ void PlayerHuman::getInput(std::string& input) {
     std::getline(std::cin, input);
 }
 
-bool PlayerHuman::isInputValid(const std::string& in_sInput, Coordinate& out_start, Coordinate& out_end) {
+bool PlayerHuman::isInputValid(const std::string& in_sInput, int& out_start, int& out_end) {
     if (in_sInput.length() != 5 || in_sInput[2] != ' ') {
         std::cout << "Erreur: L'entree doit etre au format 'e2 e4'." << std::endl;
         return false;
@@ -51,8 +51,8 @@ bool PlayerHuman::isInputValid(const std::string& in_sInput, Coordinate& out_sta
         return false;
     }
 
-    out_start = {startRow - '1', startCol - 'a'};
-    out_end = {endRow - '1', endCol - 'a'};
+    out_start = (startRow - '1')*8 + (startCol - 'a');
+    out_end = (endRow - '1')*8 + (endCol - 'a');
 
     return true;
 }

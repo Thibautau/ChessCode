@@ -11,8 +11,8 @@ Color Bot::getPlayerColor() const {
     return m_color;
 }
 
-void Bot::play(Board& board, Coordinate& start, Coordinate& end) {
-    std::vector<Move> possibleMoves = board.listOfPossibleMoves(m_color);
+void Bot::play(Board& board, int& start, int& end) {
+    std::vector<int> possibleMoves = board.listOfPossibleMoves(m_color);
 
     if (possibleMoves.empty()) {
         return;
@@ -20,8 +20,8 @@ void Bot::play(Board& board, Coordinate& start, Coordinate& end) {
 
     int randomIndex = rand() % possibleMoves.size();
 
-    start = possibleMoves[randomIndex].coordStart;
-    end = possibleMoves[randomIndex].coordEnd;
+    start = possibleMoves[randomIndex];
+    end = possibleMoves[randomIndex];
 }
 
 

@@ -15,7 +15,7 @@ private:
 
 public:
     Bot(Color color);
-    void play(Board& board, Coordinate& start, Coordinate& end) override;
+    void play(Board& board, int& start, int& end) override;
     Color getPlayerColor() const override;
 };
 
