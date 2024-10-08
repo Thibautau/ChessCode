@@ -32,7 +32,7 @@ void PlayerHuman::play(Board& board,Coordinate& start, Coordinate& end) {
 }
 
 void PlayerHuman::getInput(std::string& input) {
-    std::cout << "Veuillez entrer votre mouvement (ex: 'e2 e4'): ";
+    std::cout << "Veuillez entrer votre mouvement (ex: 'e2e4'): ";
     std::getline(std::cin, input);
 }
 
@@ -44,8 +44,8 @@ bool PlayerHuman::isInputValid(const std::string& in_sInput, Coordinate& out_sta
 
     char startCol = in_sInput[0];
     char startRow = in_sInput[1];
-    char endCol = in_sInput[3];
-    char endRow = in_sInput[4];
+    char endCol = in_sInput[2];
+    char endRow = in_sInput[3];
 
     if (!isValidCoordinate(startCol, startRow) || !isValidCoordinate(endCol, endRow)) {
         return false;
