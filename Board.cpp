@@ -428,7 +428,7 @@ bool Board::placePiece(int in_iRow, int in_iCol, Piece* in_pPiece)
     {
         return false;
     }
-    m_tabtabpiBoard[in_iRow][in_iCol] = in_pPiece;
+    m_tabpiBoard[in_iRow*8+in_iCol] = in_pPiece;
     return true;
 }
 
