@@ -42,7 +42,7 @@ public:
     void findFirstPiecesOnEachBishopMovements(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
     void findFirstPiecesOnEachKnightMovements(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
 
-    bool movePiece(const std::string& move, Color in_colPlayer);
+    bool movePiece(const std::string& move, Color in_colPlayer = Color::WHITE);
     bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
 
     /* ------------- OLD FUNCTION BELOW ------------- */
