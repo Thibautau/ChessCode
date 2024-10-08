@@ -198,39 +198,39 @@ void Piece::addRookMoves(Piece** board, int newPosition) {
         // Haut
         int upMove = newPosition + i * 8;
         if (!isValidPosition(upMove)) break;
-        m_possibleMoves.push_back(upMove);
         if (board[upMove] != nullptr) {
             if (board[upMove]->getColor() != m_colColorPiece) {
                 m_possibleMoves.push_back(upMove);
             }
             break;
         }
+        m_possibleMoves.push_back(upMove);
     }
 
     for (int i = 1; i < 8; ++i) {
         // Bas
         int downMove = newPosition - i * 8;
         if (!isValidPosition(downMove)) break;
-        m_possibleMoves.push_back(downMove);
         if (board[downMove] != nullptr) {
             if (board[downMove]->getColor() != m_colColorPiece) {
                 m_possibleMoves.push_back(downMove);
             }
             break;
         }
+        m_possibleMoves.push_back(downMove);
     }
 
     for (int i = 1; i < 8; ++i) {
         // Droite
         int rightMove = newPosition + i;
         if (currentCol+i < 7 && isValidPosition(rightMove)) {
-            m_possibleMoves.push_back(rightMove);
             if (board[rightMove] != nullptr) {
                 if (board[rightMove]->getColor() != m_colColorPiece) {
                     m_possibleMoves.push_back(rightMove);
                 }
                 break;
             }
+            m_possibleMoves.push_back(rightMove);
         }
     }
 
@@ -238,13 +238,13 @@ void Piece::addRookMoves(Piece** board, int newPosition) {
         // Gauche
         int leftMove = newPosition - i;
         if (currentCol-i > 0 && isValidPosition(leftMove)) {
-            m_possibleMoves.push_back(leftMove);
             if (board[leftMove] != nullptr) {
                 if (board[leftMove]->getColor() != m_colColorPiece) {
                     m_possibleMoves.push_back(leftMove);
                 }
                 break;
             }
+            m_possibleMoves.push_back(leftMove);
         }
     }
 }
