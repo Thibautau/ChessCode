@@ -10,6 +10,7 @@
 #define ERROR               0x0002
 
 #include "Type.h"
+#include <vector>
 
 class Piece {
 private:
