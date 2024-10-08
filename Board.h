@@ -33,6 +33,7 @@ public:
     bool placePiece(const std::string& move, Piece* in_pPiece);
     bool placePiece(int in_iPositionPiece, Piece* in_pPiece);
     Piece* getPieceAt(int  in_iPositionPiece) const;
+    Piece* getPieceAt(const std::string& in_sPosition) const;
     bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE);
     void updateAffectedPieces(int position);
     bool isMovementPossible(int in_iStartPosition, int in_iTargetPosition);
