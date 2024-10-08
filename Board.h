@@ -30,6 +30,7 @@ public:
     bool isBlackKingCheck() const;
     static bool isValidPosition(int in_iPosition);
 
+    bool placePiece(const std::string& move, Piece* in_pPiece);
     bool placePiece(int in_iPositionPiece, Piece* in_pPiece);
     Piece* getPieceAt(int  in_iPositionPiece) const;
     bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE);

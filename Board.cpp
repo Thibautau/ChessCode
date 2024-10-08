@@ -206,84 +206,6 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
     return false;
 }
 
-void Board::updateAffectedPieces(int position)
-{
-    // Calculez les lignes et colonnes des positions
-    std::vector<int> in_vectPositionPieceFound;
-
-    //Gérer les mouvement en horizontaux + verticaux
-    findFirstPiecesOnEachRookMovements(position, in_vectPositionPieceFound);
-
-    for (int pos : in_vectPositionPieceFound) {
-        int pieceRow = pos / 8;
-        int pieceCol = pos % 8;
-
-        Piece* piece = getPieceAt(pos);
-        TypePieces type = piece->getTypePiece();
-        if (type == TypePieces::ROOK || type == TypePieces::QUEEN) {
-            piece->movePiece(m_tabpiBoard, pos);
-        }
-        else if (type == TypePieces::KING) {
-            if (abs(pieceRow - (position / 8)) <= 1 && abs(pieceCol - (position % 8)) <= 1) {
-                piece->movePiece(m_tabpiBoard, pos);
-            }
-        }
-        else if (type == TypePieces::PAWN) {
-            int direction = piece->getColor() == Color::WHITE ? 1 : -1;
-            if (pieceRow == (position / 8) + direction && pieceCol == (position % 8)) {
-                piece->movePiece(m_tabpiBoard, pos);
-            }
-        }
-    }
-    in_vectPositionPieceFound.clear();
-
-    //Gérer les mouvements en diagonale
-    findFirstPiecesOnEachBishopMovements(position, in_vectPositionPieceFound);
-    for (int pos : in_vectPositionPieceFound) {
-        int pieceRow = pos / 8;
-        int pieceCol = pos % 8;
-
-        Piece* piece = getPieceAt(pos);
-        if (piece) {
-            TypePieces type = piece->getTypePiece();
-
-            if (type == TypePieces::BISHOP || type == TypePieces::QUEEN) {
-                piece->movePiece(m_tabpiBoard, pos);
-            }
-            else if (type == TypePieces::KING) {
-                if (abs(pieceRow - (position / 8)) <= 1 && abs(pieceCol - (position % 8)) <= 1) {
-                    piece->movePiece(m_tabpiBoard, pos);
-                }
-            }
-            else if (type == TypePieces::PAWN) {
-                Color color = piece->getColor();
-                int direction = (color == Color::WHITE) ? 1 : -1;
-                int expectedRow = (color == Color::WHITE) ? (position / 8) + direction : (position / 8) - direction;
-
-                if (pieceRow == expectedRow && (pieceCol == (position % 8) - 1 || pieceCol == (position % 8) + 1)) {
-                    piece->movePiece(m_tabpiBoard, pos);
-                }
-            }
-        }
-    }
-
-    in_vectPositionPieceFound.clear();
-
-    //Gérer les mouvements du cavalier
-    findFirstPiecesOnEachKnightMovements(position, in_vectPositionPieceFound);
-    for (int pos : in_vectPositionPieceFound) {
-
-        Piece* piece = getPieceAt(pos);
-        if (piece) {
-            TypePieces type = piece->getTypePiece();
-            if (type == TypePieces::KNIGHT) {
-                piece->movePiece(m_tabpiBoard, pos);
-            }
-        }
-    }
-
-}
-
 void Board::findFirstPiecesOnEachRookMovements(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
 {
     if(! isValidPosition(in_iPosition))
@@ -396,16 +318,6 @@ void Board::findFirstPiecesOnEachKnightMovements(int in_iPosition, std::vector<i
         return;
     }
 
-    /*const int* knightMoves = Piece::getKnightMoves();
-
-    for (const int& move : knightMoves) {
-        int knightPosition = in_iPosition + move;
-        if (isValidPosition(knightPosition)) {
-            if (m_tabpiBoard[knightPosition] == nullptr) {
-                in_vectPositionPieceFound.push_back(knightPosition);
-            }
-        }
-    }*/
     const int* knightMoves = Piece::getKnightMoves();
     int numMoves = 8;  // Définir le nombre de mouvements possibles pour le cavalier (à ajuster selon la taille du tableau)
 
@@ -467,20 +379,6 @@ bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, 
     return false;
 }
 
-
-
-
-
-
-
-
-
-/*
- *
- *-------------------------------------------------------------------------------- OLD CODE BELOW /!\ ------------------------------------------------------------------------------------------------------------------------------------------
- *
- */
-
 int Board::convertToPosition(char col, char row) {
     int column = col - 'a';
     int line = row - '1';
@@ -503,6 +401,25 @@ bool Board::movePiece(const std::string& move, Color in_colPlayer)
     convertMoveToPositions(move, iStartPosition, iEndPosition);
     return movePiece(iStartPosition, iEndPosition, in_colPlayer);
 }
+
+bool Board::placePiece(const std::string& move, Piece* in_pPiece)
+{
+    int iStartPos = convertToPosition(move[0], move[1]);
+    return placePiece(iStartPos, in_pPiece);
+}
+
+
+
+
+
+
+
+/*
+ *
+ *-------------------------------------------------------------------------------- OLD CODE BELOW /!\ ------------------------------------------------------------------------------------------------------------------------------------------
+ *
+ */
+
 
 
 bool Board::placePiece(int in_iRow, int in_iCol, Piece* in_pPiece)
