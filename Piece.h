@@ -16,7 +16,6 @@ class Piece {
 private:
     TypePieces m_tpTypePiece;
     Color m_colColorPiece;
-    std::vector<int> m_possibleMoves;
 
 public:
     Piece(TypePieces type, Color color);
@@ -30,17 +29,15 @@ public:
     bool attackStraight() const;
     bool attackDiagonal() const;
     bool attackKnight() const;
-    const std::vector<int>& getPossibleMoves() const;
-
-    void movePiece(Piece**, int newPosition, int oldPosition = 0);
+    std::vector<int> getPossibleMoves(Piece** board, int in_iPiecePosition) const;
+    std::vector<int> movePiece(Piece **board, int newPosition) const;
     static const int* getKingMoves() ;
     static const int* getKnightMoves() ;
 
     static bool isValidPosition(int position);
 
-    void addRookMoves(Piece** board, int newPosition);
-    void addBishopMoves(Piece** board, int newPosition);
-    void initializePiecePossibleMoves(Piece** board, int in_iPiecePosition);
+    void addRookMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves) const;
+    void addBishopMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves) const;
 };
 
 #endif //PIECE_H

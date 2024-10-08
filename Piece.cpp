@@ -110,83 +110,77 @@ bool Piece::attackKnight() const
     return typeAttack == TypeOfPieceAttack::L;
 }
 
-const std::vector<int>& Piece::getPossibleMoves() const {
-    return m_possibleMoves;
+std::vector<int> Piece::getPossibleMoves(Piece **board, int in_iPiecePosition) const {
+    return movePiece(board, in_iPiecePosition);
 }
 
-void Piece::initializePiecePossibleMoves(Piece** board, int in_iPiecePosition)
-{
-    movePiece(board, in_iPiecePosition);
-}
-
-void Piece::movePiece(Piece** board, int newPosition, int oldPosition) {
-    int currentRow = newPosition / 8;
-    int currentCol = newPosition % 8;
+std::vector<int> Piece::movePiece(Piece** board, int iposition) const {
+    std::vector<int> possibleMoves;
     switch (m_tpTypePiece) {
         case TypePieces::PAWN: {
             int direction = (m_colColorPiece == Color::WHITE) ? 1 : -1;
             int startRow = (m_colColorPiece == Color::WHITE) ? 1 : 6;
 
             // Normal moves
-            int forwardMove = newPosition + direction * 8;
+            int forwardMove = iposition + direction * 8;
             if (isValidPosition(forwardMove) && board[forwardMove] == nullptr) {
-                m_possibleMoves.push_back(forwardMove);
+                possibleMoves.push_back(forwardMove);
             }
 
-            int twoSteps = newPosition + (direction * 16);
-            if (newPosition/8 == startRow) {
+            int twoSteps = iposition + (direction * 16);
+            if (iposition/8 == startRow) {
                 if (isValidPosition(twoSteps) && board[forwardMove] == nullptr && board[twoSteps] == nullptr) {
-                    m_possibleMoves.push_back(twoSteps);
+                    possibleMoves.push_back(twoSteps);
                 }
             }
 
             // Capture moves
-            int captureLeft = newPosition + direction * 8 - 1;
-            int captureRight = newPosition + direction * 8 + 1;
+            int captureLeft = iposition + direction * 8 - 1;
+            int captureRight = iposition + direction * 8 + 1;
             if (isValidPosition(captureLeft) && board[captureLeft] != nullptr && board[captureLeft]->getColor() != m_colColorPiece) {
-                m_possibleMoves.push_back(captureLeft);
+                possibleMoves.push_back(captureLeft);
             }
             if (isValidPosition(captureRight) && board[captureRight] != nullptr && board[captureRight]->getColor() != m_colColorPiece) {
-                m_possibleMoves.push_back(captureRight);
+                possibleMoves.push_back(captureRight);
             }
             break;
         }
         case TypePieces::ROOK: {
-            addRookMoves(board, newPosition);
+            addRookMoves(board, iposition, possibleMoves);
             break;
         }
         case TypePieces::KNIGHT: {
             const int *knightMoves = getKnightMoves();
-            int numMoves = 8;  // ou la taille appropriée selon tes mouvements de cavalier
+            int numMoves = 8;
 
             for (int i = 0; i < numMoves; ++i) {
-                int knightPosition = newPosition + knightMoves[i];
+                int knightPosition = iposition + knightMoves[i];
                 if (isValidPosition(knightPosition)) {
                     if (board[knightPosition] == nullptr || board[knightPosition]->getColor() != m_colColorPiece) {
-                        m_possibleMoves.push_back(knightPosition);
+                        possibleMoves.push_back(knightPosition);
                     }
                 }
             }
 
         }
         case TypePieces::BISHOP: {
-            addBishopMoves(board, newPosition);
+            addBishopMoves(board, iposition, possibleMoves);
             break;
         }
         case TypePieces::QUEEN:
-            addRookMoves(board, newPosition); // Mouvements de la tour
-            addBishopMoves(board, newPosition);
+            addRookMoves(board, iposition, possibleMoves); // Mouvements de la tour
+            addBishopMoves(board, iposition, possibleMoves);
             break;
 
         case TypePieces::KING: {
             const int* kingMoves = getKingMoves();
-            int numMoves = 8;  // nombre de mouvements possibles pour le roi, à ajuster selon ton cas
+            int numMoves = 8;
 
             for (int i = 0; i < numMoves; ++i) {
-                int kingPosition = newPosition + kingMoves[i];
+                int kingPosition = iposition + kingMoves[i];
                 if (isValidPosition(kingPosition)) {
                     if (board[kingPosition] == nullptr || board[kingPosition]->getColor() != m_colColorPiece) {
-                        m_possibleMoves.push_back(kingPosition);
+                        possibleMoves.push_back(kingPosition);
                     }
                 }
             }
@@ -195,6 +189,7 @@ void Piece::movePiece(Piece** board, int newPosition, int oldPosition) {
         default:
             break;
     }
+    return possibleMoves;
 }
 
 const int* Piece::getKingMoves() {
@@ -219,7 +214,7 @@ bool Piece::isValidPosition(int position) {
     return position >= 0 && position < 64;
 }
 
-void Piece::addRookMoves(Piece** board, int newPosition) {
+void Piece::addRookMoves(Piece** board, int newPosition, std::vector<int>& possibleMoves) const {
     int currentCol = newPosition % 8;
     for (int i = 1; i < 8; ++i) {
         // Haut
@@ -227,11 +222,11 @@ void Piece::addRookMoves(Piece** board, int newPosition) {
         if (!isValidPosition(upMove)) break;
         if (board[upMove] != nullptr) {
             if (board[upMove]->getColor() != m_colColorPiece) {
-                m_possibleMoves.push_back(upMove);
+                possibleMoves.push_back(upMove);
             }
             break;
         }
-        m_possibleMoves.push_back(upMove);
+        possibleMoves.push_back(upMove);
     }
 
     for (int i = 1; i < 8; ++i) {
@@ -240,11 +235,11 @@ void Piece::addRookMoves(Piece** board, int newPosition) {
         if (!isValidPosition(downMove)) break;
         if (board[downMove] != nullptr) {
             if (board[downMove]->getColor() != m_colColorPiece) {
-                m_possibleMoves.push_back(downMove);
+                possibleMoves.push_back(downMove);
             }
             break;
         }
-        m_possibleMoves.push_back(downMove);
+        possibleMoves.push_back(downMove);
     }
 
     for (int i = 1; i < 8; ++i) {
@@ -253,11 +248,11 @@ void Piece::addRookMoves(Piece** board, int newPosition) {
         if (currentCol+i < 7 && isValidPosition(rightMove)) {
             if (board[rightMove] != nullptr) {
                 if (board[rightMove]->getColor() != m_colColorPiece) {
-                    m_possibleMoves.push_back(rightMove);
+                    possibleMoves.push_back(rightMove);
                 }
                 break;
             }
-            m_possibleMoves.push_back(rightMove);
+            possibleMoves.push_back(rightMove);
         }
     }
 
@@ -267,27 +262,27 @@ void Piece::addRookMoves(Piece** board, int newPosition) {
         if (currentCol-i > 0 && isValidPosition(leftMove)) {
             if (board[leftMove] != nullptr) {
                 if (board[leftMove]->getColor() != m_colColorPiece) {
-                    m_possibleMoves.push_back(leftMove);
+                    possibleMoves.push_back(leftMove);
                 }
                 break;
             }
-            m_possibleMoves.push_back(leftMove);
+            possibleMoves.push_back(leftMove);
         }
     }
 }
 
-void Piece::addBishopMoves(Piece** board, int newPosition) {
+void Piece::addBishopMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves) const {
     int currentCol = newPosition % 8;
     for (int i = 1; i < 8; ++i) {
         // Haut-Droite
         int upRightMove = newPosition + i * 9;
         if (currentCol+i<7 || !isValidPosition(upRightMove)) break;
         if (board[upRightMove] == nullptr) {
-            m_possibleMoves.push_back(upRightMove);
+            possibleMoves.push_back(upRightMove);
         }
         else {
             if (board[upRightMove]->getColor() != m_colColorPiece) {
-                m_possibleMoves.push_back(upRightMove);
+                possibleMoves.push_back(upRightMove);
             }
             break;
         }
@@ -298,11 +293,11 @@ void Piece::addBishopMoves(Piece** board, int newPosition) {
         int upLeftMove = newPosition + i * 7; // 1 ligne en haut, 1 colonne à gauche
         if (currentCol-i>0 || !isValidPosition(upLeftMove)) break;
         if (board[upLeftMove] == nullptr) {
-            m_possibleMoves.push_back(upLeftMove);
+            possibleMoves.push_back(upLeftMove);
         }
         else {
             if (board[upLeftMove]->getColor() != m_colColorPiece) {
-                m_possibleMoves.push_back(upLeftMove);
+                possibleMoves.push_back(upLeftMove);
             }
             break;
         }
@@ -313,11 +308,11 @@ void Piece::addBishopMoves(Piece** board, int newPosition) {
         int downRightMove = newPosition - i * 7; // 1 ligne en bas, 1 colonne à droite
         if (currentCol+i<7 || !isValidPosition(downRightMove)) break;
         if (board[downRightMove] == nullptr) {
-            m_possibleMoves.push_back(downRightMove);
+            possibleMoves.push_back(downRightMove);
         }
         else {
             if (board[downRightMove]->getColor() != m_colColorPiece) {
-                m_possibleMoves.push_back(downRightMove);
+                possibleMoves.push_back(downRightMove);
             }
             break;
         }
@@ -328,11 +323,11 @@ void Piece::addBishopMoves(Piece** board, int newPosition) {
         int downLeftMove = newPosition - i * 9; // 1 ligne en bas, 1 colonne à gauche
         if (currentCol-i>0 || !isValidPosition(downLeftMove)) break;
         if (board[downLeftMove] == nullptr) {
-            m_possibleMoves.push_back(downLeftMove);
+            possibleMoves.push_back(downLeftMove);
         }
         else {
             if (board[downLeftMove]->getColor() != m_colColorPiece) {
-                m_possibleMoves.push_back(downLeftMove);
+                possibleMoves.push_back(downLeftMove);
             }
             break;
         }
