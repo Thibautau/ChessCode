@@ -9,14 +9,14 @@ TEST(TestBoard, Initialization) {
 
 
     // Vérifie que la case (0,0) contient une tour blanche
-    EXPECT_NE(board->getPieceAt({0, 0}), nullptr);
-    EXPECT_EQ(board->getPieceAt({0, 0})->getTypePiece(), TypePieces::ROOK);
-    EXPECT_EQ(board->getPieceAt({0, 0})->getColor(), Color::WHITE);
+    EXPECT_NE(board->getPieceAt(0, 0), nullptr);
+    EXPECT_EQ(board->getPieceAt(0, 0)->getTypePiece(), TypePieces::ROOK);
+    EXPECT_EQ(board->getPieceAt(0, 0)->getColor(), Color::WHITE);
 
     // Vérifie que la case (7,4) contient un roi noir
-    EXPECT_NE(board->getPieceAt({7, 4}), nullptr);
-    EXPECT_EQ(board->getPieceAt({7, 4})->getTypePiece(), TypePieces::KING);
-    EXPECT_EQ(board->getPieceAt({7, 4})->getColor(), Color::BLACK);
+    EXPECT_NE(board->getPieceAt(7, 4), nullptr);
+    EXPECT_EQ(board->getPieceAt(7, 4)->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board->getPieceAt(7, 4)->getColor(), Color::BLACK);
 }
 
 TEST(TestBoard, PlacePiece) {
@@ -28,9 +28,9 @@ TEST(TestBoard, PlacePiece) {
     Piece* newPiece = new Piece(TypePieces::QUEEN, Color::WHITE);
     board->placePiece(3, 3, newPiece);
 
-    EXPECT_EQ(board->getPieceAt({3, 3}), newPiece);
-    EXPECT_EQ(board->getPieceAt({3, 3})->getTypePiece(), TypePieces::QUEEN);
-    EXPECT_EQ(board->getPieceAt({3, 3})->getColor(), Color::WHITE);
+    EXPECT_EQ(board->getPieceAt(3, 3), newPiece);
+    EXPECT_EQ(board->getPieceAt(3, 3)->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board->getPieceAt(3, 3)->getColor(), Color::WHITE);
 }
 
 // Test de la récupération d'une pièce
@@ -40,7 +40,7 @@ TEST(TestBoard, GetPieceAt) {
     board->initializeBoard();
 
 
-    Piece* piece = board->getPieceAt({0, 4}); // Roi blanc
+    Piece* piece = board->getPieceAt(0, 4); // Roi blanc
     EXPECT_EQ(piece->getTypePiece(), TypePieces::KING);
     EXPECT_EQ(piece->getColor(), Color::WHITE);
 }
@@ -55,9 +55,9 @@ TEST(TestBoard, MovePiece) {
     // Déplace un pion blanc de (1, 0) à (2, 0)
     bool moved = board->movePiece(1, 0, 2, 0);
     EXPECT_TRUE(moved);
-    EXPECT_NE(board->getPieceAt({2, 0}), nullptr);
-    EXPECT_EQ(board->getPieceAt({2, 0})->getTypePiece(), TypePieces::PAWN);
-    EXPECT_EQ(board->getPieceAt({1, 0}), nullptr);
+    EXPECT_NE(board->getPieceAt(2, 0), nullptr);
+    EXPECT_EQ(board->getPieceAt(2, 0)->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board->getPieceAt(1, 0), nullptr);
 }
 
 // Test de la validation d'un mouvement (actuellement toujours vrai)
