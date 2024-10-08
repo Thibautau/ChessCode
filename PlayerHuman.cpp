@@ -37,7 +37,7 @@ void PlayerHuman::getInput(std::string& input) {
 }
 
 bool PlayerHuman::isInputValid(const std::string& in_sInput, int& out_start, int& out_end) {
-    if (in_sInput.length() != 5 || in_sInput[2] != ' ') {
+    if (in_sInput.length() != 4) {
         std::cout << "Erreur: L'entree doit etre au format 'e2 e4'." << std::endl;
         return false;
     }
