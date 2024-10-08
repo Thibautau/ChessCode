@@ -104,6 +104,41 @@ Piece* Board::getPieceAt(int in_iPositionPiece) const
     return m_tabpiBoard[in_iPositionPiece];
 }
 
+Piece* Board::getPieceAt(const std::string& in_sPosition) const
+{
+    int iStartPos = convertToPosition(in_sPosition[0], in_sPosition[1]);
+    return getPieceAt(iStartPos);
+}
+
+int Board::convertToPosition(char col, char row) {
+    int column = col - 'a';
+    int line = row - '1';
+    return column + line * 8;
+}
+
+void Board::convertMoveToPositions(const std::string& move, int& startPos, int& endPos) {
+    startPos = convertToPosition(move[0], move[1]);
+    endPos = convertToPosition(move[2], move[3]);
+}
+
+bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer)
+{
+    return movePiece((in_iStartRow * 8) + in_iStartCol, (in_iEndRow * 8) + in_iEndCol, in_colPlayer);
+}
+
+bool Board::movePiece(const std::string& move, Color in_colPlayer)
+{
+    int iStartPosition, iEndPosition;
+    convertMoveToPositions(move, iStartPosition, iEndPosition);
+    return movePiece(iStartPosition, iEndPosition, in_colPlayer);
+}
+
+bool Board::placePiece(const std::string& move, Piece* in_pPiece)
+{
+    int iStartPos = convertToPosition(move[0], move[1]);
+    return placePiece(iStartPos, in_pPiece);
+}
+
 bool Board::isKingInCheck(Color in_kingColor) const
 {
     if(in_kingColor == Color::WHITE)
@@ -379,34 +414,7 @@ bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, 
     return false;
 }
 
-int Board::convertToPosition(char col, char row) {
-    int column = col - 'a';
-    int line = row - '1';
-    return column + line * 8;
-}
 
-void Board::convertMoveToPositions(const std::string& move, int& startPos, int& endPos) {
-    startPos = convertToPosition(move[0], move[1]);
-    endPos = convertToPosition(move[2], move[3]);
-}
-
-bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer)
-{
-    return movePiece((in_iStartRow * 8) + in_iStartCol, (in_iEndRow * 8) + in_iEndCol, in_colPlayer);
-}
-
-bool Board::movePiece(const std::string& move, Color in_colPlayer)
-{
-    int iStartPosition, iEndPosition;
-    convertMoveToPositions(move, iStartPosition, iEndPosition);
-    return movePiece(iStartPosition, iEndPosition, in_colPlayer);
-}
-
-bool Board::placePiece(const std::string& move, Piece* in_pPiece)
-{
-    int iStartPos = convertToPosition(move[0], move[1]);
-    return placePiece(iStartPos, in_pPiece);
-}
 
 
 
