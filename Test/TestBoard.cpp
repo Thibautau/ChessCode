@@ -2,7 +2,7 @@
 
 #include "Board.cpp"
 // Test de l'initialisation du plateau
-TEST(BoardTest, Initialization) {
+TEST(TestBoard, Initialization) {
     Board* board = new Board();
 
     board->initializeBoard();
@@ -19,7 +19,7 @@ TEST(BoardTest, Initialization) {
     EXPECT_EQ(board->getPieceAt({7, 4})->getColor(), Color::BLACK);
 }
 
-TEST(BoardTest, PlacePiece) {
+TEST(TestBoard, PlacePiece) {
     Board* board = new Board();
 
     board->initializeBoard();
@@ -34,7 +34,7 @@ TEST(BoardTest, PlacePiece) {
 }
 
 // Test de la récupération d'une pièce
-TEST(BoardTest, GetPieceAt) {
+TEST(TestBoard, GetPieceAt) {
     Board* board = new Board();
 
     board->initializeBoard();
@@ -46,7 +46,7 @@ TEST(BoardTest, GetPieceAt) {
 }
 
 // Test du déplacement d'une pièce
-TEST(BoardTest, MovePiece) {
+TEST(TestBoard, MovePiece) {
     Board* board = new Board();
 
     board->initializeBoard();
@@ -61,7 +61,7 @@ TEST(BoardTest, MovePiece) {
 }
 
 // Test de la validation d'un mouvement (actuellement toujours vrai)
-TEST(BoardTest, IsMoveValid) {
+TEST(TestBoard, IsMoveValid) {
     Board* board = new Board();
 
     board->initializeBoard();
