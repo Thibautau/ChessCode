@@ -13,14 +13,15 @@ TEST(PlayerTest, PlayerInitialisation) {
 //Verification de l'input
 TEST(PlayerTest, ValideInput) {
     PlayerHuman* player = new PlayerHuman(Color::WHITE);
-    std::string input = "e2 e4";
+    std::string input = "e2e4";
     Coordinate start = Coordinate(1, 4);
     Coordinate end = Coordinate(3, 4);
-    EXPECT_EQ(player->isInputValid(input, start, end), true);
-    input = "e2  e4";
-    EXPECT_EQ(player->isInputValid(input, start, end), false);
-    input = "e2 e10";
-    EXPECT_EQ(player->isInputValid(input, start, end), false);
+    int iStart = 12, iEnd = 28;
+    EXPECT_EQ(player->isInputValid(input, iStart, iEnd), true);
+    input = "e2 e4";
+    EXPECT_EQ(player->isInputValid(input, iStart, iEnd), false);
+    input = "e2e10";
+    EXPECT_EQ(player->isInputValid(input, iStart, iEnd), false);
 }
 
 //Verification des coordonnées

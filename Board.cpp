@@ -115,7 +115,7 @@ bool Board::isKingInCheck(Color in_kingColor) const
 
 
 
-bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition) const
+bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition)
 {
     if(! isValidPosition(in_iStartPosition) || ! isValidPosition(in_iTargetPosition))
     {
@@ -133,7 +133,7 @@ bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition) co
         return false;
     }
 
-    std::vector<int> itabValidPositions = pPieceToSeeValidMove->getPossibleMoves();
+    std::vector<int> itabValidPositions = pPieceToSeeValidMove->getPossibleMoves(m_tabpiBoard, in_iStartPosition);
 
     for(int iIndiceValidPosition = 0; iIndiceValidPosition < itabValidPositions.size(); iIndiceValidPosition++)
     {
@@ -198,28 +198,7 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
         }
 
         placePiece(in_iEndPosition, pPiece);
-        //Mise à jour du cache de la pièce concerné
-        pPiece->movePiece(m_tabpiBoard, in_iEndPosition);
-        updateAffectedPieces(in_iStartPosition);
-        updateAffectedPieces(in_iEndPosition);
         m_tabpiBoard[in_iStartPosition] = nullptr;
-
-        /*if (!wasEnPassant) {
-            m_enPassantPosition = Coordinate{-1, -1};
-        }*/
-
-        /*Coordinate coordKingEnemy = findKing(pPiece->getEnemyColor());
-        if(isCaseAttackedByColor(coordKingEnemy.iRow, coordKingEnemy.iColumn, in_colPlayer))
-        {
-            if(in_colPlayer == Color::WHITE)
-            {
-                m_isBlackKingChecked = true;
-            }
-            else
-            {
-                m_isWhiteKingChecked = true;
-            }
-        }*/
 
         return true;
     }
@@ -502,6 +481,30 @@ bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, 
  *
  */
 
+int Board::convertToPosition(char col, char row) {
+    int column = col - 'a';
+    int line = row - '1';
+    return column + line * 8;
+}
+
+void Board::convertMoveToPositions(const std::string& move, int& startPos, int& endPos) {
+    startPos = convertToPosition(move[0], move[1]);
+    endPos = convertToPosition(move[2], move[3]);
+}
+
+bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer)
+{
+    return movePiece((in_iStartRow * 8) + in_iStartCol, (in_iEndRow * 8) + in_iEndCol, in_colPlayer);
+}
+
+bool Board::movePiece(const std::string& move, Color in_colPlayer)
+{
+    int iStartPosition, iEndPosition;
+    convertMoveToPositions(move, iStartPosition, iEndPosition);
+    return movePiece(iStartPosition, iEndPosition, in_colPlayer);
+}
+
+
 bool Board::placePiece(int in_iRow, int in_iCol, Piece* in_pPiece)
 {
     if(in_iRow < 0 || in_iRow >= 8 || in_iCol < 0 || in_iCol >= 8)
@@ -523,14 +526,15 @@ Piece* Board::getPieceAt(const Coordinate& coord) const
 
 Piece* Board::getPieceAt(int in_iRow, int in_iColumn) const
 {
-    if(in_iRow < 0 || in_iRow >= 8 || in_iColumn < 0 || in_iColumn >= 8)
+    return getPieceAt((in_iRow * 8) + in_iColumn);
+    /*if(in_iRow < 0 || in_iRow >= 8 || in_iColumn < 0 || in_iColumn >= 8)
     {
         return nullptr;
     }
-    return m_tabtabpiBoard[in_iRow][in_iColumn];
+    return m_tabtabpiBoard[in_iRow][in_iColumn];*/
 }
 
-bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer)
+/*bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer)
 {
     Piece* pPiece = getPieceAt(in_iStartRow, in_iStartCol);
     if(pPiece == nullptr || pPiece->getColor() != in_colPlayer) //If the player try to move a piece of another color, return false
@@ -601,7 +605,7 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
     }
 
     return false;
-}
+}*/
 
 bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer)
 {
@@ -1091,5 +1095,4 @@ void Board::displayBoard() const {
     std::cout << "    ---------------" << std::endl;
     std::cout << "    a b c d e f g h" << std::endl;
 }
-
 

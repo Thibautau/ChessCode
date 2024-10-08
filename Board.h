@@ -34,13 +34,15 @@ public:
     Piece* getPieceAt(int  in_iPositionPiece) const;
     bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE);
     void updateAffectedPieces(int position);
-    bool isMovementPossible(int in_iStartPosition, int in_iTargetPosition) const;
+    bool isMovementPossible(int in_iStartPosition, int in_iTargetPosition);
     bool isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound) const;
     bool isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
     void findFirstPiecesOnEachRookMovements(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
     void findFirstPiecesOnEachBishopMovements(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
     void findFirstPiecesOnEachKnightMovements(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
 
+    bool movePiece(const std::string& move, Color in_colPlayer);
+    bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
 
     /* ------------- OLD FUNCTION BELOW ------------- */
 
@@ -52,7 +54,7 @@ public:
 
 
     bool placePiece(int in_iRow, int in_iCol, Piece* in_pPiece);
-    bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
+    //bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     bool isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer);
     std::vector<Move> listOfPossibleMoves(Color in_colColor);
@@ -71,6 +73,11 @@ public:
     Coordinate findKing(Color in_colorToFind) const;
     void promotePawn(int in_iEndRow, int in_iEndCol, Color in_colPlayer, Piece** ppPiece);
     void putNextMoveIfValid(Coordinate& in_coordKing, bool in_isKingInCheck, Coordinate& in_coordNextMove, Piece* in_pPieceToMove, Piece* pPieceFoundOnNextMove, std::vector<Coordinate>& in_vectMoveToFill);
+
+
+private:
+    static int convertToPosition(char col, char row);
+    static void convertMoveToPositions(const std::string& move, int& startPos, int& endPos);
 };
 
 #endif //BOARD_H
