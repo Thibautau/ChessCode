@@ -156,7 +156,7 @@ void Piece::movePiece(Piece** board, int newPosition, int oldPosition) {
             break;
         }
         case TypePieces::KNIGHT: {
-            const int knightMoves[8] = {6, 10, 15, 17, -6, -10, -15, -17};
+            const int *knightMoves = getKnightMoves();
             int numMoves = 8;  // ou la taille appropriée selon tes mouvements de cavalier
 
             for (int i = 0; i < numMoves; ++i) {
@@ -207,8 +207,8 @@ const int* Piece::getKingMoves() {
 
 const int* Piece::getKnightMoves() {
     static const int knightMoves[8] = {
-        -1, 1, -8, 8,
-        -7, -9, 7, 9
+        6, 10, 15, 17,
+        -6, -10, -15, -17
     };
     return knightMoves;
 }
