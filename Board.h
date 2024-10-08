@@ -33,6 +33,7 @@ public:
     bool placePiece(int in_iPositionPiece, Piece* in_pPiece);
     Piece* getPieceAt(int  in_iPositionPiece) const;
     bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE);
+    void updateAffectedPieces(int position);
     bool isMovementPossible(int in_iStartPosition, int in_iTargetPosition) const;
     bool isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound) const;
     bool isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;

@@ -200,7 +200,8 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
         placePiece(in_iEndPosition, pPiece);
         //Mise à jour du cache de la pièce concerné
         pPiece->movePiece(m_tabpiBoard, in_iEndPosition);
-        //@TODO Mise à jour de toutes les pièce impactées par ce mouvement
+        updateAffectedPieces(in_iStartPosition);
+        updateAffectedPieces(in_iEndPosition);
         m_tabpiBoard[in_iStartPosition] = nullptr;
 
         /*if (!wasEnPassant) {
@@ -224,6 +225,84 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
     }
 
     return false;
+}
+
+void Board::updateAffectedPieces(int position)
+{
+    // Calculez les lignes et colonnes des positions
+    std::vector<int> in_vectPositionPieceFound;
+
+    //Gérer les mouvement en horizontaux + verticaux
+    findFirstPiecesOnEachRookMovements(position, in_vectPositionPieceFound);
+
+    for (int pos : in_vectPositionPieceFound) {
+        int pieceRow = pos / 8;
+        int pieceCol = pos % 8;
+
+        Piece* piece = getPieceAt(pos);
+        TypePieces type = piece->getTypePiece();
+        if (type == TypePieces::ROOK || type == TypePieces::QUEEN) {
+            piece->movePiece(m_tabpiBoard, pos);
+        }
+        else if (type == TypePieces::KING) {
+            if (abs(pieceRow - (position / 8)) <= 1 && abs(pieceCol - (position % 8)) <= 1) {
+                piece->movePiece(m_tabpiBoard, pos);
+            }
+        }
+        else if (type == TypePieces::PAWN) {
+            int direction = piece->getColor() == Color::WHITE ? 1 : -1;
+            if (pieceRow == (position / 8) + direction && pieceCol == (position % 8)) {
+                piece->movePiece(m_tabpiBoard, pos);
+            }
+        }
+    }
+    in_vectPositionPieceFound.clear();
+
+    //Gérer les mouvements en diagonale
+    findFirstPiecesOnEachBishopMovements(position, in_vectPositionPieceFound);
+    for (int pos : in_vectPositionPieceFound) {
+        int pieceRow = pos / 8;
+        int pieceCol = pos % 8;
+
+        Piece* piece = getPieceAt(pos);
+        if (piece) {
+            TypePieces type = piece->getTypePiece();
+
+            if (type == TypePieces::BISHOP || type == TypePieces::QUEEN) {
+                piece->movePiece(m_tabpiBoard, pos);
+            }
+            else if (type == TypePieces::KING) {
+                if (abs(pieceRow - (position / 8)) <= 1 && abs(pieceCol - (position % 8)) <= 1) {
+                    piece->movePiece(m_tabpiBoard, pos);
+                }
+            }
+            else if (type == TypePieces::PAWN) {
+                Color color = piece->getColor();
+                int direction = (color == Color::WHITE) ? 1 : -1;
+                int expectedRow = (color == Color::WHITE) ? (position / 8) + direction : (position / 8) - direction;
+
+                if (pieceRow == expectedRow && (pieceCol == (position % 8) - 1 || pieceCol == (position % 8) + 1)) {
+                    piece->movePiece(m_tabpiBoard, pos);
+                }
+            }
+        }
+    }
+
+    in_vectPositionPieceFound.clear();
+
+    //Gérer les mouvements du cavalier
+    findFirstPiecesOnEachKnightMovements(position, in_vectPositionPieceFound);
+    for (int pos : in_vectPositionPieceFound) {
+
+        Piece* piece = getPieceAt(pos);
+        if (piece) {
+            TypePieces type = piece->getTypePiece();
+            if (type == TypePieces::KNIGHT) {
+                piece->movePiece(m_tabpiBoard, pos);
+            }
+        }
+    }
+
 }
 
 void Board::findFirstPiecesOnEachRookMovements(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
