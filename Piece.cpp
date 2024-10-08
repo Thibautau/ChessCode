@@ -223,7 +223,7 @@ void Piece::addRookMoves(Piece** board, int newPosition) {
     for (int i = 1; i < 8; ++i) {
         // Droite
         int rightMove = newPosition + i;
-        if (currentCol < 7 && isValidPosition(rightMove)) {
+        if (currentCol+i < 7 && isValidPosition(rightMove)) {
             m_possibleMoves.push_back(rightMove);
             if (board[rightMove] != nullptr) {
                 if (board[rightMove]->getColor() != m_colColorPiece) {
@@ -237,7 +237,7 @@ void Piece::addRookMoves(Piece** board, int newPosition) {
     for (int i = 1; i < 8; ++i) {
         // Gauche
         int leftMove = newPosition - i;
-        if (currentCol > 0 && isValidPosition(leftMove)) {
+        if (currentCol-i > 0 && isValidPosition(leftMove)) {
             m_possibleMoves.push_back(leftMove);
             if (board[leftMove] != nullptr) {
                 if (board[leftMove]->getColor() != m_colColorPiece) {
@@ -250,10 +250,11 @@ void Piece::addRookMoves(Piece** board, int newPosition) {
 }
 
 void Piece::addBishopMoves(Piece** board, int newPosition) {
+    int currentCol = newPosition % 8;
     for (int i = 1; i < 8; ++i) {
         // Haut-Droite
         int upRightMove = newPosition + i * 9;
-        if (!isValidPosition(upRightMove)) break;
+        if (currentCol+i<7 || !isValidPosition(upRightMove)) break;
         if (board[upRightMove] == nullptr) {
             m_possibleMoves.push_back(upRightMove);
         }
@@ -268,7 +269,7 @@ void Piece::addBishopMoves(Piece** board, int newPosition) {
     for (int i = 1; i < 8; ++i) {
         // Haut-Gauche
         int upLeftMove = newPosition + i * 7; // 1 ligne en haut, 1 colonne à gauche
-        if (!isValidPosition(upLeftMove)) break;
+        if (currentCol-i>0 || !isValidPosition(upLeftMove)) break;
         if (board[upLeftMove] == nullptr) {
             m_possibleMoves.push_back(upLeftMove);
         }
@@ -283,7 +284,7 @@ void Piece::addBishopMoves(Piece** board, int newPosition) {
     for (int i = 1; i < 8; ++i) {
         // Bas-Droite
         int downRightMove = newPosition - i * 7; // 1 ligne en bas, 1 colonne à droite
-        if (!isValidPosition(downRightMove)) break;
+        if (currentCol+i<7 || !isValidPosition(downRightMove)) break;
         if (board[downRightMove] == nullptr) {
             m_possibleMoves.push_back(downRightMove);
         }
@@ -298,7 +299,7 @@ void Piece::addBishopMoves(Piece** board, int newPosition) {
     for (int i = 1; i < 8; ++i) {
         // Bas-Gauche
         int downLeftMove = newPosition - i * 9; // 1 ligne en bas, 1 colonne à gauche
-        if (!isValidPosition(downLeftMove)) break;
+        if (currentCol-i>0 || !isValidPosition(downLeftMove)) break;
         if (board[downLeftMove] == nullptr) {
             m_possibleMoves.push_back(downLeftMove);
         }
