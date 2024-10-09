@@ -116,6 +116,7 @@ std::vector<int> Piece::getPossibleMoves(Piece **board, int in_iPiecePosition) c
 
 std::vector<int> Piece::movePiece(Piece** board, int iposition) const {
     std::vector<int> possibleMoves;
+    int iUseless1, iUseless2;
     switch (m_tpTypePiece) {
         case TypePieces::PAWN: {
             int direction = (m_colColorPiece == Color::WHITE) ? 1 : -1;
@@ -150,7 +151,7 @@ std::vector<int> Piece::movePiece(Piece** board, int iposition) const {
             break;
         }
         case TypePieces::KNIGHT: {
-            const int *knightMoves = getKnightMoves();
+            const int *knightMoves = getKnightMoves(iUseless1, iUseless2);
             int numMoves = 8;
 
             for (int i = 0; i < numMoves; ++i) {
@@ -173,7 +174,7 @@ std::vector<int> Piece::movePiece(Piece** board, int iposition) const {
             break;
 
         case TypePieces::KING: {
-            const int* kingMoves = getKingMoves();
+            const int* kingMoves = getKingMoves(iUseless1, iUseless2);
             int numMoves = 8;
 
             for (int i = 0; i < numMoves; ++i) {
@@ -184,7 +185,6 @@ std::vector<int> Piece::movePiece(Piece** board, int iposition) const {
                     }
                 }
             }
-
         }
         default:
             break;
@@ -192,31 +192,303 @@ std::vector<int> Piece::movePiece(Piece** board, int iposition) const {
     return possibleMoves;
 }
 
-const int* Piece::getKingMoves() {
-    static const int kingMoves[8] = {
-        -1, 1, -8, 8,
+int* Piece::getKingMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement)
+{
+    out_iNbOfRepetitionToDo = 1;
+    out_iNbOfMovement = 8;
+    static int kingMoves[8] = {
+        -1, 1,-8, 8,
         -7, -9, 7, 9
     };
     return kingMoves;
 }
 
-const int* Piece::getKnightMoves() {
-    static const int knightMoves[8] = {
+int* Piece::getRockMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) {
+    out_iNbOfRepetitionToDo = 1;
+    out_iNbOfMovement = 2;
+    static int kingMoves[2] = {
+        2, -2
+    };
+    return kingMoves;
+}
+
+int* Piece::getKnightMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) {
+    out_iNbOfRepetitionToDo = 1;
+    out_iNbOfMovement = 8;
+    static int knightMoves[8] = {
         6, 10, 15, 17,
         -6, -10, -15, -17
     };
     return knightMoves;
 }
 
+int* Piece::getRookMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) {
+    out_iNbOfRepetitionToDo = 7;
+    out_iNbOfMovement = 4;
+    static int rookMoves[4] = {
+        8, // Haut
+        -8, // Bas
+        -1, // Gauche
+        1 // Droit
+    };
+    return rookMoves;
+}
+
+int* Piece::getBishopMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) {
+    out_iNbOfRepetitionToDo = 7;
+    out_iNbOfMovement = 4;
+    static int bishopMoves[4] = {
+        7, // Haut gauche
+        9, // Haut droite
+        -7, //Bas droite (c'est bien ça!)
+        -9 // Bas gauche
+    };
+    return bishopMoves;
+}
+
+int* Piece::getQueenMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) {
+    out_iNbOfRepetitionToDo = 7;
+    out_iNbOfMovement = 8;
+    static int queenMoves[8] = {
+        8, // Haut
+        -8, // Bas
+        -1, // Gauche
+        1, // Droit
+        7, // Haut gauche
+        9, // Haut droite
+        -7, //Bas droite (c'est bien ça!)
+        -9 // Bas gauche
+    };
+    return queenMoves;
+}
+
+int* Piece::getPawnMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement, Color in_colPiece) {
+    out_iNbOfRepetitionToDo = 2;
+    if(in_colPiece == Color::WHITE)
+    {
+        static int queenMoves[4] = {
+            8, 7, 9, 16
+        };
+        return queenMoves;
+    }
+    else if(in_colPiece == Color::BLACK)
+    {
+        static int queenMoves[4] = {
+            -8, -7, -9, -16
+        };
+        return queenMoves;
+    }
+    return {};
+}
 
 
 bool Piece::isValidPosition(int position) {
     return position >= 0 && position < 64;
 }
 
-void Piece::addRookMoves(Piece** board, int newPosition, std::vector<int>& possibleMoves) const {
+
+bool Piece::isBishopNextPositionValid(int in_iDirection, int in_iNextPosition)
+{
+    if(in_iNextPosition < 0 || in_iNextPosition >= 64)
+    {
+        return false;
+    }
+
+    switch (in_iDirection) {
+        case 9:
+        case -7:
+            return in_iNextPosition % 8 != 0;  // Si on dépasse la bordure droite
+
+        case 7:
+        case -9:
+            return in_iNextPosition % 8 != 7;  // Si on dépasse la bordure gauche
+
+        default:
+            return false;  // Pour toute autre direction non gérée
+    }
+}
+
+
+bool Piece::isRookNextPositionValid(int in_iDirection, int in_iNextPosition)
+{
+    if(in_iNextPosition < 0 || in_iNextPosition >= 64) // Verify is the rook can go up or down
+    {
+        return false;
+    }
+
+    switch (in_iDirection) {
+        case -8:
+        case 8:
+            return isValidPosition(in_iNextPosition);
+        case 1:
+            return in_iNextPosition % 8 < 8;  // Si on dépasse la bordure droite
+        case -1:
+            return in_iNextPosition >= 0; // Si on dépasse la bordure gauche
+
+        default:
+            return false;  // Pour toute autre direction non gérée
+    }
+}
+
+bool Piece::isKnightNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition)
+{
+    if(in_iNextPosition < 0 || in_iNextPosition >= 64) // Verify is the rook can go up or down
+    {
+        return false;
+    }
+
+    int iInitialRow = in_iInitialPosition / 8;
+    int iInitialColumn = in_iInitialPosition % 8;
+
+    int iNextRow = in_iNextPosition / 8;
+    int iNextColumn = in_iNextPosition % 8;
+
+    int iRowDifference = std::abs(iInitialRow - iNextRow);
+    int iColumnDifference = std::abs(iInitialColumn - iNextColumn);
+
+    if(iRowDifference == 1 && iColumnDifference == 2)
+    {
+        return true;
+    }
+    if(iRowDifference == 2 && iColumnDifference == 1)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Piece::isPawnNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition)
+{
+    if(in_iNextPosition < 0 || in_iNextPosition >= 64) // Verify is the rook can go up or down
+    {
+        return false;
+    }
+
+    int direction = (m_colColorPiece == Color::WHITE) ? 1 : -1;
+    int startRow = (m_colColorPiece == Color::WHITE) ? 1 : 6;
+
+    int iInitialRow = in_iInitialPosition / 8;
+
+    bool bCanMoveOf2 = false;
+    if(iInitialRow == startRow)
+    {
+        bCanMoveOf2 = true;
+    }
+    switch (in_iDirection) {
+        case 16:
+            return isValidPosition(in_iNextPosition) && bCanMoveOf2 && m_colColorPiece == Color::WHITE;
+        case -16:
+            return isValidPosition(in_iNextPosition) && bCanMoveOf2 && m_colColorPiece == Color::BLACK;
+        case -8:
+            return isValidPosition(in_iNextPosition) && m_colColorPiece == Color::BLACK;
+        case 8:
+            return isValidPosition(in_iNextPosition) && m_colColorPiece == Color::WHITE;
+        case 9:
+        case -7:
+            return in_iNextPosition % 8 != 0;  // Si on dépasse la bordure droite
+
+        case 7:
+        case -9:
+            return in_iNextPosition % 8 != 7;  // Si on dépasse la bordure gauche
+
+        default:
+            return false;  // Pour toute autre direction non gérée
+    }
+}
+
+bool Piece::isNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition)
+{
+    if(in_iNextPosition < 0 || in_iNextPosition >= 64)
+    {
+        return false;
+    }
+
+    switch (m_tpTypePiece) {
+        case TypePieces::BISHOP:
+            return isBishopNextPositionValid(in_iDirection, in_iNextPosition);
+        case TypePieces::ROOK:
+            return isRookNextPositionValid(in_iDirection, in_iNextPosition);
+        case TypePieces::QUEEN:
+            return isRookNextPositionValid(in_iDirection, in_iNextPosition) || isBishopNextPositionValid(in_iDirection, in_iNextPosition);
+        case TypePieces::KING:
+            return isRookNextPositionValid(in_iDirection, in_iNextPosition) || isBishopNextPositionValid(in_iDirection, in_iNextPosition);
+        case TypePieces::KNIGHT:
+            return isKnightNextPositionValid(in_iDirection, in_iInitialPosition, in_iNextPosition);
+        case TypePieces::PAWN:
+            return isPawnNextPositionValid(in_iDirection, in_iInitialPosition, in_iNextPosition);
+    }
+
+    return false;
+}
+
+void Piece::addBishopMoves(Piece** board, int newPosition, std::vector<int>& possibleMoves) {
     int currentCol = newPosition % 8;
+/*
+    // Haut-Droite
     for (int i = 1; i < 8; ++i) {
+        int upRightMove = newPosition + i * 9; // 1 ligne en haut, 1 colonne à droite
+        if (upRightMove % 8 == 0) break; // Si on dépasse la bordure droite
+        if (!isValidPosition(upRightMove)) break;
+        if (board[upRightMove] == nullptr) {
+            possibleMoves.push_back(upRightMove);
+        } else {
+            if (board[upRightMove]->getColor() != m_colColorPiece) {
+                possibleMoves.push_back(upRightMove);
+            }
+            break;
+        }
+    }
+
+    // Haut-Gauche
+    for (int i = 1; i < 8; ++i) {
+        int upLeftMove = newPosition + i * 7; // 1 ligne en haut, 1 colonne à gauche
+        if (upLeftMove % 8 == 7) break; // Si on dépasse la bordure gauche
+        if (!isValidPosition(upLeftMove)) break;
+        if (board[upLeftMove] == nullptr) {
+            possibleMoves.push_back(upLeftMove);
+        } else {
+            if (board[upLeftMove]->getColor() != m_colColorPiece) {
+                possibleMoves.push_back(upLeftMove);
+            }
+            break;
+        }
+    }
+
+    // Bas-Droite
+    for (int i = 1; i < 8; ++i) {
+        int downRightMove = newPosition - i * 7; // 1 ligne en bas, 1 colonne à droite
+        if (downRightMove % 8 == 0) break; // Si on dépasse la bordure droite
+        if (!isValidPosition(downRightMove)) break;
+        if (board[downRightMove] == nullptr) {
+            possibleMoves.push_back(downRightMove);
+        } else {
+            if (board[downRightMove]->getColor() != m_colColorPiece) {
+                possibleMoves.push_back(downRightMove);
+            }
+            break;
+        }
+    }
+
+    // Bas-Gauche
+    for (int i = 1; i < 8; ++i) {
+        int downLeftMove = newPosition - i * 9; // 1 ligne en bas, 1 colonne à gauche
+        if (downLeftMove % 8 == 7) break; // Si on dépasse la bordure gauche
+        if (!isValidPosition(downLeftMove)) break;
+        if (board[downLeftMove] == nullptr) {
+            possibleMoves.push_back(downLeftMove);
+        } else {
+            if (board[downLeftMove]->getColor() != m_colColorPiece) {
+                possibleMoves.push_back(downLeftMove);
+            }
+            break;
+        }
+    }*/
+}
+
+
+void Piece::addRookMoves(Piece** board, int newPosition, std::vector<int>& possibleMoves) {
+    int currentCol = newPosition % 8;
+    /*for (int i = 1; i < 8; ++i) {
         // Haut
         int upMove = newPosition + i * 8;
         if (!isValidPosition(upMove)) break;
@@ -268,69 +540,5 @@ void Piece::addRookMoves(Piece** board, int newPosition, std::vector<int>& possi
             }
             possibleMoves.push_back(leftMove);
         }
-    }
+    }*/
 }
-
-void Piece::addBishopMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves) const {
-    int currentCol = newPosition % 8;
-    for (int i = 1; i < 8; ++i) {
-        // Haut-Droite
-        int upRightMove = newPosition + i * 9;
-        if (currentCol+i<7 || !isValidPosition(upRightMove)) break;
-        if (board[upRightMove] == nullptr) {
-            possibleMoves.push_back(upRightMove);
-        }
-        else {
-            if (board[upRightMove]->getColor() != m_colColorPiece) {
-                possibleMoves.push_back(upRightMove);
-            }
-            break;
-        }
-    }
-
-    for (int i = 1; i < 8; ++i) {
-        // Haut-Gauche
-        int upLeftMove = newPosition + i * 7; // 1 ligne en haut, 1 colonne à gauche
-        if (currentCol-i>0 || !isValidPosition(upLeftMove)) break;
-        if (board[upLeftMove] == nullptr) {
-            possibleMoves.push_back(upLeftMove);
-        }
-        else {
-            if (board[upLeftMove]->getColor() != m_colColorPiece) {
-                possibleMoves.push_back(upLeftMove);
-            }
-            break;
-        }
-    }
-
-    for (int i = 1; i < 8; ++i) {
-        // Bas-Droite
-        int downRightMove = newPosition - i * 7; // 1 ligne en bas, 1 colonne à droite
-        if (currentCol+i<7 || !isValidPosition(downRightMove)) break;
-        if (board[downRightMove] == nullptr) {
-            possibleMoves.push_back(downRightMove);
-        }
-        else {
-            if (board[downRightMove]->getColor() != m_colColorPiece) {
-                possibleMoves.push_back(downRightMove);
-            }
-            break;
-        }
-    }
-
-    for (int i = 1; i < 8; ++i) {
-        // Bas-Gauche
-        int downLeftMove = newPosition - i * 9; // 1 ligne en bas, 1 colonne à gauche
-        if (currentCol-i>0 || !isValidPosition(downLeftMove)) break;
-        if (board[downLeftMove] == nullptr) {
-            possibleMoves.push_back(downLeftMove);
-        }
-        else {
-            if (board[downLeftMove]->getColor() != m_colColorPiece) {
-                possibleMoves.push_back(downLeftMove);
-            }
-            break;
-        }
-    }
-}
-

@@ -31,13 +31,26 @@ public:
     bool attackKnight() const;
     std::vector<int> getPossibleMoves(Piece** board, int in_iPiecePosition) const;
     std::vector<int> movePiece(Piece **board, int newPosition) const;
-    static const int* getKingMoves() ;
-    static const int* getKnightMoves() ;
+
+    static int* getKingMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) ;
+    static int* getKnightMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
+    static int* getRookMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
+    static int* getRockMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
+    static int* getBishopMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
+    static int* getQueenMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
+    static int* getPawnMoves(int &out_iNbOfRepetitionToDo, int& out_iNbOfMovement, Color in_colPiece);
+
 
     static bool isValidPosition(int position);
 
-    void addRookMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves) const;
-    void addBishopMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves) const;
+    bool isBishopNextPositionValid(int in_iDirection, int in_iNextPosition);
+    bool isRookNextPositionValid(int in_iDirection, int in_iNextPosition);
+    bool isKnightNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
+    bool isPawnNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
+    bool isNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
+
+    static void addRookMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves);
+    static void addBishopMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves);
 };
 
 #endif //PIECE_H

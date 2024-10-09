@@ -14,8 +14,17 @@ private:
     Piece* m_tabpiBoard[64]{};
     Piece* m_tabtabpiBoard[8][8]{};
     Coordinate m_enPassantPosition;
+
     bool m_isWhiteKingChecked = false;
     bool m_isBlackKingChecked = false;
+
+    bool m_bWhiteKingCanLittleRock = true;
+    bool m_bWhiteKingCanBigRock = true;
+    bool m_bBlackKingCanLittleRock = true;
+    bool m_bBlackKingCanBigRock = true;
+
+    int m_iBlackKingPosition = 60;
+    int m_iWhiteKingPosition = 4;
 
     bool respectBoardLength(int in_iRow, int in_iColumn) const;
     static bool isCoordinateInVector(const Coordinate& coordTargetPoint, const std::vector<Coordinate>& vectPossibleMoves);
@@ -35,7 +44,6 @@ public:
     Piece* getPieceAt(int  in_iPositionPiece) const;
     Piece* getPieceAt(const std::string& in_sPosition) const;
     bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE);
-    void updateAffectedPieces(int position);
     bool isMovementPossible(int in_iStartPosition, int in_iTargetPosition);
     bool isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound) const;
     bool isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
@@ -45,6 +53,21 @@ public:
 
     bool movePiece(const std::string& move, Color in_colPlayer = Color::WHITE);
     bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
+    void possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& in_vectPossibleMoves);
+    void getPieceMovementsPossible(int in_iPositionToFindMovement, int in_iDirectionMovement, int in_iNbOfRepetition, std::vector<int>& in_vectPositionPossible);
+    void getAllPossibleMovementsForAPiece(int in_iPositionToFindMovement, std::vector<int>& out_vectDirectionToFill);
+    void putNextMoveIfValid(int in_iNextPosition, Piece* in_pPieceToMove, std::vector<int>& in_vectMoveToFill);
+
+    /**
+     * Does not check if the cases are attacked.
+     * @param in_colKing
+     * @param in_iDirectionForRock
+     * @return
+     */
+    bool doesKingCanRock(Color in_colKing, int in_iDirectionForRock) const;
+    Piece* findFirstPieceOnDirection(int in_iPosition,int in_iDirection, int in_iNbOfRepetition, int& in_iPositionPieceFound) const;
+
+    std::vector<std::pair<int, std::vector<int>>> listOfPossibleMovements(Color in_colColor);
 
     /* ------------- OLD FUNCTION BELOW ------------- */
 
@@ -60,7 +83,7 @@ public:
     bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     bool isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer);
     std::vector<Move> listOfPossibleMoves(Color in_colColor);
-    std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece);
+    //std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece);
     void displayBoard() const;
 
     std::vector<Coordinate> getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove);

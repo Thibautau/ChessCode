@@ -12,8 +12,16 @@ Board::Board(): m_enPassantPosition{-1, -1}
         m_tabpiBoard[iIndiceRow] = nullptr;
     }
 
+    m_bWhiteKingCanLittleRock = true;
+    m_bWhiteKingCanBigRock = true;
+    m_bBlackKingCanLittleRock = true;
+    m_bBlackKingCanBigRock = true;
+
     m_isWhiteKingChecked = false;
     m_isBlackKingChecked = false;
+
+    m_iBlackKingPosition = 60;
+    m_iWhiteKingPosition = 4;
 }
 
 void Board::initializeBoard()
@@ -55,6 +63,17 @@ void Board::initializeBoard()
         m_tabpiBoard[iTabPosition]->movePiece(m_tabpiBoard, iTabPosition);
         m_tabpiBoard[iTabBlackPawnPosition]->movePiece(m_tabpiBoard, iTabBlackPawnPosition);
     }
+
+    m_isWhiteKingChecked = false;
+    m_isBlackKingChecked = false;
+
+    m_iBlackKingPosition = 60;
+    m_iWhiteKingPosition = 4;
+
+    m_bWhiteKingCanLittleRock = true;
+    m_bWhiteKingCanBigRock = true;
+    m_bBlackKingCanLittleRock = true;
+    m_bBlackKingCanBigRock = true;
 }
 
 void Board::clearBoard()
@@ -197,6 +216,15 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
 
         if(pPiece->getTypePiece() == TypePieces::KING) // If the king rocked (move of length 2, we move the rook)
         {
+            if(in_colPlayer == Color::WHITE)
+            {
+                m_iWhiteKingPosition = in_iEndPosition;
+            }
+            else
+            {
+                m_iBlackKingPosition = in_iEndPosition;
+            }
+
             Piece* pRookForRock = nullptr;
             if(bKingWentRightForRock)
             {
@@ -292,6 +320,225 @@ void Board::findFirstPiecesOnEachRookMovements(int in_iPosition, std::vector<int
     }
 }
 
+void Board::putNextMoveIfValid(int in_iNextPosition, Piece* in_pPieceToMove, std::vector<int>& in_vectMoveToFill)
+{
+    if(! isValidPosition(in_iNextPosition) || in_pPieceToMove == nullptr)
+    {
+        return;
+    }
+
+    Piece* pPieceOnNextMove = getPieceAt(in_iNextPosition);
+    std::vector<int> uselessVectorOfPiecesFound;
+
+    //TODO Verify if we eat a king
+
+    m_tabpiBoard[in_iNextPosition] = in_pPieceToMove;
+    if(!isCaseAttackedByColor(in_iNextPosition, in_pPieceToMove->getEnemyColor(), uselessVectorOfPiecesFound))
+    {
+        in_vectMoveToFill.emplace_back(in_iNextPosition);
+    }
+    m_tabpiBoard[in_iNextPosition] = pPieceOnNextMove; // We put it back to normal
+}
+
+// DO not check if the cases are attacked
+bool Board::doesKingCanRock(Color in_colKing, int in_iDirectionForRock) const
+{
+    int iKingPosition;
+    switch(in_colKing)
+    {
+        case Color::WHITE:
+            if(m_isWhiteKingChecked)
+            {
+                return false;
+            }
+            iKingPosition = m_iWhiteKingPosition;
+            break;
+        case Color::BLACK:
+            if(m_isBlackKingChecked)
+            {
+                return false;
+            }
+            iKingPosition = m_iBlackKingPosition;
+            break;
+        default:
+            return false;
+    }
+
+    int iPositionPieceFound = -1;
+    Piece* pPieceFound = findFirstPieceOnDirection(iKingPosition, in_iDirectionForRock, 7, iPositionPieceFound);
+    if(pPieceFound == nullptr)
+    {
+        return false;
+    }
+
+    if(pPieceFound->getTypePiece() == TypePieces::ROOK && iPositionPieceFound != -1)
+    {
+        switch(in_colKing)
+        {
+            case Color::WHITE:
+                if(iPositionPieceFound == 7 && m_bWhiteKingCanLittleRock)
+                {
+                    return true;
+                }
+                else if (iPositionPieceFound == 0 && m_bWhiteKingCanBigRock)
+                {
+                    return true;
+                }
+                break;
+            case Color::BLACK:
+                if(iPositionPieceFound == 56 && m_bBlackKingCanLittleRock)
+                {
+                    return true;
+                }
+                else if (iPositionPieceFound == 63 && m_bBlackKingCanBigRock)
+                {
+                    return true;
+                }
+                break;
+            default:
+                return false;
+        }
+    }
+    return false;
+}
+
+void Board::getAllPossibleMovementsForAPiece(int in_iPositionToFindMovement, std::vector<int>& out_vectDirectionToFill)
+{
+    if(! isValidPosition(in_iPositionToFindMovement))
+    {
+        return;
+    }
+
+    Piece* pPieceToSeeMovement = getPieceAt(in_iPositionToFindMovement);
+    if(pPieceToSeeMovement == nullptr)
+    {
+        return;
+    }
+
+    int* itabDirection;
+    int iNbOfRepetition = 0;
+    int iNbOfMoves = 0;
+
+    switch (pPieceToSeeMovement->getTypePiece()) {
+        case TypePieces::ROOK:
+            itabDirection = Piece::getRookMoves(iNbOfRepetition, iNbOfMoves);
+            break;
+        case TypePieces::KNIGHT:
+            itabDirection = Piece::getKnightMoves(iNbOfRepetition, iNbOfMoves);
+            break;
+        case TypePieces::BISHOP:
+            itabDirection = Piece::getBishopMoves(iNbOfRepetition, iNbOfMoves);
+            break;
+        case TypePieces::QUEEN:
+            itabDirection = Piece::getQueenMoves(iNbOfRepetition, iNbOfMoves);
+            break;
+        case TypePieces::KING:
+            itabDirection = Piece::getKingMoves(iNbOfRepetition, iNbOfMoves);
+            break;
+        case TypePieces::PAWN:
+            itabDirection = Piece::getPawnMoves(iNbOfRepetition, iNbOfMoves, pPieceToSeeMovement->getColor());
+            break;
+    }
+
+    for(int iDirection: itabDirection)
+    {
+        getPieceMovementsPossible(in_iPositionToFindMovement, iDirection, iNbOfRepetition, out_vectDirectionToFill);
+    }
+}
+
+void Board::getPieceMovementsPossible(int in_iPositionToFindMovement, int in_iDirectionMovement, int in_iNbOfRepetition, std::vector<int>& in_vectPositionPossible)
+{
+    if(! isValidPosition(in_iPositionToFindMovement) || in_iNbOfRepetition <= 0)
+    {
+        return;
+    }
+
+    in_iNbOfRepetition++; // It is a local variable, it doesn't affect the one who calls this function
+    Piece* pPieceToFindMovement = getPieceAt(in_iPositionToFindMovement);
+    TypePieces typePieceToFindMovement = pPieceToFindMovement->getTypePiece();
+    Color colPieceToFindMovement = pPieceToFindMovement->getColor();
+    int iRowPieceToFindMovement = in_iPositionToFindMovement / 8;
+    int iColumnPieceToFindMovement = in_iPositionToFindMovement % 8;
+
+    int iNextPosition = in_iPositionToFindMovement;
+
+    for(int iNbMovement = 1; iNbMovement < in_iNbOfRepetition; iNbMovement++)
+    {
+        iNextPosition = iNextPosition + in_iDirectionMovement;
+        int iNextRow = iNextPosition / 8;
+        int iNextColumn = iNextPosition % 8;
+
+        int iRowDifference = std::abs(iRowPieceToFindMovement - iNextRow);
+        int iColumnDifference = std::abs(iColumnPieceToFindMovement - iNextColumn);
+
+        if(! pPieceToFindMovement->isNextPositionValid(in_iDirectionMovement, in_iPositionToFindMovement, iNextPosition)) // Invalid Move
+        {
+            break;
+        }
+
+        Piece* pPieceFound = getPieceAt(iNextPosition);
+
+        if (typePieceToFindMovement == TypePieces::PAWN)
+        {
+            if (iColumnDifference == 0 && pPieceFound == nullptr) // Pour avancer de 2
+            {
+                putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
+                continue;
+            }
+            else if (iColumnDifference == 1 && pPieceFound != nullptr && pPieceFound->getColor() != colPieceToFindMovement && iNbMovement == 1)
+            {
+                putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else if(typePieceToFindMovement == TypePieces::KING)
+        {
+            std::vector<int> uselessVectorOfPiecesFound;
+            bool bMovePutInCheck = isCaseAttackedByColor(iNextPosition, pPieceToFindMovement->getEnemyColor(), uselessVectorOfPiecesFound);
+            if(pPieceFound != nullptr && pPieceFound->getColor() != colPieceToFindMovement && iNbMovement == 1 && ! bMovePutInCheck) // If the is a piece he can eat, If that piece does not put the king in check
+            {
+                in_vectPositionPossible.emplace_back(iNextPosition);
+            }
+            else if(pPieceFound == nullptr && ! bMovePutInCheck) // If the case is empty and If the move does not put the king in check
+            {
+                if(iNbMovement == 1)
+                {
+                    in_vectPositionPossible.emplace_back(iNextPosition);
+                    //continue;
+                }
+                else if(iNbMovement == 2 && doesKingCanRock(colPieceToFindMovement, in_iDirectionMovement)) // For the rock
+                {
+                    in_vectPositionPossible.emplace_back(iNextPosition);
+                    //break;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            else {
+                break;
+            }
+        }
+        else if (pPieceFound != nullptr)
+        {
+            Color colPieceFound = pPieceFound->getColor();
+            TypePieces typePieceFound = pPieceFound->getTypePiece();
+
+            if (colPieceToFindMovement != colPieceFound && typePieceFound != TypePieces::KING) // We can't eat the same Color or eat a King
+            {
+                putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
+            }
+            break; // Stop since we hit a piece
+        }
+        putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
+    }
+}
+
 void Board::findFirstPiecesOnEachBishopMovements(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
 {
     if(! isValidPosition(in_iPosition))
@@ -352,8 +599,8 @@ void Board::findFirstPiecesOnEachKnightMovements(int in_iPosition, std::vector<i
     {
         return;
     }
-
-    const int* knightMoves = Piece::getKnightMoves();
+    int iUseless1, iUseless2;
+    const int* knightMoves = Piece::getKnightMoves(iUseless1, iUseless2);
     int numMoves = 8;  // Définir le nombre de mouvements possibles pour le cavalier (à ajuster selon la taille du tableau)
 
     for (int i = 0; i < numMoves; ++i) {
@@ -393,6 +640,7 @@ bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, 
         return false;
     }
 
+
     bool bCaseAttacked = isCaseAttackedByAnyColor(in_iPosition, in_vectPositionPieceFound);
     if(! bCaseAttacked) // If it is not attacked
     {
@@ -413,6 +661,173 @@ bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, 
 
     return false;
 }
+
+void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& in_vectPossibleMoves)
+{
+    Piece* pPieceToSeeMoves = getPieceAt(in_iPositionToSeeMoves);
+    if(pPieceToSeeMoves == nullptr)
+    {
+        return;
+    }
+
+    int iUseless, iUseless2;
+
+    Color colPieceToSeeMoves = pPieceToSeeMoves->getColor();
+    TypePieces typePieceToSeeMoves = pPieceToSeeMoves->getTypePiece();
+    switch (typePieceToSeeMoves) {
+        case TypePieces::PAWN: {
+            int direction = (colPieceToSeeMoves == Color::WHITE) ? 1 : -1;
+            int startRow = (colPieceToSeeMoves == Color::WHITE) ? 1 : 6;
+
+            // Normal moves
+            int forwardMove = in_iPositionToSeeMoves + direction * 8;
+            if (isValidPosition(forwardMove) && m_tabpiBoard[forwardMove] == nullptr) {
+                in_vectPossibleMoves.push_back(forwardMove);
+            }
+
+            int twoSteps = in_iPositionToSeeMoves + (direction * 16);
+            if (in_iPositionToSeeMoves/8 == startRow) {
+                if (isValidPosition(twoSteps) && m_tabpiBoard[forwardMove] == nullptr && m_tabpiBoard[twoSteps] == nullptr) {
+                    in_vectPossibleMoves.push_back(twoSteps);
+                }
+            }
+
+            // Capture moves
+            int captureLeft = in_iPositionToSeeMoves + direction * 8 - 1;
+            int captureRight = in_iPositionToSeeMoves + direction * 8 + 1;
+            if (isValidPosition(captureLeft) && m_tabpiBoard[captureLeft] != nullptr && m_tabpiBoard[captureLeft]->getColor() != colPieceToSeeMoves) {
+                in_vectPossibleMoves.push_back(captureLeft);
+            }
+            if (isValidPosition(captureRight) && m_tabpiBoard[captureRight] != nullptr && m_tabpiBoard[captureRight]->getColor() != colPieceToSeeMoves) {
+                in_vectPossibleMoves.push_back(captureRight);
+            }
+            break;
+        }
+        case TypePieces::ROOK: {
+            Piece::addRookMoves(m_tabpiBoard, in_iPositionToSeeMoves, in_vectPossibleMoves);
+            break;
+        }
+        case TypePieces::KNIGHT: {
+            const int *knightMoves = Piece::getKnightMoves(iUseless, iUseless2);
+            int numMoves = 8;
+
+            for (int i = 0; i < numMoves; ++i) {
+                int knightPosition = in_iPositionToSeeMoves + knightMoves[i];
+                if (isValidPosition(knightPosition)) {
+                    if (m_tabpiBoard[knightPosition] == nullptr || m_tabpiBoard[knightPosition]->getColor() != colPieceToSeeMoves) {
+                        in_vectPossibleMoves.push_back(knightPosition);
+                    }
+                }
+            }
+
+        }
+        case TypePieces::BISHOP: {
+            Piece::addBishopMoves(m_tabpiBoard, in_iPositionToSeeMoves, in_vectPossibleMoves);
+            break;
+        }
+        case TypePieces::QUEEN:
+            Piece::addRookMoves(m_tabpiBoard, in_iPositionToSeeMoves, in_vectPossibleMoves); // Mouvements de la tour
+            Piece::addBishopMoves(m_tabpiBoard, in_iPositionToSeeMoves, in_vectPossibleMoves);
+            break;
+
+        case TypePieces::KING: {
+            const int* kingMoves = Piece::getKingMoves(iUseless, iUseless2);
+            int numMoves = 8;
+
+            for (int i = 0; i < numMoves; ++i) {
+                int kingPosition = in_iPositionToSeeMoves + kingMoves[i];
+                if (isValidPosition(kingPosition)) {
+                    if (m_tabpiBoard[kingPosition] == nullptr || m_tabpiBoard[kingPosition]->getColor() != colPieceToSeeMoves) {
+                        in_vectPossibleMoves.push_back(kingPosition);
+                    }
+                }
+            }
+        }
+        default:
+            break;
+    }
+}
+
+
+Piece* Board::findFirstPieceOnDirection(int in_iPosition,int in_iDirection, int in_iNbOfRepetition, int& in_iPositionPieceFound) const {
+    Piece* pPieceToFindMovement = getPieceAt(in_iPosition);
+    if(! isValidPosition(in_iPosition) || in_iNbOfRepetition <= 0 || pPieceToFindMovement == nullptr)
+    {
+        return nullptr;
+    }
+
+    in_iNbOfRepetition++;
+
+    int iNextPosition = in_iPosition;
+
+
+
+
+    for(int iNbMovement = 1; iNbMovement < in_iNbOfRepetition; iNbMovement++) {
+        iNextPosition = iNextPosition + in_iDirection;
+
+        if(! pPieceToFindMovement->isNextPositionValid(in_iDirection, in_iPosition, iNextPosition)) // Invalid Move
+        {
+            break;
+        }
+
+        Piece* pPieceFound = getPieceAt(iNextPosition);
+        if(pPieceFound != nullptr)
+        {
+            in_iPositionPieceFound = in_iPosition + iNbMovement;
+            return pPieceFound;
+        }
+    }
+
+    in_iPositionPieceFound = 0;
+    return nullptr;
+}
+
+std::vector<std::pair<int, std::vector<int>>> Board::listOfPossibleMovements(Color in_colColor)
+{
+    std::vector<std::pair<int, std::vector<int>>> vectPossibleMoves;
+
+    for (int iPosition = 0; iPosition < 64; iPosition++)
+    {
+        Piece* pPieceToGetMovements = getPieceAt(iPosition);
+        if (pPieceToGetMovements != nullptr)
+        {
+            std::vector<int> vectPieceMoves;
+            getAllPossibleMovementsForAPiece(iPosition, vectPieceMoves);
+
+            // Ajouter la position et les mouvements sous forme de paire
+            vectPossibleMoves.emplace_back(iPosition, vectPieceMoves);
+        }
+    }
+
+    return vectPossibleMoves;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -555,7 +970,7 @@ bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int 
 
     Coordinate coordTargetPoint = Coordinate(in_iEndRow, in_iEndCol);
     // We get the piece to move
-    std::vector<Coordinate> vectPossibleMoves = possibleMovesForPiece(Coordinate(in_iStartRow, in_iStartCol));
+    std::vector<Coordinate> vectPossibleMoves/* = possibleMovesForPiece(Coordinate(in_iStartRow, in_iStartCol))*/;
     if(vectPossibleMoves.empty()) // Means that the piece could not move
     {
         return false;
@@ -601,7 +1016,7 @@ bool Board::isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer)
             return false;
         }
     }
-    std::vector<Coordinate> vectPossibleMovesForKing = possibleMovesForPiece(Coordinate(in_iStartRow, in_iStartCol));
+    std::vector<Coordinate> vectPossibleMovesForKing /*= possibleMovesForPiece(Coordinate(in_iStartRow, in_iStartCol))*/;
     if(!vectPossibleMovesForKing.empty()) {
         return false;
     }
@@ -888,13 +1303,12 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
             Color colPieceFound = pPieceFound->getColor();
             TypePieces typePieceFound = pPieceFound->getTypePiece();
 
-            // TODO /!\ Verify if the king is not moving and then put in check
             if (colPieceToSeeValidMove != colPieceFound && typePieceFound != TypePieces::KING) // We can't eat the same Color or eat a King
             {
                 //vectMovePossible.push_back(Coordinate(iNextRow, iNextCol));
                 putNextMoveIfValid(coordKing, isKingChecked, coordNextMove, pPieceToSeeValidMove, pPieceFound,vectMovePossible);
             }
-            iProgressionVector = iLengthVector+1; //TODO Réellement utile ?
+            iProgressionVector = iLengthVector+1;
             break; // Stop since we hit a piece
         }
 
@@ -920,7 +1334,7 @@ std::vector<Move> Board::listOfPossibleMoves(Color in_colColor)
             Piece* piece = getPieceAt(row, col);
             if (piece != nullptr && piece->getColor() == in_colColor) {
                 Coordinate pieceCoord(row, col);
-                std::vector<Coordinate> moves = possibleMovesForPiece(pieceCoord);
+                std::vector<Coordinate> moves /*= possibleMovesForPiece(pieceCoord)*/;
                 for (const Coordinate& move : moves) {
                     possibleMoves.emplace_back(Move{pieceCoord, move});
                 }
@@ -930,7 +1344,7 @@ std::vector<Move> Board::listOfPossibleMoves(Color in_colColor)
 
     return possibleMoves;
 }
-
+/*
 std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordPiece)
 {
     Piece* pPiece = getPieceAt(in_coordPiece);
@@ -962,7 +1376,7 @@ std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordP
     vectOfPiece = nullptr;
 
     return vectCoordAllowToMovePiece;
-}
+}*/
 
 void Board::promotePawn(int in_iEndRow, int in_iEndCol, Color in_colPlayer, Piece** ppPiece) {
     std::cout << "Felicitations ! Votre pion peut être promu. Choisissez parmi les options suivantes :\n";
