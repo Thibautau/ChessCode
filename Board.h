@@ -38,7 +38,8 @@ public:
     void clearBoard();
 
     bool placePiece(int in_iRow, int in_iCol, Piece* in_pPiece);
-    bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
+    bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE, Piece** capturedPiece = nullptr);
+    bool undoMove(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Piece* capturedPiece);
     bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     bool isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer);
     bool isPat(int in_iStartRow, int in_iStartCol, Color in_colPlayer);

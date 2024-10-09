@@ -140,7 +140,7 @@ Piece* Board::getPieceAt(int in_iRow, int in_iColumn) const
     return m_tabtabpiBoard[in_iRow][in_iColumn];
 }
 
-bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer)
+bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer, Piece** capturedPiece)
 {
     Piece* pPiece = getPieceAt(in_iStartRow, in_iStartCol);
     if(pPiece == nullptr || pPiece->getColor() != in_colPlayer) //If the player try to move a piece of another color, return false
@@ -207,10 +207,53 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
             }
         }
 
+        *capturedPiece = getPieceAt(in_iEndRow, in_iEndCol);
+
         return true;
     }
 
     return false;
+}
+bool Board::undoMove(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Piece *capturedPiece) {
+    Piece* pPiece = getPieceAt(in_iEndRow, in_iEndCol);
+    if(pPiece == nullptr) {
+        return false;
+    }
+    bool bKingWentRightForRock = in_iEndCol - in_iStartCol == 2;
+    bool bKingWentLeftForRock = in_iEndCol - in_iStartCol == -2;
+    if(pPiece->getTypePiece() == TypePieces::KING) {
+        if(bKingWentRightForRock) {
+            Piece* pRookForRock = getPieceAt(in_iStartRow, 5);
+            placePiece(in_iStartRow,7,pRookForRock);
+            m_tabtabpiBoard[in_iStartRow][5] = nullptr;
+        }
+        else if(bKingWentLeftForRock) {
+            Piece* pRookForRock = getPieceAt(in_iStartRow, 3);
+            placePiece(in_iStartRow, 0, pRookForRock);
+            m_tabtabpiBoard[in_iStartRow][3] = nullptr;
+        }
+    }
+    if(pPiece->getTypePiece() == TypePieces::PAWN) {
+        int direction = (pPiece->getColor() == Color::WHITE) ? 1 : -1;
+        if(in_iEndRow == m_enPassantPosition.getRow() && in_iEndCol == m_enPassantPosition.getColumn()) {
+            placePiece(in_iEndRow - direction, in_iEndCol, capturedPiece);
+            m_tabtabpiBoard[in_iEndRow][in_iEndCol] = nullptr;
+        }
+    }
+    placePiece(in_iStartRow, in_iStartCol, pPiece);
+    m_tabtabpiBoard[in_iEndRow][in_iEndCol] = nullptr;
+
+    if(capturedPiece != nullptr) {
+        placePiece(in_iEndRow,in_iEndCol,capturedPiece);
+    }
+    if(pPiece->getColor() == Color::WHITE) {
+        isBlackKingChecked = false;
+    }
+    else {
+        isWhiteKingChecked = false;
+    }
+
+    return true;
 }
 
 bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer)

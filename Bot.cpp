@@ -31,8 +31,10 @@ Move Bot::chooseBestMove(Board& board, int max_depth) {
     int maxScore = -INFINITY;
     Move bestMove = {{1,0},{2,0}};
     for(Move move: board.listOfPossibleMoves(m_color)) {
-        board.movePiece(move.coordStart.iRow, move.coordStart.iColumn, move.coordEnd.iRow, move.coordEnd.iColumn, m_color);
+        Piece* capturedPiece = nullptr;
+        board.movePiece(move.coordStart.iRow, move.coordStart.iColumn, move.coordEnd.iRow, move.coordEnd.iColumn, m_color, &capturedPiece);
         int score = minimax(board, max_depth-1,false);
+        board.undoMove(move.coordStart.iRow, move.coordStart.iColumn, move.coordEnd.iRow, move.coordEnd.iColumn, capturedPiece);
         if(score > maxScore) {
             maxScore = score;
             bestMove = move;
@@ -48,8 +50,10 @@ int Bot::minimax(Board& board,int depth,bool isMax) {
     if(isMax) {
         int maxScore = -INFINITY;
         for(Move move: board.listOfPossibleMoves(m_color)) {
-            board.movePiece(move.coordStart.iRow, move.coordStart.iColumn, move.coordEnd.iRow, move.coordEnd.iColumn, m_color);
+            Piece* capturedPiece = nullptr;
+            board.movePiece(move.coordStart.iRow, move.coordStart.iColumn, move.coordEnd.iRow, move.coordEnd.iColumn, m_color, &capturedPiece);
             int score = minimax(board, depth-1, false);
+            board.undoMove(move.coordStart.iRow, move.coordStart.iColumn, move.coordEnd.iRow, move.coordEnd.iColumn, capturedPiece);
             maxScore = std::max(maxScore,score);
         }
         return maxScore;
@@ -57,8 +61,10 @@ int Bot::minimax(Board& board,int depth,bool isMax) {
     else {
         int maxScore = INFINTY;
         for(Move move: board.listOfPossibleMoves(m_color)) {
-            board.movePiece(move.coordStart.iRow, move.coordStart.iColumn, move.coordEnd.iRow, move.coordEnd.iColumn, m_color);
+            Piece* capturedPiece = nullptr;
+            board.movePiece(move.coordStart.iRow, move.coordStart.iColumn, move.coordEnd.iRow, move.coordEnd.iColumn, m_color, &capturedPiece);
             int score = minimax(board, depth-1, true);
+            board.undoMove(move.coordStart.iRow, move.coordStart.iColumn, move.coordEnd.iRow, move.coordEnd.iColumn, capturedPiece);
             maxScore = std::min(maxScore, score);
         }
         return maxScore;
