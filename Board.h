@@ -25,6 +25,8 @@ public:
     Board();
     void initializeBoard();
 
+    int evaluate(Color in_colPlayer) const;
+
     bool isWhiteKingCheck() const;
 
     bool isBlackKingCheck() const;

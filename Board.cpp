@@ -3,6 +3,8 @@
 //
 
 #include "Board.h"
+
+#include <cmath>
 #include <iostream>
 //TODO faire en sorte de stocker à chaque coup quelle pièce attaque quelle case pour plus d'opti
 Board::Board(): m_enPassantPosition{-1, -1}
@@ -57,6 +59,47 @@ void Board::clearBoard()
 
     isWhiteKingChecked = false;
     isBlackKingChecked = false;
+}
+
+int Board::evaluate(Color in_colPlayer) const {
+    int score = 0;
+    for(int i=0; i<8; i++) {
+        for(int j=0; j<8; j++) {
+            Piece* piece = m_tabtabpiBoard[i][j];
+            if(piece != nullptr) {
+                int pieceScore = 0;
+                switch(piece->getTypePiece()) {
+                    case TypePieces::PAWN:
+                        pieceScore = 1;
+                    break;
+                    case TypePieces::KNIGHT:
+                        pieceScore = 3;
+                    break;
+                    case TypePieces::BISHOP:
+                        pieceScore = 3;
+                    break;
+                    case TypePieces::ROOK:
+                        pieceScore = 5;
+                    break;
+                    case TypePieces::QUEEN:
+                        pieceScore = 9;
+                    break;
+                    case TypePieces::KING:
+                        pieceScore = INFINITY;
+                    break;
+                }
+
+                if(piece->getColor() == in_colPlayer) {
+                    score += pieceScore;
+                } else {
+                    score -= pieceScore;
+                }
+            }
+        }
+        }
+
+
+    return score;
 }
 
 bool Board::isWhiteKingCheck() const

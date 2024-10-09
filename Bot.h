@@ -16,6 +16,8 @@ private:
 public:
     Bot(Color color);
     void play(Board& board, Coordinate& start, Coordinate& end) override;
+    Move chooseBestMove(Board& board, int max_depth);
+    int minimax(Board& board, int depth, bool isMax);
     Color getPlayerColor() const override;
 };
 
