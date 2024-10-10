@@ -6,7 +6,6 @@
 #include "Type.h"
 
 #include <cmath>
-#include <cstdlib>
 
 Bot::Bot(Color color) : m_color(color) {}
 
@@ -15,21 +14,16 @@ Color Bot::getPlayerColor() const {
 }
 
 void Bot::play(Board& board, Coordinate& start, Coordinate& end) {
-    std::vector<Move> possibleMoves = board.listOfPossibleMoves(m_color);
+    Move bestMove;
+    int max_depth = 3;
+    chooseBestMove(board, max_depth, bestMove);
 
-    if (possibleMoves.empty()) {
-        return;
-    }
-
-    int randomIndex = rand() % possibleMoves.size();
-
-    start = possibleMoves[randomIndex].coordStart;
-    end = possibleMoves[randomIndex].coordEnd;
+    start = bestMove.coordStart;
+    end = bestMove.coordEnd;
 }
 
-Move Bot::chooseBestMove(Board& board, int max_depth) {
+Move Bot::chooseBestMove(Board& board, int max_depth, Move bestMove) {
     int maxScore = -INFINITY;
-    Move bestMove = {{1,0},{2,0}};
     for(Move move: board.listOfPossibleMoves(m_color)) {
         Piece* capturedPiece = nullptr;
         board.movePiece(move.coordStart.iRow, move.coordStart.iColumn, move.coordEnd.iRow, move.coordEnd.iColumn, m_color, &capturedPiece);
@@ -59,7 +53,7 @@ int Bot::minimax(Board& board,int depth,bool isMax) {
         return maxScore;
     }
     else {
-        int maxScore = INFINTY;
+        int maxScore = INFINITY;
         for(Move move: board.listOfPossibleMoves(m_color)) {
             Piece* capturedPiece = nullptr;
             board.movePiece(move.coordStart.iRow, move.coordStart.iColumn, move.coordEnd.iRow, move.coordEnd.iColumn, m_color, &capturedPiece);

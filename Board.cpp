@@ -207,8 +207,9 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
                 isWhiteKingChecked = true;
             }
         }
-
-        *capturedPiece = getPieceAt(in_iEndRow, in_iEndCol);
+        if(capturedPiece) {
+            *capturedPiece = getPieceAt(in_iEndRow, in_iEndCol);
+        }
 
         return true;
     }
@@ -220,40 +221,11 @@ bool Board::undoMove(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_
     if(pPiece == nullptr) {
         return false;
     }
-    bool bKingWentRightForRock = in_iEndCol - in_iStartCol == 2;
-    bool bKingWentLeftForRock = in_iEndCol - in_iStartCol == -2;
-    if(pPiece->getTypePiece() == TypePieces::KING) {
-        if(bKingWentRightForRock) {
-            Piece* pRookForRock = getPieceAt(in_iStartRow, 5);
-            placePiece(in_iStartRow,7,pRookForRock);
-            m_tabtabpiBoard[in_iStartRow][5] = nullptr;
-        }
-        else if(bKingWentLeftForRock) {
-            Piece* pRookForRock = getPieceAt(in_iStartRow, 3);
-            placePiece(in_iStartRow, 0, pRookForRock);
-            m_tabtabpiBoard[in_iStartRow][3] = nullptr;
-        }
-    }
-    if(pPiece->getTypePiece() == TypePieces::PAWN) {
-        int direction = (pPiece->getColor() == Color::WHITE) ? 1 : -1;
-        if(in_iEndRow == m_enPassantPosition.getRow() && in_iEndCol == m_enPassantPosition.getColumn()) {
-            placePiece(in_iEndRow - direction, in_iEndCol, capturedPiece);
-            m_tabtabpiBoard[in_iEndRow][in_iEndCol] = nullptr;
-        }
-    }
-    placePiece(in_iStartRow, in_iStartCol, pPiece);
+   placePiece(in_iStartRow, in_iStartCol, pPiece);
     m_tabtabpiBoard[in_iEndRow][in_iEndCol] = nullptr;
-
-    if(capturedPiece != nullptr) {
-        placePiece(in_iEndRow,in_iEndCol,capturedPiece);
+    if(capturedPiece) {
+        placePiece(in_iEndRow, in_iEndCol, capturedPiece);
     }
-    if(pPiece->getColor() == Color::WHITE) {
-        isBlackKingChecked = false;
-    }
-    else {
-        isWhiteKingChecked = false;
-    }
-
     return true;
 }
 
