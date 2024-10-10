@@ -16,7 +16,7 @@ Color Bot::getPlayerColor() const {
 void Bot::play(Board& board, Coordinate& start, Coordinate& end) {
     Move bestMove;
     int max_depth = 3;
-    chooseBestMove(board, max_depth, bestMove);
+    bestMove = chooseBestMove(board, max_depth, bestMove);
 
     start = bestMove.coordStart;
     end = bestMove.coordEnd;

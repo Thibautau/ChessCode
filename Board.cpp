@@ -4,6 +4,7 @@
 
 #include "Board.h"
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 //TODO faire en sorte de stocker à chaque coup quelle pièce attaque quelle case pour plus d'opti
@@ -188,6 +189,10 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
         }
 
         pPiece->setAlreadyMoved(true);
+        if(capturedPiece) {
+            *capturedPiece = getPieceAt(in_iEndRow, in_iEndCol);
+        }
+
         placePiece(in_iEndRow, in_iEndCol, pPiece);
         m_tabtabpiBoard[in_iStartRow][in_iStartCol] = nullptr;
 
@@ -207,9 +212,7 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
                 isWhiteKingChecked = true;
             }
         }
-        if(capturedPiece) {
-            *capturedPiece = getPieceAt(in_iEndRow, in_iEndCol);
-        }
+
 
         return true;
     }
