@@ -716,3 +716,80 @@ TEST_F(BoardTest, KingInCheck) {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ----------------------------------- OPTI -----------------------------------
+
+// Test mouvement dame invalide
+TEST_F(BoardTest, QueenMove) {
+    board.clearBoard();
+    board.placePiece("c5", new Piece(TypePieces::QUEEN, Color::WHITE));
+    bool result = board.movePiece("c5g4"); // Dame blanche en g4
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt("c5")->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt("g4"), nullptr);
+}
+
+// Test mouvement dame invalide (bug que l'on a eu)
+TEST_F(BoardTest, QueenMove2) {
+    board.clearBoard();
+
+    board.placePiece("a8", new Piece(TypePieces::ROOK, Color::BLACK));
+    board.placePiece("b8", new Piece(TypePieces::KNIGHT, Color::BLACK));
+    board.placePiece("e8", new Piece(TypePieces::KING, Color::BLACK));
+    board.placePiece("f8", new Piece(TypePieces::BISHOP, Color::BLACK));
+    board.placePiece("g8", new Piece(TypePieces::KNIGHT, Color::BLACK));
+    board.placePiece("h8", new Piece(TypePieces::ROOK, Color::BLACK));
+
+    board.placePiece("e7", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.placePiece("f7", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.placePiece("g7", new Piece(TypePieces::PAWN, Color::BLACK));
+
+    board.placePiece("b6", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.placePiece("h6", new Piece(TypePieces::PAWN, Color::BLACK));
+
+    board.placePiece("c5", new Piece(TypePieces::QUEEN, Color::BLACK));
+    board.placePiece("d5", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.placePiece("e5", new Piece(TypePieces::PAWN, Color::WHITE));
+
+    board.placePiece("g4", new Piece(TypePieces::QUEEN, Color::WHITE));
+
+    board.placePiece("a3", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.placePiece("h3", new Piece(TypePieces::KNIGHT, Color::WHITE));
+
+    board.placePiece("a2", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.placePiece("c2", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.placePiece("d2", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.placePiece("f2", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.placePiece("g2", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.placePiece("h2", new Piece(TypePieces::PAWN, Color::WHITE));
+
+    board.placePiece("a1", new Piece(TypePieces::ROOK, Color::WHITE));
+    board.placePiece("c1", new Piece(TypePieces::BISHOP, Color::WHITE));
+    board.placePiece("e1", new Piece(TypePieces::KING, Color::WHITE));
+    board.placePiece("f1", new Piece(TypePieces::BISHOP, Color::WHITE));
+    board.placePiece("h1", new Piece(TypePieces::ROOK, Color::WHITE));
+
+    bool result = board.movePiece("c5g4", Color::BLACK); // Dame noire en g4
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt("c5")->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt("c5")->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt("g4")->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt("g4")->getColor(), Color::WHITE);
+}
