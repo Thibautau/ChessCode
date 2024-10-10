@@ -19,6 +19,7 @@ Board::Board(): m_enPassantPosition{-1, -1}
 
     isWhiteKingChecked = false;
     isBlackKingChecked = false;
+    gameOver = false;
 }
 
 void Board::initializeBoard()
@@ -328,6 +329,7 @@ bool Board::isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer)
     if(!vectPossibleMovesForKing.empty()) {
         return false;
     }
+    gameOver = true;
     return true;
 }
 
@@ -346,8 +348,14 @@ bool Board::isPat(int in_iStartRow, int in_iStartCol, Color in_colPlayer) {
     if(!vectPossibleMovesForKing.empty()) {
         return false;
     }
+    gameOver = true;
     return true;
 }
+
+bool Board::isGameOver() const {
+    return gameOver;
+}
+
 
 
 bool Board::isCoordinateInVector(const Coordinate& coordTargetPoint, const std::vector<Coordinate>& vectPossibleMoves)

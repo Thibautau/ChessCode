@@ -44,7 +44,7 @@ Move Bot::chooseBestMove(Board& board, int max_depth) {
 }
 
 int Bot::minimax(Board& board,int depth,bool isMax) {
-    if(depth == 0) {
+    if(depth == 0 || board.isGameOver() == true) {
         return board.evaluate(m_color);
     }
     if(isMax) {
