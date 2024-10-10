@@ -197,7 +197,9 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
                 int direction = (in_colPlayer == Color::WHITE) ? -1 : 1;
                 placePiece(m_ipositionEnPassant+direction*8,nullptr);
             }
-            if(in_iStartPosition==in_iEndPosition-16) {
+            if(abs(in_iEndPosition - in_iStartPosition) == 16) {
+                int direction = (in_colPlayer == Color::WHITE) ? 1 : -1;
+                m_ipositionEnPassant = in_iStartPosition + direction * 8;
                 wasEnPassant = true;
             }
         }
@@ -548,7 +550,6 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             int twoSteps = in_iPositionToSeeMoves + (direction * 16);
             if (in_iPositionToSeeMoves/8 == startRow) {
                 if (isValidPosition(twoSteps) && m_tabpiBoard[forwardMove] == nullptr && m_tabpiBoard[twoSteps] == nullptr) {
-                    m_ipositionEnPassant = in_iPositionToSeeMoves + direction * 8;
                     in_vectPossibleMoves.push_back(twoSteps);
                 }
             }
@@ -566,7 +567,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                 in_vectPossibleMoves.push_back(captureLeft);
             }
             if(captureRight == m_ipositionEnPassant) {
-                in_vectPossibleMoves.push_back(captureLeft);
+                in_vectPossibleMoves.push_back(captureRight);
             }
             break;
         }
