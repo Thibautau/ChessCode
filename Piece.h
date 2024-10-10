@@ -49,8 +49,8 @@ public:
     bool isPawnNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
     bool isNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
 
-    static void addRookMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves);
-    static void addBishopMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves);
+    // void addRookMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves);
+    // void addBishopMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves);
 };
 
 #endif //PIECE_H
