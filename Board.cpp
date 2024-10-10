@@ -381,143 +381,7 @@ bool Board::doesKingCanRock(Color in_colKing, int in_iDirectionForRock) const
     return false;
 }
 
-void Board::getAllPossibleMovementsForAPiece(int in_iPositionToFindMovement, std::vector<int>& out_vectDirectionToFill)
-{
-    if(! isValidPosition(in_iPositionToFindMovement))
-    {
-        return;
-    }
 
-    Piece* pPieceToSeeMovement = getPieceAt(in_iPositionToFindMovement);
-    if(pPieceToSeeMovement == nullptr)
-    {
-        return;
-    }
-
-    int* itabDirection = nullptr;
-    int iNbOfRepetition = 0;
-    int iNbOfMoves = 0;
-
-    switch (pPieceToSeeMovement->getTypePiece()) {
-        case TypePieces::ROOK:
-            itabDirection = Piece::getRookMoves(iNbOfRepetition, iNbOfMoves);
-            break;
-        case TypePieces::KNIGHT:
-            itabDirection = Piece::getKnightMoves(iNbOfRepetition, iNbOfMoves);
-            break;
-        case TypePieces::BISHOP:
-            itabDirection = Piece::getBishopMoves(iNbOfRepetition, iNbOfMoves);
-            break;
-        case TypePieces::QUEEN:
-            itabDirection = Piece::getQueenMoves(iNbOfRepetition, iNbOfMoves);
-            break;
-        case TypePieces::KING:
-            itabDirection = Piece::getKingMoves(iNbOfRepetition, iNbOfMoves);
-            break;
-        case TypePieces::PAWN:
-            itabDirection = Piece::getPawnMoves(iNbOfRepetition, iNbOfMoves, pPieceToSeeMovement->getColor());
-            break;
-    }
-
-    for (int i = 0; i < iNbOfMoves; ++i)
-    {
-        int iDirection = itabDirection[i];
-        getPieceMovementsPossible(in_iPositionToFindMovement, iDirection, iNbOfRepetition, out_vectDirectionToFill);
-    }
-}
-
-void Board::getPieceMovementsPossible(int in_iPositionToFindMovement, int in_iDirectionMovement, int in_iNbOfRepetition, std::vector<int>& in_vectPositionPossible)
-{
-    if(! isValidPosition(in_iPositionToFindMovement) || in_iNbOfRepetition <= 0)
-    {
-        return;
-    }
-
-    in_iNbOfRepetition++; // It is a local variable, it doesn't affect the one who calls this function
-    Piece* pPieceToFindMovement = getPieceAt(in_iPositionToFindMovement);
-    TypePieces typePieceToFindMovement = pPieceToFindMovement->getTypePiece();
-    Color colPieceToFindMovement = pPieceToFindMovement->getColor();
-    int iRowPieceToFindMovement = in_iPositionToFindMovement / 8;
-    int iColumnPieceToFindMovement = in_iPositionToFindMovement % 8;
-
-    int iNextPosition = in_iPositionToFindMovement;
-
-    for(int iNbMovement = 1; iNbMovement < in_iNbOfRepetition; iNbMovement++)
-    {
-        iNextPosition = iNextPosition + in_iDirectionMovement;
-        int iNextRow = iNextPosition / 8;
-        int iNextColumn = iNextPosition % 8;
-
-        int iRowDifference = std::abs(iRowPieceToFindMovement - iNextRow);
-        int iColumnDifference = std::abs(iColumnPieceToFindMovement - iNextColumn);
-
-        if(! pPieceToFindMovement->isNextPositionValid(in_iDirectionMovement, in_iPositionToFindMovement, iNextPosition)) // Invalid Move
-        {
-            break;
-        }
-
-        Piece* pPieceFound = getPieceAt(iNextPosition);
-
-        if (typePieceToFindMovement == TypePieces::PAWN)
-        {
-            if (iColumnDifference == 0 && pPieceFound == nullptr) // Pour avancer de 2
-            {
-                putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
-                continue;
-            }
-            else if (iColumnDifference == 1 && pPieceFound != nullptr && pPieceFound->getColor() != colPieceToFindMovement && iNbMovement == 1)
-            {
-                putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
-                continue;
-            }
-            else
-            {
-                break;
-            }
-        }
-        else if(typePieceToFindMovement == TypePieces::KING)
-        {
-            std::vector<int> uselessVectorOfPiecesFound;
-            bool bMovePutInCheck = isCaseAttackedByColor(iNextPosition, pPieceToFindMovement->getEnemyColor(), uselessVectorOfPiecesFound);
-            if(pPieceFound != nullptr && pPieceFound->getColor() != colPieceToFindMovement && iNbMovement == 1 && ! bMovePutInCheck) // If the is a piece he can eat, If that piece does not put the king in check
-            {
-                in_vectPositionPossible.emplace_back(iNextPosition);
-            }
-            else if(pPieceFound == nullptr && ! bMovePutInCheck) // If the case is empty and If the move does not put the king in check
-            {
-                if(iNbMovement == 1)
-                {
-                    in_vectPositionPossible.emplace_back(iNextPosition);
-                    //continue;
-                }
-                else if(iNbMovement == 2 && doesKingCanRock(colPieceToFindMovement, in_iDirectionMovement)) // For the rock
-                {
-                    in_vectPositionPossible.emplace_back(iNextPosition);
-                    //break;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            else {
-                break;
-            }
-        }
-        else if (pPieceFound != nullptr)
-        {
-            Color colPieceFound = pPieceFound->getColor();
-            TypePieces typePieceFound = pPieceFound->getTypePiece();
-
-            if (colPieceToFindMovement != colPieceFound && typePieceFound != TypePieces::KING) // We can't eat the same Color or eat a King
-            {
-                putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
-            }
-            break; // Stop since we hit a piece
-        }
-        putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
-    }
-}
 
 void Board::findFirstPiecesOnEachBishopMovements(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
 {
@@ -803,9 +667,6 @@ Piece* Board::findFirstPieceOnDirection(int in_iPosition,int in_iDirection, int 
 
     int iNextPosition = in_iPosition;
 
-
-
-
     for(int iNbMovement = 1; iNbMovement < in_iNbOfRepetition; iNbMovement++) {
         iNextPosition = iNextPosition + in_iDirection;
 
@@ -826,25 +687,7 @@ Piece* Board::findFirstPieceOnDirection(int in_iPosition,int in_iDirection, int 
     return nullptr;
 }
 
-std::vector<std::pair<int, std::vector<int>>> Board::listOfPossibleMovements(Color in_colColor)
-{
-    std::vector<std::pair<int, std::vector<int>>> vectPossibleMoves;
 
-    for (int iPosition = 0; iPosition < 64; iPosition++)
-    {
-        Piece* pPieceToGetMovements = getPieceAt(iPosition);
-        if (pPieceToGetMovements != nullptr)
-        {
-            std::vector<int> vectPieceMoves;
-            getAllPossibleMovementsForAPiece(iPosition, vectPieceMoves);
-
-            // Ajouter la position et les mouvements sous forme de paire
-            vectPossibleMoves.emplace_back(iPosition, vectPieceMoves);
-        }
-    }
-
-    return vectPossibleMoves;
-}
 
 std::vector<std::pair<int, int>> Board::listOfPossibleMoves(Color in_colPlayer) {
     std::vector<std::pair<int, int>> possibleMoves;
@@ -1098,6 +941,188 @@ bool Board::isCoordinateInVector(const Coordinate& coordTargetPoint, const std::
     return false; // Coordinate not found
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -------------------------------------------------------------------------- Code à garder qq temps avant de le jeter
+
+
+void Board::getAllPossibleMovementsForAPiece(int in_iPositionToFindMovement, std::vector<int>& out_vectDirectionToFill)
+{
+    if(! isValidPosition(in_iPositionToFindMovement))
+    {
+        return;
+    }
+
+    Piece* pPieceToSeeMovement = getPieceAt(in_iPositionToFindMovement);
+    if(pPieceToSeeMovement == nullptr)
+    {
+        return;
+    }
+
+    int* itabDirection = nullptr;
+    int iNbOfRepetition = 0;
+    int iNbOfMoves = 0;
+
+    switch (pPieceToSeeMovement->getTypePiece()) {
+        case TypePieces::ROOK:
+            itabDirection = Piece::getRookMoves(iNbOfRepetition, iNbOfMoves);
+            break;
+        case TypePieces::KNIGHT:
+            itabDirection = Piece::getKnightMoves(iNbOfRepetition, iNbOfMoves);
+            break;
+        case TypePieces::BISHOP:
+            itabDirection = Piece::getBishopMoves(iNbOfRepetition, iNbOfMoves);
+            break;
+        case TypePieces::QUEEN:
+            itabDirection = Piece::getQueenMoves(iNbOfRepetition, iNbOfMoves);
+            break;
+        case TypePieces::KING:
+            itabDirection = Piece::getKingMoves(iNbOfRepetition, iNbOfMoves);
+            break;
+        case TypePieces::PAWN:
+            itabDirection = Piece::getPawnMoves(iNbOfRepetition, iNbOfMoves, pPieceToSeeMovement->getColor());
+            break;
+    }
+
+    for (int i = 0; i < iNbOfMoves; ++i)
+    {
+        int iDirection = itabDirection[i];
+        getPieceMovementsPossible(in_iPositionToFindMovement, iDirection, iNbOfRepetition, out_vectDirectionToFill);
+    }
+}
+
+void Board::getPieceMovementsPossible(int in_iPositionToFindMovement, int in_iDirectionMovement, int in_iNbOfRepetition, std::vector<int>& in_vectPositionPossible)
+{
+    if(! isValidPosition(in_iPositionToFindMovement) || in_iNbOfRepetition <= 0)
+    {
+        return;
+    }
+
+    in_iNbOfRepetition++; // It is a local variable, it doesn't affect the one who calls this function
+    Piece* pPieceToFindMovement = getPieceAt(in_iPositionToFindMovement);
+    TypePieces typePieceToFindMovement = pPieceToFindMovement->getTypePiece();
+    Color colPieceToFindMovement = pPieceToFindMovement->getColor();
+    int iRowPieceToFindMovement = in_iPositionToFindMovement / 8;
+    int iColumnPieceToFindMovement = in_iPositionToFindMovement % 8;
+
+    int iNextPosition = in_iPositionToFindMovement;
+
+    for(int iNbMovement = 1; iNbMovement < in_iNbOfRepetition; iNbMovement++)
+    {
+        iNextPosition = iNextPosition + in_iDirectionMovement;
+        int iNextRow = iNextPosition / 8;
+        int iNextColumn = iNextPosition % 8;
+
+        int iRowDifference = std::abs(iRowPieceToFindMovement - iNextRow);
+        int iColumnDifference = std::abs(iColumnPieceToFindMovement - iNextColumn);
+
+        if(! pPieceToFindMovement->isNextPositionValid(in_iDirectionMovement, in_iPositionToFindMovement, iNextPosition)) // Invalid Move
+        {
+            break;
+        }
+
+        Piece* pPieceFound = getPieceAt(iNextPosition);
+
+        if (typePieceToFindMovement == TypePieces::PAWN)
+        {
+            if (iColumnDifference == 0 && pPieceFound == nullptr) // Pour avancer de 2
+            {
+                putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
+                continue;
+            }
+            else if (iColumnDifference == 1 && pPieceFound != nullptr && pPieceFound->getColor() != colPieceToFindMovement && iNbMovement == 1)
+            {
+                putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else if(typePieceToFindMovement == TypePieces::KING)
+        {
+            std::vector<int> uselessVectorOfPiecesFound;
+            bool bMovePutInCheck = isCaseAttackedByColor(iNextPosition, pPieceToFindMovement->getEnemyColor(), uselessVectorOfPiecesFound);
+            if(pPieceFound != nullptr && pPieceFound->getColor() != colPieceToFindMovement && iNbMovement == 1 && ! bMovePutInCheck) // If the is a piece he can eat, If that piece does not put the king in check
+            {
+                in_vectPositionPossible.emplace_back(iNextPosition);
+            }
+            else if(pPieceFound == nullptr && ! bMovePutInCheck) // If the case is empty and If the move does not put the king in check
+            {
+                if(iNbMovement == 1)
+                {
+                    in_vectPositionPossible.emplace_back(iNextPosition);
+                    //continue;
+                }
+                else if(iNbMovement == 2 && doesKingCanRock(colPieceToFindMovement, in_iDirectionMovement)) // For the rock
+                {
+                    in_vectPositionPossible.emplace_back(iNextPosition);
+                    //break;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            else {
+                break;
+            }
+        }
+        else if (pPieceFound != nullptr)
+        {
+            Color colPieceFound = pPieceFound->getColor();
+            TypePieces typePieceFound = pPieceFound->getTypePiece();
+
+            if (colPieceToFindMovement != colPieceFound && typePieceFound != TypePieces::KING) // We can't eat the same Color or eat a King
+            {
+                putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
+            }
+            break; // Stop since we hit a piece
+        }
+        putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
+    }
+}
+
+std::vector<std::pair<int, std::vector<int>>> Board::listOfPossibleMovements(Color in_colColor)
+{
+    std::vector<std::pair<int, std::vector<int>>> vectPossibleMoves;
+
+    for (int iPosition = 0; iPosition < 64; iPosition++)
+    {
+        Piece* pPieceToGetMovements = getPieceAt(iPosition);
+        if (pPieceToGetMovements != nullptr)
+        {
+            std::vector<int> vectPieceMoves;
+            getAllPossibleMovementsForAPiece(iPosition, vectPieceMoves);
+
+            // Ajouter la position et les mouvements sous forme de paire
+            vectPossibleMoves.emplace_back(iPosition, vectPieceMoves);
+        }
+    }
+
+    return vectPossibleMoves;
+}
 
 
 
