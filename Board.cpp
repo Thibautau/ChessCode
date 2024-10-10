@@ -50,21 +50,6 @@ void Board::initializeBoard()
     placePiece(61, new Piece(TypePieces::BISHOP, Color::BLACK));
     placePiece(62, new Piece(TypePieces::KNIGHT, Color::BLACK));
     placePiece(63, new Piece(TypePieces::ROOK, Color::BLACK));
-
-
-    // ------- Initialize the differents move possible for the pieces -------
-
-
-    m_tabpiBoard[1]->movePiece(m_tabpiBoard, 1); // Left white knight
-    m_tabpiBoard[6]->movePiece(m_tabpiBoard, 6); // Right white knight
-    m_tabpiBoard[62]->movePiece(m_tabpiBoard, 62); // Left black knight
-    m_tabpiBoard[57]->movePiece(m_tabpiBoard, 57); // Right black knight
-
-    for (int iTabPosition = 8; iTabPosition < 16; ++iTabPosition) {
-        int iTabBlackPawnPosition = 55 + (8 - iTabPosition);
-        m_tabpiBoard[iTabPosition]->movePiece(m_tabpiBoard, iTabPosition);
-        m_tabpiBoard[iTabBlackPawnPosition]->movePiece(m_tabpiBoard, iTabBlackPawnPosition);
-    }
 }
 
 void Board::clearBoard()
@@ -178,7 +163,8 @@ bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition)
         return false;
     }
 
-    std::vector<int> itabValidPositions = pPieceToSeeValidMove->getPossibleMoves(m_tabpiBoard, in_iStartPosition);
+    std::vector<int> itabValidPositions;
+    possibleMovesForPiece(in_iStartPosition, itabValidPositions);
 
     for(int iIndiceValidPosition = 0; iIndiceValidPosition < itabValidPositions.size(); iIndiceValidPosition++)
     {
@@ -838,11 +824,10 @@ std::vector<std::pair<int, int>> Board::listOfPossibleMoves(Color in_colPlayer) 
     for (int iPosition = 0; iPosition < 64; ++iPosition) {
         Piece* pPiece = getPieceAt(iPosition);
         if (pPiece != nullptr && pPiece->getColor() == in_colPlayer) {
-            std::vector<int> validMoves = pPiece->getPossibleMoves(m_tabpiBoard, iPosition);
+            std::vector<int> validMoves;
+            possibleMovesForPiece(iPosition, validMoves);
             for (int targetPos : validMoves) {
-                if (isMovementPossible(iPosition, targetPos)) {
-                    possibleMoves.emplace_back(iPosition, targetPos);
-                }
+                possibleMoves.emplace_back(iPosition, targetPos);
             }
         }
     }

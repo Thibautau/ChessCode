@@ -29,8 +29,6 @@ public:
     bool attackStraight() const;
     bool attackDiagonal() const;
     bool attackKnight() const;
-    std::vector<int> getPossibleMoves(Piece** board, int in_iPiecePosition) const;
-    std::vector<int> movePiece(Piece **board, int newPosition) const;
 
     static int* getKingMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) ;
     static int* getKnightMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
@@ -48,9 +46,6 @@ public:
     bool isKnightNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
     bool isPawnNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
     bool isNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
-
-    // void addRookMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves);
-    // void addBishopMoves(Piece** board, int newPosition,std::vector<int>& possibleMoves);
 };
 
 #endif //PIECE_H
