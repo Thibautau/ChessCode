@@ -6,7 +6,6 @@
 
 #include <cmath>
 #include <iostream>
-//TODO faire en sorte de stocker à chaque coup quelle pièce attaque quelle case pour plus d'opti
 Board::Board(): m_enPassantPosition{-1, -1}
 {
     for(int iIndiceRow = 0; iIndiceRow < 64; iIndiceRow++ )
@@ -676,28 +675,31 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             // Capture moves
             int captureLeft = in_iPositionToSeeMoves + direction * 8 - 1;
             int captureRight = in_iPositionToSeeMoves + direction * 8 + 1;
-            if (isValidPosition(captureLeft) && m_tabpiBoard[captureLeft] != nullptr && m_tabpiBoard[captureLeft]->getColor() != colPieceToSeeMoves) {
+            if (isValidPosition(captureLeft) && in_iPositionToSeeMoves % 8 != 0 && m_tabpiBoard[captureLeft] != nullptr && m_tabpiBoard[captureLeft]->getColor() != colPieceToSeeMoves) {
                 in_vectPossibleMoves.push_back(captureLeft);
             }
-            if (isValidPosition(captureRight) && m_tabpiBoard[captureRight] != nullptr && m_tabpiBoard[captureRight]->getColor() != colPieceToSeeMoves) {
+            if (isValidPosition(captureRight) && in_iPositionToSeeMoves % 8 != 7 && m_tabpiBoard[captureRight] != nullptr && m_tabpiBoard[captureRight]->getColor() != colPieceToSeeMoves) {
                 in_vectPossibleMoves.push_back(captureRight);
             }
             break;
         }
         case TypePieces::ROOK: {
-            // Piece::addRookMoves(m_tabpiBoard, in_iPositionToSeeMoves, in_vectPossibleMoves);
             int repetitions, numDirections;
             int* directions = Piece::getRookMoves(repetitions, numDirections);
-            for(int dir = 0; dir < numDirections; ++dir) {
-                for(int rep = 1; rep <= repetitions; ++rep) {
+
+            for (int dir = 0; dir < numDirections; ++dir) {
+                for (int rep = 1; rep <= repetitions; ++rep) {
                     int nextPosition = in_iPositionToSeeMoves + directions[dir] * rep;
-                    if(!isValidPosition(nextPosition)) {
+
+                    // Utilisation de la fonction isNextPositionValid
+                    if (!pPieceToSeeMoves->isNextPositionValid(dir, in_iPositionToSeeMoves, nextPosition)) {
                         break;
                     }
-                    if(m_tabpiBoard[nextPosition] == nullptr) {
+
+                    if (m_tabpiBoard[nextPosition] == nullptr) {
                         in_vectPossibleMoves.push_back(nextPosition);
                     } else {
-                        if(m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
+                        if (m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
                             in_vectPossibleMoves.push_back(nextPosition);
                         }
                         break;
@@ -707,32 +709,36 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             break;
         }
         case TypePieces::KNIGHT: {
-            const int *knightMoves = Piece::getKnightMoves(iUseless, iUseless2);
+            const int* knightMoves = Piece::getKnightMoves(iUseless, iUseless2);
             int numMoves = 8;
 
             for (int i = 0; i < numMoves; ++i) {
-                int knightPosition = in_iPositionToSeeMoves + knightMoves[i];
-                if (isValidPosition(knightPosition)) {
-                    if (m_tabpiBoard[knightPosition] == nullptr || m_tabpiBoard[knightPosition]->getColor() != colPieceToSeeMoves) {
-                        in_vectPossibleMoves.push_back(knightPosition);
+                int nextPosition = in_iPositionToSeeMoves + knightMoves[i];
+
+                if (pPieceToSeeMoves->isNextPositionValid(i, in_iPositionToSeeMoves, nextPosition)) {
+                    if (m_tabpiBoard[nextPosition] == nullptr || m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
+                        in_vectPossibleMoves.push_back(nextPosition);
                     }
                 }
             }
-
+            break;
         }
         case TypePieces::BISHOP: {
             int repetitions, numDirections;
             int* directions = Piece::getBishopMoves(repetitions, numDirections);
-            for(int dir = 0; dir < numDirections; ++dir) {
-                for(int rep = 1; rep <= repetitions; ++rep) {
+
+            for (int dir = 0; dir < numDirections; ++dir) {
+                for (int rep = 1; rep <= repetitions; ++rep) {
                     int nextPosition = in_iPositionToSeeMoves + directions[dir] * rep;
-                    if(!isValidPosition(nextPosition)) {
+
+                    if (!pPieceToSeeMoves->isNextPositionValid(dir, in_iPositionToSeeMoves, nextPosition) ){
                         break;
                     }
-                    if(m_tabpiBoard[nextPosition] == nullptr) {
+
+                    if (m_tabpiBoard[nextPosition] == nullptr) {
                         in_vectPossibleMoves.push_back(nextPosition);
                     } else {
-                        if(m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
+                        if (m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
                             in_vectPossibleMoves.push_back(nextPosition);
                         }
                         break;
@@ -744,16 +750,19 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
         case TypePieces::QUEEN: {
             int repetitions, numDirections;
             int* directions = Piece::getQueenMoves(repetitions, numDirections);
-            for(int dir = 0; dir < numDirections; ++dir) {
-                for(int rep = 1; rep <= repetitions; ++rep) {
+
+            for (int dir = 0; dir < numDirections; ++dir) {
+                for (int rep = 1; rep <= repetitions; ++rep) {
                     int nextPosition = in_iPositionToSeeMoves + directions[dir] * rep;
-                    if(!isValidPosition(nextPosition)) {
+
+                    if (!pPieceToSeeMoves->isNextPositionValid(dir, in_iPositionToSeeMoves, nextPosition)) {
                         break;
                     }
-                    if(m_tabpiBoard[nextPosition] == nullptr) {
+
+                    if (m_tabpiBoard[nextPosition] == nullptr) {
                         in_vectPossibleMoves.push_back(nextPosition);
                     } else {
-                        if(m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
+                        if (m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
                             in_vectPossibleMoves.push_back(nextPosition);
                         }
                         break;
@@ -767,13 +776,15 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             int numMoves = 8;
 
             for (int i = 0; i < numMoves; ++i) {
-                int kingPosition = in_iPositionToSeeMoves + kingMoves[i];
-                if (isValidPosition(kingPosition)) {
-                    if (m_tabpiBoard[kingPosition] == nullptr || m_tabpiBoard[kingPosition]->getColor() != colPieceToSeeMoves) {
-                        in_vectPossibleMoves.push_back(kingPosition);
+                int nextPosition = in_iPositionToSeeMoves + kingMoves[i];
+
+                if (pPieceToSeeMoves->isNextPositionValid(i, in_iPositionToSeeMoves, nextPosition)) {
+                    if (m_tabpiBoard[nextPosition] == nullptr || m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
+                        in_vectPossibleMoves.push_back(nextPosition);
                     }
                 }
             }
+            break;
         }
         default:
             break;

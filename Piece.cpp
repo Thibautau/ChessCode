@@ -207,22 +207,21 @@ bool Piece::isValidPosition(int position) {
 
 bool Piece::isBishopNextPositionValid(int in_iDirection, int in_iNextPosition)
 {
-    if(in_iNextPosition < 0 || in_iNextPosition >= 64)
+    if (in_iNextPosition < 0 || in_iNextPosition >= 64)
     {
         return false;
     }
-
     switch (in_iDirection) {
         case 9:
         case -7:
-            return in_iNextPosition % 8 != 0;  // Si on dépasse la bordure droite
+            return in_iNextPosition < 7;
 
         case 7:
         case -9:
-            return in_iNextPosition % 8 != 7;  // Si on dépasse la bordure gauche
+            return in_iNextPosition > 0;
 
         default:
-            return false;  // Pour toute autre direction non gérée
+            return false;
     }
 }
 
