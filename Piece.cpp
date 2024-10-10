@@ -239,9 +239,9 @@ bool Piece::isRookNextPositionValid(int in_iDirection, int in_iNextPosition)
         case 8:
             return isValidPosition(in_iNextPosition);
         case 1:
-            return in_iNextPosition % 8 < 8;  // Si on dépasse la bordure droite
+            return in_iNextPosition % 8 != 0;  // Si on dépasse la bordure droite
         case -1:
-            return in_iNextPosition >= 0; // Si on dépasse la bordure gauche
+            return in_iNextPosition % 8 != 7;  // Si on dépasse la bordure gauche
 
         default:
             return false;  // Pour toute autre direction non gérée
