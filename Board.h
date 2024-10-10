@@ -25,6 +25,7 @@ private:
 
     int m_iBlackKingPosition = 60;
     int m_iWhiteKingPosition = 4;
+    int m_ipositionEnPassant = -1;
 
     bool respectBoardLength(int in_iRow, int in_iColumn) const;
     static bool isCoordinateInVector(const Coordinate& coordTargetPoint, const std::vector<Coordinate>& vectPossibleMoves);

@@ -4,6 +4,7 @@
 
 #include "Board.h"
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 Board::Board(): m_enPassantPosition{-1, -1}
@@ -179,6 +180,7 @@ bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition)
 bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer,Piece** piece)
 {
     Piece* pPiece = getPieceAt(in_iStartPosition);
+    bool wasEnPassant = false;
     if(pPiece == nullptr || pPiece->getColor() != in_colPlayer) //If the player try to move a piece of another color, return false
     {
         return false;
@@ -189,6 +191,16 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
 
         bool bKingWentRightForRock = in_iEndPosition - in_iStartPosition == 2;
         bool bKingWentLeftForRock = in_iEndPosition - in_iStartPosition == -2;
+
+        if(pPiece->getTypePiece() == TypePieces::PAWN) {
+            if(in_iEndPosition==m_ipositionEnPassant) {
+                int direction = (in_colPlayer == Color::WHITE) ? -1 : 1;
+                placePiece(m_ipositionEnPassant+direction*8,nullptr);
+            }
+            if(in_iStartPosition==in_iEndPosition-16) {
+                wasEnPassant = true;
+            }
+        }
 
         if(pPiece->getTypePiece() == TypePieces::KING) // If the king rocked (move of length 2, we move the rook)
         {
@@ -234,6 +246,10 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
                     m_tabpiBoard[iFirstPositionOnTheRow] = nullptr; // La première case de la ligne
                 }
             }
+        }
+
+        if(!wasEnPassant && m_ipositionEnPassant !=-1) {
+            m_ipositionEnPassant = -1;
         }
 
         if(piece) {
@@ -532,6 +548,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             int twoSteps = in_iPositionToSeeMoves + (direction * 16);
             if (in_iPositionToSeeMoves/8 == startRow) {
                 if (isValidPosition(twoSteps) && m_tabpiBoard[forwardMove] == nullptr && m_tabpiBoard[twoSteps] == nullptr) {
+                    m_ipositionEnPassant = in_iPositionToSeeMoves + direction * 8;
                     in_vectPossibleMoves.push_back(twoSteps);
                 }
             }
@@ -544,6 +561,12 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             }
             if (isValidPosition(captureRight) && in_iPositionToSeeMoves % 8 != 7 && m_tabpiBoard[captureRight] != nullptr && m_tabpiBoard[captureRight]->getColor() != colPieceToSeeMoves) {
                 in_vectPossibleMoves.push_back(captureRight);
+            }
+            if(captureLeft==m_ipositionEnPassant) {
+                in_vectPossibleMoves.push_back(captureLeft);
+            }
+            if(captureRight == m_ipositionEnPassant) {
+                in_vectPossibleMoves.push_back(captureLeft);
             }
             break;
         }
