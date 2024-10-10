@@ -195,6 +195,9 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
         if(pPiece->getTypePiece() == TypePieces::PAWN) {
             if(in_iEndPosition==m_ipositionEnPassant) {
                 int direction = (in_colPlayer == Color::WHITE) ? -1 : 1;
+                if(piece) {
+                    *piece = getPieceAt(m_ipositionEnPassant+direction*8);
+                }
                 placePiece(m_ipositionEnPassant+direction*8,nullptr);
             }
             if(abs(in_iEndPosition - in_iStartPosition) == 16) {
@@ -563,11 +566,13 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             if (isValidPosition(captureRight) && in_iPositionToSeeMoves % 8 != 7 && m_tabpiBoard[captureRight] != nullptr && m_tabpiBoard[captureRight]->getColor() != colPieceToSeeMoves) {
                 in_vectPossibleMoves.push_back(captureRight);
             }
-            if(captureLeft==m_ipositionEnPassant) {
-                in_vectPossibleMoves.push_back(captureLeft);
-            }
-            if(captureRight == m_ipositionEnPassant) {
-                in_vectPossibleMoves.push_back(captureRight);
+            if(m_ipositionEnPassant!=-1) {
+                if(captureLeft==m_ipositionEnPassant) {
+                    in_vectPossibleMoves.push_back(captureLeft);
+                }
+                if(captureRight == m_ipositionEnPassant) {
+                    in_vectPossibleMoves.push_back(captureRight);
+                }
             }
             break;
         }
