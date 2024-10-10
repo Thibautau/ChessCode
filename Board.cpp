@@ -3,6 +3,8 @@
 //
 
 #include "Board.h"
+
+#include <cmath>
 #include <iostream>
 //TODO faire en sorte de stocker à chaque coup quelle pièce attaque quelle case pour plus d'opti
 Board::Board(): m_enPassantPosition{-1, -1}
@@ -63,17 +65,6 @@ void Board::initializeBoard()
         m_tabpiBoard[iTabPosition]->movePiece(m_tabpiBoard, iTabPosition);
         m_tabpiBoard[iTabBlackPawnPosition]->movePiece(m_tabpiBoard, iTabBlackPawnPosition);
     }
-
-    m_isWhiteKingChecked = false;
-    m_isBlackKingChecked = false;
-
-    m_iBlackKingPosition = 60;
-    m_iWhiteKingPosition = 4;
-
-    m_bWhiteKingCanLittleRock = true;
-    m_bWhiteKingCanBigRock = true;
-    m_bBlackKingCanLittleRock = true;
-    m_bBlackKingCanBigRock = true;
 }
 
 void Board::clearBoard()
@@ -200,7 +191,7 @@ bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition)
     return false;
 }
 
-bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer)
+bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer,Piece** piece)
 {
     Piece* pPiece = getPieceAt(in_iStartPosition);
     if(pPiece == nullptr || pPiece->getColor() != in_colPlayer) //If the player try to move a piece of another color, return false
@@ -260,6 +251,9 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
             }
         }
 
+        if(piece) {
+            *piece = getPieceAt(in_iEndPosition);
+        }
         placePiece(in_iEndPosition, pPiece);
         m_tabpiBoard[in_iStartPosition] = nullptr;
 
@@ -415,7 +409,7 @@ void Board::getAllPossibleMovementsForAPiece(int in_iPositionToFindMovement, std
         return;
     }
 
-    int* itabDirection;
+    int* itabDirection = nullptr;
     int iNbOfRepetition = 0;
     int iNbOfMoves = 0;
 
@@ -440,8 +434,9 @@ void Board::getAllPossibleMovementsForAPiece(int in_iPositionToFindMovement, std
             break;
     }
 
-    for(int iDirection: itabDirection)
+    for (int i = 0; i < iNbOfMoves; ++i)
     {
+        int iDirection = itabDirection[i];
         getPieceMovementsPossible(in_iPositionToFindMovement, iDirection, iNbOfRepetition, out_vectDirectionToFill);
     }
 }
@@ -826,6 +821,82 @@ std::vector<std::pair<int, std::vector<int>>> Board::listOfPossibleMovements(Col
 
 
 
+
+
+
+std::vector<std::pair<int, int>> Board::listOfPossibleMoves(Color in_colPlayer) {
+    std::vector<std::pair<int, int>> possibleMoves;
+    for (int iPosition = 0; iPosition < 64; ++iPosition) {
+        Piece* pPiece = getPieceAt(iPosition);
+        if (pPiece != nullptr && pPiece->getColor() == in_colPlayer) {
+            std::vector<int> validMoves = pPiece->getPossibleMoves(m_tabpiBoard, iPosition);
+            for (int targetPos : validMoves) {
+                if (isMovementPossible(iPosition, targetPos)) {
+                    possibleMoves.emplace_back(iPosition, targetPos);
+                }
+            }
+        }
+    }
+    return possibleMoves;
+}
+
+int Board::evaluate(Color in_colPlayer) const {
+    int score = 0;
+
+    for(Piece* piece : m_tabpiBoard) {
+        if(piece != nullptr) {
+            int pieceScore = 0;
+            switch(piece->getTypePiece()) {
+                case TypePieces::PAWN:
+                    pieceScore = 1;
+                break;
+                case TypePieces::KNIGHT:
+                    pieceScore = 3;
+                break;
+                case TypePieces::BISHOP:
+                    pieceScore = 3;
+                break;
+                case TypePieces::ROOK:
+                    pieceScore = 5;
+                break;
+                case TypePieces::QUEEN:
+                    pieceScore = 9;
+                break;
+                case TypePieces::KING:
+                    pieceScore = INFINITY;
+                break;
+            }
+
+            if(piece->getColor() == in_colPlayer) {
+                score += pieceScore;
+            } else {
+                score -= pieceScore;
+            }
+        }
+    }
+
+    return score;
+}
+
+bool Board::isGameOver() const {
+    return m_isGameOver;
+}
+
+bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece) {
+    Piece* movingPiece = getPieceAt(in_iEndPosition);
+    if(movingPiece == nullptr) {
+        return false;
+    }
+
+    placePiece(in_iStartPosition, movingPiece);
+    m_tabpiBoard[in_iEndPosition] = nullptr;
+
+    if(capturedPiece) {
+        placePiece(in_iEndPosition, capturedPiece);
+    }
+
+    return true;
+}
 
 
 
@@ -1325,25 +1396,25 @@ std::vector<Coordinate> Board::getMovementsPossibleWithVector(int in_iStartRow, 
 }
 
 // Ajoutez des méthodes pour lister les mouvements possibles
-std::vector<Move> Board::listOfPossibleMoves(Color in_colColor)
-{
-    std::vector<Move> possibleMoves;
-
-    for (int row = 0; row < 8; ++row) {
-        for (int col = 0; col < 8; ++col) {
-            Piece* piece = getPieceAt(row, col);
-            if (piece != nullptr && piece->getColor() == in_colColor) {
-                Coordinate pieceCoord(row, col);
-                std::vector<Coordinate> moves /*= possibleMovesForPiece(pieceCoord)*/;
-                for (const Coordinate& move : moves) {
-                    possibleMoves.emplace_back(Move{pieceCoord, move});
-                }
-            }
-        }
-    }
-
-    return possibleMoves;
-}
+// std::vector<Move> Board::listOfPossibleMoves(Color in_colColor)
+// {
+//     std::vector<Move> possibleMoves;
+//
+//     for (int row = 0; row < 8; ++row) {
+//         for (int col = 0; col < 8; ++col) {
+//             Piece* piece = getPieceAt(row, col);
+//             if (piece != nullptr && piece->getColor() == in_colColor) {
+//                 Coordinate pieceCoord(row, col);
+//                 std::vector<Coordinate> moves /*= possibleMovesForPiece(pieceCoord)*/;
+//                 for (const Coordinate& move : moves) {
+//                     possibleMoves.emplace_back(Move{pieceCoord, move});
+//                 }
+//             }
+//         }
+//     }
+//
+//     return possibleMoves;
+// }
 /*
 std::vector<Coordinate> Board::possibleMovesForPiece(const Coordinate& in_coordPiece)
 {

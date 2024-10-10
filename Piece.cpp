@@ -185,6 +185,7 @@ std::vector<int> Piece::movePiece(Piece** board, int iposition) const {
                     }
                 }
             }
+
         }
         default:
             break;

@@ -14,7 +14,7 @@ private:
     Piece* m_tabpiBoard[64]{};
     Piece* m_tabtabpiBoard[8][8]{};
     Coordinate m_enPassantPosition;
-
+    bool m_isGameOver = false;
     bool m_isWhiteKingChecked = false;
     bool m_isBlackKingChecked = false;
 
@@ -43,7 +43,7 @@ public:
     bool placePiece(int in_iPositionPiece, Piece* in_pPiece);
     Piece* getPieceAt(int  in_iPositionPiece) const;
     Piece* getPieceAt(const std::string& in_sPosition) const;
-    bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE);
+    bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE, Piece** piece = nullptr);
     bool isMovementPossible(int in_iStartPosition, int in_iTargetPosition);
     bool isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound) const;
     bool isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
@@ -69,6 +69,11 @@ public:
 
     std::vector<std::pair<int, std::vector<int>>> listOfPossibleMovements(Color in_colColor);
 
+    std::vector<std::pair<int, int>> listOfPossibleMoves(Color in_colColor);
+    int evaluate(Color in_colPlayer) const;
+    bool isGameOver() const;
+    bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece);
+
     /* ------------- OLD FUNCTION BELOW ------------- */
 
 
@@ -82,8 +87,8 @@ public:
     //bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     bool isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer);
-    std::vector<Move> listOfPossibleMoves(Color in_colColor);
-    //std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece);
+    // std::vector<Move> listOfPossibleMoves(Color in_colColor);
+    std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece);
     void displayBoard() const;
 
     std::vector<Coordinate> getMovementsPossibleWithVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove);

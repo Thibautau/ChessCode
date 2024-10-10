@@ -17,7 +17,7 @@ public:
     Bot(Color color);
     void play(Board& board, int& start, int& end) override;
     Color getPlayerColor() const override;
-    std::pair<int, int> choisir_meilleur_coup(Board& board, int profondeur_max);
+    void choisir_meilleur_coup(Board& board, int profondeur_max,std::pair<int, int>& meilleurCoup);
     int minimax(Board& board, int profondeur, bool estMaximisant);
 };
 

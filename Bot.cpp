@@ -13,35 +13,31 @@ Color Bot::getPlayerColor() const {
 }
 
 void Bot::play(Board& board, int& start, int& end) {
-    std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);
+    std::pair<int, int> meilleurCoup;
+    int profondeur_max = 4;
 
-    if (possibleMoves.empty()) {
-        return;
-    }
+    choisir_meilleur_coup(board, profondeur_max, meilleurCoup);
 
-    int randomIndex = rand() % possibleMoves.size();
-
-    start = possibleMoves[randomIndex].first;
-    end = possibleMoves[randomIndex].second;
+    start = meilleurCoup.first;
+    end = meilleurCoup.second;
 }
 
-std::pair<int, int> Bot::choisir_meilleur_coup(Board& board, int profondeur_max) {
+void Bot::choisir_meilleur_coup(Board& board, int profondeur_max,std::pair<int, int>& meilleurCoup) {
     int meilleurScore = -1;
-    std::pair<int, int> meilleurCoup = { -1, -1 };
+    meilleurCoup = { -1, -1 };
 
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);
 
     for(const std::pair<int, int>& coup : possibleMoves) {
-        board.movePiece(coup.first, coup.second, m_color);
+        Piece* capturedPiece = nullptr;
+        board.movePiece(coup.first, coup.second, m_color, &capturedPiece);
         int score = minimax(board, profondeur_max - 1, false);
-        board.undoMove();
+        board.undoMove(coup.first, coup.second, capturedPiece);
         if(score > meilleurScore) {
             meilleurScore = score;
             meilleurCoup = coup;
         }
     }
-
-    return meilleurCoup;
 }
 
 int Bot::minimax(Board& board, int profondeur, bool estMaximisant) {
@@ -54,9 +50,10 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant) {
         std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);
 
         for(const std::pair<int, int>& coup : possibleMoves) {
-            board.movePiece(coup.first, coup.second, m_color);
+            Piece* capturedPiece = nullptr;
+            board.movePiece(coup.first, coup.second, m_color, &capturedPiece);
             int score = minimax(board, profondeur - 1, false);
-            board.undoMove();
+            board.undoMove(coup.first, coup.second, capturedPiece);
             meilleurScore = std::max(meilleurScore, score);
         }
 
@@ -68,9 +65,10 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant) {
         std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(adversaire);
 
         for(const std::pair<int, int>& coup : possibleMoves) {
-            board.movePiece(coup.first, coup.second, adversaire);
+            Piece* capturedPiece = nullptr;
+            board.movePiece(coup.first, coup.second, adversaire,&capturedPiece);
             int score = minimax(board, profondeur - 1, true);
-            board.undoMove();
+            board.undoMove(coup.first, coup.second, capturedPiece);
             meilleurScore = std::min(meilleurScore, score);
         }
 
