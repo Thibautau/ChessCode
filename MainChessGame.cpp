@@ -48,26 +48,23 @@ void MainChessGame::playTurn()
     int coordStart;
     int coordEnd;
 
-    std::vector<std::pair<int, std::vector<int>>> moves = m_board->listOfPossibleMovements(m_currentPlayer->getPlayerColor());
+    /*std::vector<std::pair<int, int>> moves = m_board->listOfPossibleMoves(m_currentPlayer->getPlayerColor());
+
+    std::cout << "List of possible moves:\n";
 
     for (const auto& pair : moves)
     {
-        int position = pair.first;
-        const std::vector<int>& pieceMoves = pair.second;
+        int piecePosition = pair.first;
+        int targetPosition = pair.second;
 
-        //std::cout << "Piece at position " << position << " has possible moves: ";
+        std::cout << "" << piecePosition << " => " << targetPosition << std::endl;
+    }*/
 
-        // Afficher chaque mouvement possible
-        // for (int move : pieceMoves)
-        // {
-        //     std::cout << move << " ";
-        // }
-        // std::cout << std::endl;
-    }
+
 
     m_currentPlayer->play(*m_board, coordStart, coordEnd);
 
-
+    std::cout << "CoordStart:" << coordStart << " | coordEnd: " << coordEnd << "\n";
     if (m_board->movePiece(coordStart, coordEnd, m_currentPlayer->getPlayerColor()))
     {
         changeCurrentPlayer();

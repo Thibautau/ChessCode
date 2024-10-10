@@ -23,7 +23,7 @@ void Bot::play(Board& board, int& start, int& end) {
 }
 
 void Bot::choisir_meilleur_coup(Board& board, int profondeur_max,std::pair<int, int>& meilleurCoup) {
-    int meilleurScore = -1;
+    int meilleurScore = -INFINITY;
     meilleurCoup = { -1, -1 };
 
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);

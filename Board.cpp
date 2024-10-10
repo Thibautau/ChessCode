@@ -188,10 +188,6 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
 
     if (isMovementPossible(in_iStartPosition,in_iEndPosition))
     {
-
-        bool bKingWentRightForRock = in_iEndPosition - in_iStartPosition == 2;
-        bool bKingWentLeftForRock = in_iEndPosition - in_iStartPosition == -2;
-
         if(pPiece->getTypePiece() == TypePieces::PAWN) {
             if(in_iEndPosition==m_ipositionEnPassant) {
                 int direction = (in_colPlayer == Color::WHITE) ? -1 : 1;
@@ -209,6 +205,9 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
 
         if(pPiece->getTypePiece() == TypePieces::KING) // If the king rocked (move of length 2, we move the rook)
         {
+            bool bKingWentRightForRock = in_iEndPosition - in_iStartPosition == 2;
+            bool bKingWentLeftForRock = in_iEndPosition - in_iStartPosition == -2;
+
             if(in_colPlayer == Color::WHITE)
             {
                 m_iWhiteKingPosition = in_iEndPosition;
