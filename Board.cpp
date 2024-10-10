@@ -741,11 +741,27 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             }
             break;
         }
-        case TypePieces::QUEEN:
-            // Piece::addRookMoves(m_tabpiBoard, in_iPositionToSeeMoves, in_vectPossibleMoves); // Mouvements de la tour
-            // Piece::addBishopMoves(m_tabpiBoard, in_iPositionToSeeMoves, in_vectPossibleMoves);
+        case TypePieces::QUEEN: {
+            int repetitions, numDirections;
+            int* directions = Piece::getQueenMoves(repetitions, numDirections);
+            for(int dir = 0; dir < numDirections; ++dir) {
+                for(int rep = 1; rep <= repetitions; ++rep) {
+                    int nextPosition = in_iPositionToSeeMoves + directions[dir] * rep;
+                    if(!isValidPosition(nextPosition)) {
+                        break;
+                    }
+                    if(m_tabpiBoard[nextPosition] == nullptr) {
+                        in_vectPossibleMoves.push_back(nextPosition);
+                    } else {
+                        if(m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
+                            in_vectPossibleMoves.push_back(nextPosition);
+                        }
+                        break;
+                    }
+                }
+            }
             break;
-
+        }
         case TypePieces::KING: {
             const int* kingMoves = Piece::getKingMoves(iUseless, iUseless2);
             int numMoves = 8;

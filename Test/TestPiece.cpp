@@ -47,6 +47,7 @@ TEST_F(BoardTest, PawnSecondMove) {
     EXPECT_EQ(board.getPieceAt(3, 4)->getTypePiece(), TypePieces::PAWN);
 }
 
+//@TODO Ne marche pas
 // Test de capture en passant
 TEST_F(BoardTest, EnPassantCapture) {
     board.movePiece(1, 4, 3, 4);// Pion blanc e2->e4
@@ -78,6 +79,7 @@ TEST_F(BoardTest, MoveThroughPieces) {
     EXPECT_EQ(board.getPieceAt(0, 4)->getTypePiece(), TypePieces::KING);
 }
 
+//@TODO Ne marche pas
 // Test de castling valide (roi et tour n'ont pas bougé, pas d'échec)
 TEST_F(BoardTest, ValidCastling) {
     // Déplacer les pions pour libérer le chemin
@@ -122,6 +124,7 @@ TEST_F(BoardTest, CastlingAfterKingMoved) {
     EXPECT_FALSE(castlingResult);
 }
 
+//@TODO Ne marche pas
 // Test impossibilité de castling après avoir bougé la tour
 TEST_F(BoardTest, CastlingAfterRookMoved) {
     board.movePiece(1, 7, 3, 7); // Pion blanc h2 -> h4
@@ -145,6 +148,7 @@ TEST_F(BoardTest, CastlingAfterRookMoved) {
     EXPECT_FALSE(castlingResult2);
 }
 
+//@TODO Ne marche pas
 // Test de mise en échec et mat
 TEST_F(BoardTest, Checkmate) {
     // Placer le King blanc en d5
@@ -368,6 +372,7 @@ TEST_F(BoardTest, invalidKingMove) {
     EXPECT_EQ(board.getPieceAt(2, 4), nullptr);
 }
 
+//@TODO Ne marche pas
 //Le roi en échec s'il bouge (e3->f4)
 TEST_F(BoardTest, invalidKingMove2) {
     board.movePiece(1, 4, 3, 4);//Pion blanc e2->e4
@@ -380,6 +385,7 @@ TEST_F(BoardTest, invalidKingMove2) {
     EXPECT_EQ(board.getPieceAt(3, 5), nullptr);
 }
 
+//@TODO Ne marche pas
 //Le roi en échec s'il bouge (b4->c4)
 TEST_F(BoardTest, invalidKingMove3) {
     board.placePiece(3,0, new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noir en a4
@@ -390,6 +396,7 @@ TEST_F(BoardTest, invalidKingMove3) {
     EXPECT_EQ(board.getPieceAt(3, 2), nullptr);
 }
 
+//@TODO Ne marche pas
 //Le roi en échec si le fou bouge (b4->c5)
 TEST_F(BoardTest, kingInCheck) {
     board.clearBoard();
@@ -420,6 +427,7 @@ TEST_F(BoardTest, invalidKingInCheck) {
     EXPECT_EQ(board.getPieceAt(4, 2), nullptr);
 }
 
+//@TODO Ne marche pas
 TEST_F(BoardTest, PromotePawnToQueen) {
     std::istringstream input("1\n");
     std::cin.rdbuf(input.rdbuf());
@@ -490,6 +498,7 @@ TEST_F(BoardTest, PawnEnPassantCapture) {
     EXPECT_EQ(board.getPieceAt(3, 4), nullptr);
 }
 
+//@TODO Ne marche pas
 // Test promotion du pion
 TEST_F(BoardTest, PawnPromotion) {
     board.placePiece(6, 0, new Piece(TypePieces::PAWN, Color::WHITE));
@@ -547,7 +556,6 @@ TEST_F(BoardTest, RookValidVerticalMove) {
     EXPECT_EQ(board.getPieceAt(4, 4), nullptr);
 }
 
-//@TODO Verifier
 // Test mouvement invalide (tour se déplaçant en diagonale)
 TEST_F(BoardTest, RookInvalidDiagonalMove) {
     bool result = board.movePiece(0, 0, 1, 1); // Tour blanche a1->b2
@@ -595,7 +603,6 @@ TEST_F(BoardTest, KnightInvalidStraightMove) {
 // Tests pour le Fou (Bishop)
 //
 
-//@TODO Verifier
 // Test déplacement en diagonale
 TEST_F(BoardTest, BishopValidDiagonalMove) {
     board.movePiece(1, 3, 2, 3); // Pion blanc c2->c3
@@ -657,7 +664,6 @@ TEST_F(BoardTest, QueenInvalidKnightMove) {
 // Tests pour le Roi (King)
 //
 
-//@TODO Verifier
 // Test déplacement d'une case dans toutes les directions
 TEST_F(BoardTest, KingValidMoves) {
     board.placePiece(4, 4, new Piece(TypePieces::KING, Color::WHITE));
@@ -671,6 +677,7 @@ TEST_F(BoardTest, KingValidMoves) {
     EXPECT_TRUE(result4);
 }
 
+//@TODO Ne marche pas
 // Test roque côté roi (petit roque)
 TEST_F(BoardTest, KingCastlingKingside) {
     // Libérer le chemin
