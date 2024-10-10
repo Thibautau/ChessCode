@@ -692,7 +692,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                     int nextPosition = in_iPositionToSeeMoves + directions[dir] * rep;
 
                     // Utilisation de la fonction isNextPositionValid
-                    if (!pPieceToSeeMoves->isNextPositionValid(dir, in_iPositionToSeeMoves, nextPosition)) {
+                    if (!pPieceToSeeMoves->isNextPositionValid(directions[dir], in_iPositionToSeeMoves, nextPosition)) {
                         break;
                     }
 
@@ -715,7 +715,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             for (int i = 0; i < numMoves; ++i) {
                 int nextPosition = in_iPositionToSeeMoves + knightMoves[i];
 
-                if (pPieceToSeeMoves->isNextPositionValid(i, in_iPositionToSeeMoves, nextPosition)) {
+                if (pPieceToSeeMoves->isNextPositionValid(knightMoves[i], in_iPositionToSeeMoves, nextPosition)) {
                     if (m_tabpiBoard[nextPosition] == nullptr || m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
                         in_vectPossibleMoves.push_back(nextPosition);
                     }
@@ -731,7 +731,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                 for (int rep = 1; rep <= repetitions; ++rep) {
                     int nextPosition = in_iPositionToSeeMoves + directions[dir] * rep;
 
-                    if (!pPieceToSeeMoves->isNextPositionValid(dir, in_iPositionToSeeMoves, nextPosition) ){
+                    if (!pPieceToSeeMoves->isNextPositionValid(directions[dir], in_iPositionToSeeMoves, nextPosition) ){
                         break;
                     }
 
@@ -755,7 +755,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                 for (int rep = 1; rep <= repetitions; ++rep) {
                     int nextPosition = in_iPositionToSeeMoves + directions[dir] * rep;
 
-                    if (!pPieceToSeeMoves->isNextPositionValid(dir, in_iPositionToSeeMoves, nextPosition)) {
+                    if (!pPieceToSeeMoves->isNextPositionValid(directions[dir], in_iPositionToSeeMoves, nextPosition)) {
                         break;
                     }
 
@@ -778,7 +778,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             for (int i = 0; i < numMoves; ++i) {
                 int nextPosition = in_iPositionToSeeMoves + kingMoves[i];
 
-                if (pPieceToSeeMoves->isNextPositionValid(i, in_iPositionToSeeMoves, nextPosition)) {
+                if (pPieceToSeeMoves->isNextPositionValid(kingMoves[i], in_iPositionToSeeMoves, nextPosition)) {
                     if (m_tabpiBoard[nextPosition] == nullptr || m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
                         in_vectPossibleMoves.push_back(nextPosition);
                     }
