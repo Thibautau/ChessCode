@@ -159,8 +159,8 @@ TEST(TestBoard, notPat) {
     EXPECT_FALSE(isNotPat);
 }
 
-//Test de vérification si roi n'est plus en echec après que les pièces bougent
-TEST(TestBoard, kingIsNotCheckedAnymore) {
+//Test de vérification si roi noir n'est plus en echec après que les pièces bougent
+TEST(TestBoard, blackKingIsNotCheckedAnymore) {
     Board* board = new Board();
     board->initializeBoard();
     board->movePiece(1,4,3,4,Color::WHITE);// pion blanc e2->e4
@@ -171,4 +171,17 @@ TEST(TestBoard, kingIsNotCheckedAnymore) {
     board->movePiece(6,5,4,7,Color::WHITE);
     board->movePiece(4,7,0,3,Color::WHITE);
     EXPECT_FALSE(board->isBlackKingCheck());
+}
+
+//Test de vérification si roi blanc n'est plus en echec après que les pièces bougent
+TEST(TestBoard, whiteIsNotCheckedAnymore) {
+    Board* board = new Board();
+    board->initializeBoard();
+    board->movePiece(1,5,2,5,Color::WHITE);
+    board->movePiece(6,4,4,4,Color::BLACK);
+    board->movePiece(1,6,3,6,Color::WHITE);
+    board->movePiece(7,3,3,7,Color::BLACK);
+    EXPECT_TRUE(board->isWhiteKingCheck());
+    board->movePiece(3,7,7,3,Color::BLACK);
+    EXPECT_FALSE(board->isWhiteKingCheck());
 }
