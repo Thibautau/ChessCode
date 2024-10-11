@@ -692,6 +692,67 @@ TEST_F(BoardTest, KingCastlingKingside) {
     EXPECT_EQ(board.getPieceAt(0, 5)->getTypePiece(), TypePieces::ROOK);
 }
 
+// Test grand roque invalide après mouvement d'une tour
+TEST_F(BoardTest, KingInvalidBigCastlingDueToRookMoving) {
+    // Libère le chemin
+    board.movePiece("d2d3");
+    board.movePiece("c1e3");
+    board.movePiece("d1d2");
+    board.movePiece("b1a3");
+    board.movePiece("a1b1");
+    // Essai de roquer
+    bool result = board.movePiece("e1c1");
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt("e1")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("b1")->getTypePiece(), TypePieces::ROOK);
+}
+
+// Test petit roque invalide après mouvement d'une tour
+TEST_F(BoardTest, KingInvalidLittleCastlingDueToRookMoving) {
+    // Libère le chemin
+    board.movePiece("e2e3");
+    board.movePiece("f1d3");
+    board.movePiece("g1h3");
+    board.movePiece("h1g1");
+    board.movePiece("g1h1");
+    // Essai de roquer
+    bool result = board.movePiece("e1g1");
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt("e1")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("h1")->getTypePiece(), TypePieces::ROOK);
+}
+
+// Test grand roque invalide après mouvement du roi
+TEST_F(BoardTest, KingInvalidBigCastlingDueToKingMoving) {
+    // Libère le chemin
+    board.movePiece("d2d3");
+    board.movePiece("c1e3");
+    board.movePiece("d1d2");
+    board.movePiece("b1a3");
+    board.movePiece("e1d1");
+    board.movePiece("d1e1");
+    // Essai de roquer
+    bool result = board.movePiece("e1c1");
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt("e1")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("a1")->getTypePiece(), TypePieces::ROOK);
+}
+
+// Test petit roque invalide après mouvement du roi
+TEST_F(BoardTest, KingInvalidLittleCastlingDueToKingMoving) {
+    // Libère le chemin
+    board.movePiece("e2e3");
+    board.movePiece("f1d3");
+    board.movePiece("g1h3");
+    board.movePiece("e1f1");
+    board.movePiece("f1e1");
+    // Essai de roquer
+    bool result = board.movePiece("e1g1");
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt("e1")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("h1")->getTypePiece(), TypePieces::ROOK);
+}
+
 // Test roque invalide (roi en échec)
 TEST_F(BoardTest, KingInvalidCastlingWhileInCheck) {
     // Libérer le chemin
