@@ -774,8 +774,20 @@ int Board::evaluate(Color in_colPlayer) const {
     return score;
 }
 
-bool Board::isGameOver() const {
-    return m_isGameOver;
+bool Board::isGameOver(Color colCurrent_player) {
+    std::vector<std::pair<int, int>> possibleMoves = listOfPossibleMoves(colCurrent_player);
+    if(possibleMoves.empty()) {
+        //@TODO Système d'échec
+        //Si mis en echec alors winner chicken dinner pour le joueur de l'autre couleur
+        if (false) {
+            return true;
+        }
+        //Si peux pas jouer de coup et est pas en echec alors PAT
+        else {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion) {

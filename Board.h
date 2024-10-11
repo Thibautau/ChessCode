@@ -73,7 +73,7 @@ public:
 
     std::vector<std::pair<int, int>> listOfPossibleMoves(Color in_colColor);
     int evaluate(Color in_colPlayer) const;
-    bool isGameOver() const;
+    bool isGameOver(Color colCurrent_player);
     bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion=false);
 
     /* ------------- OLD FUNCTION BELOW ------------- */

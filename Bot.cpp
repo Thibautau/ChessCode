@@ -45,7 +45,7 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max,std::pair<int, 
 }
 
 int Bot::minimax(Board& board, int profondeur, bool estMaximisant) {
-    if(profondeur == 0 || board.isGameOver()) {
+    if(profondeur == 0 || board.isGameOver(m_color)) {
         return board.evaluate(m_color);
     }
 
