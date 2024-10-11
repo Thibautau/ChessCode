@@ -730,4 +730,11 @@ TEST_F(BoardTest, KingInCheck) {
     EXPECT_EQ(board.getPieceAt(0, 4)->getTypePiece(), TypePieces::KING);
 }
 
-
+// Test échec au roi
+TEST_F(BoardTest, KnightHasRightToMove) {
+    board.placePiece(4, 6, new Piece(TypePieces::KNIGHT, Color::WHITE)); // Cavalier blannc en g5
+    bool result = board.movePiece(4, 6, 2, 7); // Cavalier blanc g5->h3
+    EXPECT_TRUE(result);
+    EXPECT_EQ(board.getPieceAt(2, 7)->getTypePiece(), TypePieces::KNIGHT);
+    EXPECT_EQ(board.getPieceAt(4, 6), nullptr);
+}

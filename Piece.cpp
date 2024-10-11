@@ -115,8 +115,8 @@ int Piece::getKnightVectorWithAdjustableLength(Vector* out_tabvectKnightDisplace
         return WRONG_PARAMETER;
     }
 
-    out_tabvectKnightDisplacement[in_iIndicesStart] = Vector(-2, -1, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 1] = Vector(-1, 1, in_iLengthToAdjust);
+    out_tabvectKnightDisplacement[in_iIndicesStart] = Vector(-2, -1, in_iLengthToAdjust); // bas bas gauche
+    out_tabvectKnightDisplacement[in_iIndicesStart + 1] = Vector(-2, 1, in_iLengthToAdjust); //
     out_tabvectKnightDisplacement[in_iIndicesStart + 2] = Vector(-1, 2, in_iLengthToAdjust);
     out_tabvectKnightDisplacement[in_iIndicesStart + 3] = Vector(1, 2, in_iLengthToAdjust);
     out_tabvectKnightDisplacement[in_iIndicesStart + 4] = Vector(2, 1, in_iLengthToAdjust);
