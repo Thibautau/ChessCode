@@ -44,7 +44,7 @@ public:
     bool placePiece(int in_iPositionPiece, Piece* in_pPiece);
     Piece* getPieceAt(int  in_iPositionPiece) const;
     Piece* getPieceAt(const std::string& in_sPosition) const;
-    bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE, Piece** piece = nullptr);
+    bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE, Piece** piece = nullptr,TypePieces promotionType = TypePieces::NONE);
     bool isMovementPossible(int in_iStartPosition, int in_iTargetPosition);
     bool isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound) const;
     bool isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
@@ -59,6 +59,7 @@ public:
     void getAllPossibleMovementsForAPiece(int in_iPositionToFindMovement, std::vector<int>& out_vectDirectionToFill);
     void putNextMoveIfValid(int in_iNextPosition, Piece* in_pPieceToMove, std::vector<int>& in_vectMoveToFill);
 
+    void promotePawn(Color in_colPlayer, Piece** ppPiece,TypePieces promotionType = TypePieces::NONE);
     /**
      * Does not check if the cases are attacked.
      * @param in_colKing
@@ -73,7 +74,7 @@ public:
     std::vector<std::pair<int, int>> listOfPossibleMoves(Color in_colColor);
     int evaluate(Color in_colPlayer) const;
     bool isGameOver() const;
-    bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece);
+    bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion=false);
 
     /* ------------- OLD FUNCTION BELOW ------------- */
 
@@ -102,7 +103,6 @@ public:
     bool isKingInCheck(Color in_kingColor) const;
 
     Coordinate findKing(Color in_colorToFind) const;
-    void promotePawn(int in_iEndRow, int in_iEndCol, Color in_colPlayer, Piece** ppPiece);
     void putNextMoveIfValid(Coordinate& in_coordKing, bool in_isKingInCheck, Coordinate& in_coordNextMove, Piece* in_pPieceToMove, Piece* pPieceFoundOnNextMove, std::vector<Coordinate>& in_vectMoveToFill);
 
 

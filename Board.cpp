@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <limits>
 Board::Board(): m_enPassantPosition{-1, -1}
 {
     for(int iIndiceRow = 0; iIndiceRow < 64; iIndiceRow++ )
@@ -177,7 +178,7 @@ bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition)
     return false;
 }
 
-bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer,Piece** piece)
+bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer,Piece** piece, TypePieces promotionType)
 {
     Piece* pPiece = getPieceAt(in_iStartPosition);
     bool wasEnPassant = false;
@@ -200,6 +201,9 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
                 int direction = (in_colPlayer == Color::WHITE) ? 1 : -1;
                 m_ipositionEnPassant = in_iStartPosition + direction * 8;
                 wasEnPassant = true;
+            }
+            if(in_iEndPosition/8 == 0 || in_iEndPosition/8 == 7) {
+                promotePawn(in_colPlayer, &pPiece);
             }
         }
 
@@ -755,7 +759,7 @@ int Board::evaluate(Color in_colPlayer) const {
                     pieceScore = 9;
                 break;
                 case TypePieces::KING:
-                    pieceScore = INFINITY;
+                    pieceScore = std::numeric_limits<int>::max();
                 break;
             }
 
@@ -774,7 +778,7 @@ bool Board::isGameOver() const {
     return m_isGameOver;
 }
 
-bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece) {
+bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion) {
     Piece* movingPiece = getPieceAt(in_iEndPosition);
     if(movingPiece == nullptr) {
         return false;
@@ -783,6 +787,10 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
     placePiece(in_iStartPosition, movingPiece);
     m_tabpiBoard[in_iEndPosition] = nullptr;
 
+    if(promotion) {
+        movingPiece->setTypePiece(TypePieces::PAWN);
+    }
+
     if(capturedPiece) {
         placePiece(in_iEndPosition, capturedPiece);
     }
@@ -790,38 +798,43 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
     return true;
 }
 
-void Board::promotePawn(int in_iEndRow, int in_iEndCol, Color in_colPlayer, Piece** ppPiece) {
-    std::cout << "Felicitations ! Votre pion peut être promu. Choisissez parmi les options suivantes :\n";
-    std::cout << "1. Reine (Q)\n";
-    std::cout << "2. Tour (R)\n";
-    std::cout << "3. Fou (B)\n";
-    std::cout << "4. Cavalier (N)\n";
+void Board::promotePawn(Color in_colPlayer, Piece** ppPiece, TypePieces promotionType) {
+    if (promotionType == TypePieces::NONE) {
+        // Si aucun type n'est spécifié, demandez à l'utilisateur (pour le mode joueur)
+        std::cout << "Félicitations ! Votre pion peut être promu. Choisissez parmi les options suivantes :\n";
+        std::cout << "1. Reine (Q)\n";
+        std::cout << "2. Tour (R)\n";
+        std::cout << "3. Fou (B)\n";
+        std::cout << "4. Cavalier (N)\n";
 
-    int choice;
-    std::cout << "Veuillez choisir (1,2,3 ou 4) : ";
-    std::cin >> choice;
+        int choice;
+        std::cout << "Veuillez choisir (1,2,3 ou 4) : ";
+        std::cin >> choice;
 
-    switch (choice) {
-        case 1:
+        switch (choice) {
+            case 1:
+                *ppPiece = new Piece(TypePieces::QUEEN, in_colPlayer);
+            std::cout << "Votre pion a été promu en Reine !\n";
+            break;
+            case 2:
+                *ppPiece = new Piece(TypePieces::ROOK, in_colPlayer);
+            std::cout << "Votre pion a été promu en Tour !\n";
+            break;
+            case 3:
+                *ppPiece = new Piece(TypePieces::BISHOP, in_colPlayer);
+            std::cout << "Votre pion a été promu en Fou !\n";
+            break;
+            case 4:
+                *ppPiece = new Piece(TypePieces::KNIGHT, in_colPlayer);
+            std::cout << "Votre pion a été promu en Cavalier !\n";
+            break;
+            default:
+                std::cout << "Choix invalide, promotion en Reine par défaut.\n";
             *ppPiece = new Piece(TypePieces::QUEEN, in_colPlayer);
-        std::cout << "Votre pion a ete promu en Reine !\n";
-        break;
-        case 2:
-            *ppPiece = new Piece(TypePieces::ROOK, in_colPlayer);
-        std::cout << "Votre pion a ete promu en Tour !\n";
-        break;
-        case 3:
-            *ppPiece = new Piece(TypePieces::BISHOP, in_colPlayer);
-        std::cout << "Votre pion a ete promu en Fou !\n";
-        break;
-        case 4:
-            *ppPiece = new Piece(TypePieces::KNIGHT, in_colPlayer);
-        std::cout << "Votre pion a ete promu en Cavalier !\n";
-        break;
-        default:
-            std::cout << "Choix invalide, promotion en Reine par défaut.\n";
-        *ppPiece = new Piece(TypePieces::QUEEN, in_colPlayer);
-        break;
+            break;
+        }
+    } else {
+        *ppPiece = new Piece(promotionType, in_colPlayer);
     }
 }
 

@@ -12,6 +12,10 @@ TypePieces Piece::getTypePiece() const {
     return m_tpTypePiece;
 }
 
+void Piece::setTypePiece(TypePieces type) {
+    m_tpTypePiece = type;
+}
+
 Color Piece::getColor() const {
     return m_colColorPiece;
 }

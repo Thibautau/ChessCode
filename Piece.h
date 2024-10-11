@@ -20,6 +20,7 @@ private:
 public:
     Piece(TypePieces type, Color color);
     TypePieces getTypePiece() const;
+    void setTypePiece(TypePieces type);
     Color getColor() const;
     Color getEnemyColor() const;
     char getColorAsChar() const;
