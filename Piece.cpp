@@ -125,11 +125,23 @@ int* Piece::getKingMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement)
     return kingMoves;
 }
 
-int* Piece::getRockMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) {
+int* Piece::getLittleRockMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement)
+{
     out_iNbOfRepetitionToDo = 1;
-    out_iNbOfMovement = 2;
-    static int kingMoves[2] = {
-        2, -2
+    out_iNbOfMovement = 1;
+
+    static int kingMoves[1] = {
+        2
+    };
+    return kingMoves;
+}
+int* Piece::getBigRockMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement)
+{
+    out_iNbOfRepetitionToDo = 1;
+    out_iNbOfMovement = 1;
+
+    static int kingMoves[1] = {
+        -2
     };
     return kingMoves;
 }
@@ -315,6 +327,45 @@ bool Piece::isPawnNextPositionValid(int in_iDirection, int in_iInitialPosition, 
 
         default:
             return false;  // Pour toute autre direction non gérée
+    }
+}
+
+bool Piece::isRockNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition) const {
+    if(in_iNextPosition < 0 || in_iNextPosition >= 64) // Verify is the rook can go up or down
+    {
+        return false;
+    }
+
+    int iPositionDifference = std::abs(in_iInitialPosition - in_iNextPosition);
+    if(iPositionDifference != 2)
+    {
+        return false;
+    }
+
+    switch (in_iDirection) {
+        case -2:
+            switch(m_colColorPiece)
+            {
+                case Color::WHITE:
+                    return in_iNextPosition == 2;
+                case Color::BLACK:
+                    return in_iNextPosition == 58;
+                default:
+                    return false;
+            }
+        case 2:
+            switch(m_colColorPiece)
+            {
+                case Color::WHITE:
+                    return in_iNextPosition == 6;
+                case Color::BLACK:
+                    return in_iNextPosition == 62;
+                default:
+                    return false;
+            }
+
+        default:
+            return false;
     }
 }
 

@@ -61,10 +61,14 @@ public:
     void possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& in_vectPossibleMoves);
     void getPieceMovementsPossible(int in_iPositionToFindMovement, int in_iDirectionMovement, int in_iNbOfRepetition, std::vector<int>& in_vectPositionPossible);
     void getAllPossibleMovementsForAPiece(int in_iPositionToFindMovement, std::vector<int>& out_vectDirectionToFill);
-    void putNextMoveIfValid(int in_iNextPosition, Piece* in_pPieceToMove, std::vector<int>& in_vectMoveToFill);
+    bool putNextMoveIfValid(int in_iNextPosition, Piece* in_pPieceToMove, std::vector<int>& in_vectMoveToFill);
 
     int getKingPosition(Color in_kingColor) const;
-
+    bool kingCanLittleRock(Color in_kingColor) const;
+    bool kingCanBigRock(Color in_kingColor) const;
+    bool isKingAttackedAfterMove(Color in_kingColor, Color in_attackerColor) const;
+    bool isKingInCheck(Color in_kingColor) const;
+    void putOrRemoveKingInCheck(Color in_kingColor, bool in_bPutKingInCheck);
 
     void promotePawn(Color in_colPlayer, Piece** ppPiece,TypePieces promotionType = TypePieces::NONE);
     /**
@@ -87,6 +91,10 @@ public:
     bool isPromotionMove(int start, int end, Color color);
     int getPieceValue(TypePieces type);
     int evaluateMove(const std::pair<int, int>& move, Color color);
+
+
+
+
 
     /* ------------- OLD FUNCTION BELOW ------------- */
 
@@ -112,7 +120,7 @@ public:
     Piece* findFirstPieceOnVector(int in_iStartRow, int in_iStartCol, Vector& in_vectMove, int& in_iIndicePieceFound) const;
     static bool doesPieceHaveGoodTypeOfAttack(Piece* in_pPieceToVerifyAttack, TypeOfPieceAttack in_typeOfAttack) ;
     bool isTherePiecesBetweenKingAndRookNotMoving(Vector& in_vect, int in_iRowStart, int in_iColumnStart) const;
-    bool isKingInCheck(Color in_kingColor) const;
+
 
     Coordinate findKing(Color in_colorToFind) const;
     void putNextMoveIfValid(Coordinate& in_coordKing, bool in_isKingInCheck, Coordinate& in_coordNextMove, Piece* in_pPieceToMove, Piece* pPieceFoundOnNextMove, std::vector<Coordinate>& in_vectMoveToFill);

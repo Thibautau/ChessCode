@@ -31,10 +31,11 @@ public:
     bool attackDiagonal() const;
     bool attackKnight() const;
 
+    static int* getLittleRockMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
+    static int* getBigRockMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
     static int* getKingMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) ;
     static int* getKnightMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
     static int* getRookMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
-    static int* getRockMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
     static int* getBishopMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
     static int* getQueenMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement);
     static int* getPawnMoves(int &out_iNbOfRepetitionToDo, int& out_iNbOfMovement, Color in_colPiece);
@@ -46,6 +47,8 @@ public:
     bool isRookNextPositionValid(int in_iDirection, int in_iNextPosition);
     bool isKnightNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
     bool isPawnNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
+    bool isRockNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition) const;
+
     bool isNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
 };
 
