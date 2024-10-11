@@ -254,6 +254,11 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
                     m_tabpiBoard[iFirstPositionOnTheRow] = nullptr; // La première case de la ligne
                 }
             }
+            removeRockPossibility(in_colPlayer, in_iStartPosition % 8);
+        }
+
+        if (pPiece->getTypePiece() == TypePieces::ROOK) {
+            removeRockPossibility(in_colPlayer, in_iStartPosition % 8);
         }
 
         if(!wasEnPassant && m_ipositionEnPassant !=-1) {
@@ -270,6 +275,33 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
     }
 
     return false;
+}
+
+void Board::removeRockPossibility(Color in_color, int i_columnRook) {
+    if (in_color == Color::WHITE) {
+        if (i_columnRook == 0) {
+            m_bWhiteKingCanBigRock = false;
+        }
+        else if (i_columnRook == 7) {
+            m_bWhiteKingCanLittleRock = false;
+        }
+        else {
+            m_bWhiteKingCanBigRock = false;
+            m_bWhiteKingCanLittleRock = false;
+        }
+    }
+    else {
+        if (i_columnRook == 0) {
+            m_bBlackKingCanBigRock = false;
+        }
+        else if (i_columnRook == 7) {
+            m_bBlackKingCanLittleRock = false;
+        }
+        else {
+            m_bBlackKingCanBigRock = false;
+            m_bBlackKingCanLittleRock = false;
+        }
+    }
 }
 
 void Board::findFirstPiecesOnEachRookMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const

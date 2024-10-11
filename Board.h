@@ -45,6 +45,9 @@ public:
     Piece* getPieceAt(int  in_iPositionPiece) const;
     Piece* getPieceAt(const std::string& in_sPosition) const;
     bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE, Piece** piece = nullptr,TypePieces promotionType = TypePieces::NONE);
+
+    void removeRockPossibility(Color in_colPlayer, int i_columnRook);
+
     bool isMovementPossible(int in_iStartPosition, int in_iTargetPosition);
 
     bool isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound) const;
