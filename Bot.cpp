@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <math.h>
 #include <limits>
+#include <algorithm>
 
 Bot::Bot(Color color) : m_color(color) {}
 
@@ -15,7 +16,7 @@ Color Bot::getPlayerColor() const {
 
 void Bot::play(Board& board, int& start, int& end) {
     std::pair<int, int> meilleurCoup;
-    int profondeur_max = 4;
+    int profondeur_max = 6;
 
     choisir_meilleur_coup(board, profondeur_max, meilleurCoup);
 
@@ -23,68 +24,70 @@ void Bot::play(Board& board, int& start, int& end) {
     end = meilleurCoup.second;
 }
 
-void Bot::choisir_meilleur_coup(Board& board, int profondeur_max,std::pair<int, int>& meilleurCoup) {
+void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int, int>& meilleurCoup) {
     int meilleurScore = std::numeric_limits<int>::min();
     meilleurCoup = { -1, -1 };
 
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);
+    std::sort(possibleMoves.begin(), possibleMoves.end(), [&](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+        return board.evaluateMove(a, m_color) > board.evaluateMove(b, m_color);
+    });
 
-    for(const std::pair<int, int>& coup : possibleMoves) {
+    for (const std::pair<int, int>& coup : possibleMoves) {
         Piece* capturedPiece = nullptr;
-        //@TODO Pas très opti je pense, faut trouver une autre solution pour gérer la promotion
-        Piece* movingPiece = board.getPieceAt(coup.first);
-        bool isPromotion = (movingPiece->getTypePiece() == TypePieces::PAWN) &&((m_color == Color::WHITE && coup.second / 8 == 7) ||(m_color == Color::BLACK && coup.second / 8 == 0));
-        board.movePiece(coup.first, coup.second, m_color, &capturedPiece,TypePieces::QUEEN);
-        int score = minimax(board, profondeur_max - 1, false);
+        bool isPromotion = board.isPromotionMove(coup.first, coup.second, m_color);
+        board.movePiece(coup.first, coup.second, m_color, &capturedPiece, TypePieces::QUEEN);
+        int score = minimax(board, profondeur_max - 1, false, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
         board.undoMove(coup.first, coup.second, capturedPiece, isPromotion);
-        if(score > meilleurScore) {
+        if (score > meilleurScore) {
             meilleurScore = score;
             meilleurCoup = coup;
         }
     }
 }
 
-int Bot::minimax(Board& board, int profondeur, bool estMaximisant) {
-    if(profondeur == 0 || board.isGameOver(m_color)) {
+int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta) {
+    if (profondeur == 0 || board.isGameOver(m_color)) {
         return board.evaluate(m_color);
     }
 
-    if(estMaximisant) {
+    std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE));
+    std::sort(possibleMoves.begin(), possibleMoves.end(), [&](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+        return board.evaluateMove(a, m_color) > board.evaluateMove(b, m_color);
+    });
+
+    if (estMaximisant) {
         int meilleurScore = std::numeric_limits<int>::min();
-        std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);
-
-        for(const std::pair<int, int>& coup : possibleMoves) {
+        for (const std::pair<int, int>& coup : possibleMoves) {
             Piece* capturedPiece = nullptr;
-            //@TODO Pas très opti je pense, faut trouver une autre solution pour gérer la promotion
-            Piece* movingPiece = board.getPieceAt(coup.first);
-            bool isPromotion = (movingPiece->getTypePiece() == TypePieces::PAWN) &&((m_color == Color::WHITE && coup.second / 8 == 7) ||(m_color == Color::BLACK && coup.second / 8 == 0));
-
-            board.movePiece(coup.first, coup.second, m_color, &capturedPiece,TypePieces::QUEEN);
-            int score = minimax(board, profondeur - 1, false);
-            board.undoMove(coup.first, coup.second, capturedPiece,isPromotion);
+            bool isPromotion = board.isPromotionMove(coup.first, coup.second, m_color);
+            board.movePiece(coup.first, coup.second, m_color, &capturedPiece, TypePieces::QUEEN);
+            int score = minimax(board, profondeur - 1, false, alpha, beta);
+            board.undoMove(coup.first, coup.second, capturedPiece, isPromotion);
             meilleurScore = std::max(meilleurScore, score);
+            alpha = std::max(alpha, meilleurScore);
+            if (beta <= alpha) {
+                break;
+            }
         }
-
         return meilleurScore;
-    }
-    else {
+    } else {
         int meilleurScore = std::numeric_limits<int>::max();
-        Color adversaire = (m_color == Color::WHITE) ? Color::BLACK : Color::WHITE;
-        std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(adversaire);
-
-        for(const std::pair<int, int>& coup : possibleMoves) {
+        for (const std::pair<int, int>& coup : possibleMoves) {
             Piece* capturedPiece = nullptr;
-            //@TODO Pas très opti je pense, faut trouver une autre solution pour gérer la promotion
-            Piece* movingPiece = board.getPieceAt(coup.first);
-            bool isPromotion = (movingPiece->getTypePiece() == TypePieces::PAWN) &&((m_color == Color::WHITE && coup.second / 8 == 7) ||(m_color == Color::BLACK && coup.second / 8 == 0));
-            board.movePiece(coup.first, coup.second, adversaire,&capturedPiece,TypePieces::QUEEN);
-            int score = minimax(board, profondeur - 1, true);
+            bool isPromotion = board.isPromotionMove(coup.first, coup.second, m_color);
+            board.movePiece(coup.first, coup.second, (m_color == Color::WHITE) ? Color::BLACK : Color::WHITE, &capturedPiece, TypePieces::QUEEN);
+            int score = minimax(board, profondeur - 1, true, alpha, beta);
             board.undoMove(coup.first, coup.second, capturedPiece, isPromotion);
             meilleurScore = std::min(meilleurScore, score);
+            beta = std::min(beta, meilleurScore);
+            if (beta <= alpha) {
+                break;
+            }
         }
-
         return meilleurScore;
     }
 }
+
 
 

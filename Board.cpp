@@ -203,7 +203,7 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
                 wasEnPassant = true;
             }
             if(in_iEndPosition/8 == 0 || in_iEndPosition/8 == 7) {
-                promotePawn(in_colPlayer, &pPiece);
+                promotePawn(in_colPlayer, &pPiece,promotionType);
             }
         }
 
@@ -773,6 +773,48 @@ int Board::evaluate(Color in_colPlayer) const {
 
     return score;
 }
+
+bool Board::isPromotionMove(int start, int end, Color color) {
+    Piece* piece = getPieceAt(start);
+    if (piece && piece->getTypePiece() == TypePieces::PAWN) {
+        int endRow = end / 8;
+        if ((color == Color::WHITE && endRow == 7) || (color == Color::BLACK && endRow == 0)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int Board::getPieceValue(TypePieces type) {
+    switch (type) {
+        case TypePieces::PAWN:   return 1;
+        case TypePieces::KNIGHT: return 3;
+        case TypePieces::BISHOP: return 3;
+        case TypePieces::ROOK:   return 5;
+        case TypePieces::QUEEN:  return 9;
+        case TypePieces::KING:   return 10000;
+        default: return 0;
+    }
+}
+
+int Board::evaluateMove(const std::pair<int, int>& move, Color color) {
+    Piece* capturedPiece = getPieceAt(move.second);
+    int moveValue = 0;
+
+    if (capturedPiece != nullptr) {
+        moveValue += getPieceValue(capturedPiece->getTypePiece());
+    }
+
+    // Tu peux ajouter d'autres critères pour évaluer la valeur d'un coup
+    // Par exemple :
+    // - La mobilité des pièces après le coup
+    // - La protection des pièces importantes
+    // - La création de menaces contre le roi adverse
+
+    return moveValue;
+}
+
+
 
 bool Board::isGameOver(Color colCurrent_player) {
     std::vector<std::pair<int, int>> possibleMoves = listOfPossibleMoves(colCurrent_player);

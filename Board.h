@@ -76,6 +76,10 @@ public:
     bool isGameOver(Color colCurrent_player);
     bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion=false);
 
+    bool isPromotionMove(int start, int end, Color color);
+    int getPieceValue(TypePieces type);
+    int evaluateMove(const std::pair<int, int>& move, Color color);
+
     /* ------------- OLD FUNCTION BELOW ------------- */
 
 
