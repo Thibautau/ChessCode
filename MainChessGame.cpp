@@ -50,7 +50,9 @@ void MainChessGame::playTurn()
 
     m_currentPlayer->play(*m_board, coordStart, coordEnd);
 
-    std::cout << "CoordStart:" << coordStart << " | coordEnd: " << coordEnd << "\n";
+    debugPrintMove(coordStart, coordEnd);
+
+    //std::cout << "CoordStart:" << coordStart << " | coordEnd: " << coordEnd << "\n";
     if (m_board->movePiece(coordStart, coordEnd, m_currentPlayer->getPlayerColor()))
     {
         changeCurrentPlayer();
@@ -59,6 +61,20 @@ void MainChessGame::playTurn()
     {
         std::cout << "Mouvement invalide. Essayez encore." << std::endl;
     }
+}
+
+std::string MainChessGame::indexToPosition(int pos) {
+    int row = pos / 8;
+    int col = pos % 8;
+
+    char columnChar = 'a' + col;
+    char rowChar = '1' + row;
+
+    return std::string{columnChar} + rowChar;
+}
+
+void MainChessGame::debugPrintMove(int start, int end) {
+    std::cout << "Deplacement de " << indexToPosition(start) << " a " << indexToPosition(end) << std::endl;
 }
 
 void MainChessGame::changeCurrentPlayer()

@@ -22,6 +22,10 @@ public:
     ~MainChessGame();
 
     void initChessGame() const;
+
+    std::string indexToPosition(int pos);
+    void debugPrintMove(int start, int end);
+
     void playTurn();
     void changeCurrentPlayer();
 
