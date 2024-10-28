@@ -1094,14 +1094,6 @@ bool Board::placePiece(int in_iRow, int in_iCol, Piece* in_pPiece)
     return true;
 }
 
-Piece* Board::getPieceAt(const Coordinate& coord) const
-{
-    if(coord.iRow < 0 || coord.iRow >= 8 || coord.iColumn < 0 || coord.iColumn >= 8)
-    {
-        return nullptr;
-    }
-    return m_tabtabpiBoard[coord.iRow][coord.iColumn];
-}
 
 Piece* Board::getPieceAt(int in_iRow, int in_iColumn) const {
     return getPieceAt((in_iRow * 8) + in_iColumn);
@@ -1129,40 +1121,6 @@ bool Board::doesPieceHaveGoodTypeOfAttack(Piece* in_pPieceToVerifyAttack, TypeOf
         bGoodTypeOfAttackResearched = in_pPieceToVerifyAttack->attackKnight();
     }
     return bGoodTypeOfAttackResearched;
-}
-
-bool Board::isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer)
-{
-    if(in_iStartRow >= 8 || in_iStartCol >= 8 || in_iStartRow < 0 || in_iStartCol < 0
-        || in_iEndRow >= 8 || in_iEndCol >= 8 || in_iEndRow < 0 || in_iEndCol < 0)
-    {
-        return false;
-    }
-
-    Piece* pPieceToMove = getPieceAt(in_iStartRow, in_iStartCol);
-    if(pPieceToMove == nullptr || pPieceToMove->getColor() != in_colPlayer) //If the player try to move a piece of another color, return false
-    {
-        return false;
-    }
-
-    if (pPieceToMove->getTypePiece() == TypePieces::PAWN) {
-        int direction = (in_colPlayer == Color::WHITE) ? 1 : -1;
-        if (m_enPassantPosition.getRow()+direction == in_iEndRow && m_enPassantPosition.getColumn() == in_iEndCol) {
-            return true;
-        }
-    }
-
-    Coordinate coordTargetPoint = Coordinate(in_iEndRow, in_iEndCol);
-    // We get the piece to move
-    std::vector<Coordinate> vectPossibleMoves/* = possibleMovesForPiece(Coordinate(in_iStartRow, in_iStartCol))*/;
-    if(vectPossibleMoves.empty()) // Means that the piece could not move
-    {
-        return false;
-    }
-    else
-    {
-        return isCoordinateInVector(coordTargetPoint, vectPossibleMoves);
-    }
 }
 
 bool Board::isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer) {

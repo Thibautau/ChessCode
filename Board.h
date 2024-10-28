@@ -12,7 +12,6 @@
 class Board {
 private:
     Piece* m_tabpiBoard[64]{};
-    Piece* m_tabtabpiBoard[8][8]{};
     Coordinate m_enPassantPosition;
     bool m_isGameOver = false;
     bool m_isWhiteKingChecked = false;
@@ -98,16 +97,12 @@ public:
 
     /* ------------- OLD FUNCTION BELOW ------------- */
 
-
-    Piece* getPieceAt(const Coordinate& in_coord) const;
-
     Piece* getPieceAt(int in_iRow, int in_iColumn) const;
 
 
 
     bool placePiece(int in_iRow, int in_iCol, Piece* in_pPiece);
     //bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
-    bool isMoveValid(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     bool isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer);
     // std::vector<Move> listOfPossibleMoves(Color in_colColor);
     std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece);

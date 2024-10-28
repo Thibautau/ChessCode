@@ -156,42 +156,6 @@ TEST_F(BoardTest, Checkmate) {
     EXPECT_TRUE(validMove1);
 }
 
-//TODO Le test est faux ? nonsense
-// Test de mise en échec et mat
-TEST_F(BoardTest, Checkmate2) {
-    // Placer le King blanc en d5
-    board.placePiece(4, 3, new Piece(TypePieces::KING, Color::WHITE));
-    // Placer la bishop blanche en e6
-    board.placePiece(5, 4, new Piece(TypePieces::QUEEN, Color::WHITE));
-    board.movePiece(6, 5, 4, 5); // Pion noir f7->f5
-    bool validMove2 = board.movePiece(5, 4, 7, 6);// Bishop blanc e6->g8
-    EXPECT_TRUE(validMove2);
-}
-
-//TODO Le test est faux ? nonsense
-// Test de mise en échec et mat
-TEST_F(BoardTest, Checkmate3) {
-    // Placer le King blanc en d5
-    // Placer le King blanc en d5
-    board.placePiece(4, 3, new Piece(TypePieces::KING, Color::WHITE));
-    // Placer la bishop blanche en e6
-    board.placePiece(5, 4, new Piece(TypePieces::QUEEN, Color::WHITE));
-    board.movePiece(6, 5, 4, 5); // Pion noir f7->f5
-    bool invalidMove1 = board.movePiece(5, 4, 4, 5);// Bishop blanc e6->f5
-    EXPECT_FALSE(invalidMove1);
-}
-
-//TODO Le test est faux ? nonsense
-// Test de mise en échec et mat
-TEST_F(BoardTest, Checkmate4) {
-    // Placer le King blanc en d5
-    board.placePiece("d5", new Piece(TypePieces::KING, Color::WHITE));
-    // Placer la dame blanche en e6
-    board.placePiece("e6", new Piece(TypePieces::QUEEN, Color::WHITE));
-    board.movePiece("f7f5", Color::BLACK); // Pion noir f7->f5
-    bool invalidMove2 = board.movePiece("e6d7");// Bishop blanc e6->d7
-    EXPECT_FALSE(invalidMove2);
-}
 
 // Test de mouvement valide pour un cavalier (b1 -> c3)
 TEST_F(BoardTest, ValidKnightMove) {
