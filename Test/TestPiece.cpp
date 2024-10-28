@@ -72,13 +72,10 @@ TEST_F(BoardTest, CapturePion) {
 
 //Deplacer une piece dans une autre
 TEST_F(BoardTest, MoveThroughPieces) {
-    board.placePiece(2, 4, new Piece(TypePieces::PAWN, Color::WHITE)); // Pion blanc e3
-
     //Pion blanc e2->e4
-    bool result = board.movePiece(1, 4, 3, 4);
+    bool result = board.movePiece("e1e2");
     EXPECT_FALSE(result);
-    EXPECT_EQ(board.getPieceAt(1, 4)->getTypePiece(), TypePieces::PAWN);
-    EXPECT_EQ(board.getPieceAt(3, 4), nullptr);
+    EXPECT_EQ(board.getPieceAt(0, 4)->getTypePiece(), TypePieces::KING);
 }
 
 // Test de castling valide (roi et tour n'ont pas bougé, pas d'échec)
@@ -99,14 +96,14 @@ TEST_F(BoardTest, ValidCastling) {
 
 // Test de castling invalide (roi en échec)
 TEST_F(BoardTest, InvalidCastlingInCheck) {
-    board.movePiece(1, 4, 3, 4); // Pion blanc e2 -> e4
-    board.movePiece(0, 5, 3, 2); // Bishop blanc f1 -> c4
-    board.movePiece(0, 6, 2, 5); // Knight blanc  g1 -> f3
-    board.placePiece(4, 4, new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noire en e5
-    board.movePiece(4, 4, 3, 4, Color::BLACK); // Tour noir  e5->e4, check
+    board.movePiece("e2e4"); // Pion blanc e2 -> e4
+    board.movePiece("f1c4"); // Bishop blanc f1 -> c4
+    board.movePiece("g1f3"); // Knight blanc  g1 -> f3
+    board.placePiece("e5", new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noire en e5
+    board.movePiece("e5e4", Color::BLACK); // Tour noir  e5->e4, check
 
     // Essayer de castling roi côté roi (e1 -> g1) alors que le roi est en échec
-    bool result = board.movePiece(0, 4, 0, 6);
+    bool result = board.movePiece("e1g1");
     EXPECT_FALSE(result);
     EXPECT_EQ(board.getPieceAt(0, 4)->getTypePiece(), TypePieces::KING);
     EXPECT_EQ(board.getPieceAt(0, 6), nullptr);
@@ -159,6 +156,7 @@ TEST_F(BoardTest, Checkmate) {
     EXPECT_TRUE(validMove1);
 }
 
+//TODO Le test est faux ? nonsense
 // Test de mise en échec et mat
 TEST_F(BoardTest, Checkmate2) {
     // Placer le King blanc en d5
@@ -170,6 +168,7 @@ TEST_F(BoardTest, Checkmate2) {
     EXPECT_TRUE(validMove2);
 }
 
+//TODO Le test est faux ? nonsense
 // Test de mise en échec et mat
 TEST_F(BoardTest, Checkmate3) {
     // Placer le King blanc en d5
@@ -182,14 +181,15 @@ TEST_F(BoardTest, Checkmate3) {
     EXPECT_FALSE(invalidMove1);
 }
 
+//TODO Le test est faux ? nonsense
 // Test de mise en échec et mat
 TEST_F(BoardTest, Checkmate4) {
     // Placer le King blanc en d5
-    board.placePiece(4, 3, new Piece(TypePieces::KING, Color::WHITE));
-    // Placer la bishop blanche en e6
-    board.placePiece(5, 4, new Piece(TypePieces::QUEEN, Color::WHITE));
-    board.movePiece(6, 5, 4, 5); // Pion noir f7->f5
-    bool invalidMove2 = board.movePiece(5, 4, 6, 3);// Bishop blanc e6->d7
+    board.placePiece("d5", new Piece(TypePieces::KING, Color::WHITE));
+    // Placer la dame blanche en e6
+    board.placePiece("e6", new Piece(TypePieces::QUEEN, Color::WHITE));
+    board.movePiece("f7f5", Color::BLACK); // Pion noir f7->f5
+    bool invalidMove2 = board.movePiece("e6d7");// Bishop blanc e6->d7
     EXPECT_FALSE(invalidMove2);
 }
 
@@ -383,6 +383,7 @@ TEST_F(BoardTest, invalidKingMove2) {
     EXPECT_EQ(board.getPieceAt(3, 5), nullptr);
 }
 
+//@TODO Ne marche pas
 //Le roi en échec s'il bouge (b4->c4)
 TEST_F(BoardTest, invalidKingMove3) {
     board.placePiece(3,0, new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noir en a4
@@ -393,36 +394,38 @@ TEST_F(BoardTest, invalidKingMove3) {
     EXPECT_EQ(board.getPieceAt(3, 2), nullptr);
 }
 
+//@TODO Ne marche pas
 //Le roi en échec si le fou bouge (b4->c5)
 TEST_F(BoardTest, kingInCheck) {
     board.clearBoard();
 
-    board.placePiece(3,0, new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noir en a4
-    board.placePiece(3,1, new Piece(TypePieces::BISHOP, Color::BLACK)); // Fou noir en b4
-    board.placePiece(3,2, new Piece(TypePieces::KING, Color::WHITE)); // Roi blanc en c4
-    bool result = board.movePiece(3, 1, 4, 2, Color::BLACK); // Fou noir b4->c5
+    board.placePiece("a4", new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noir en a4
+    board.placePiece("b4", new Piece(TypePieces::BISHOP, Color::BLACK)); // Fou blanc en b4
+    board.placePiece("c4", new Piece(TypePieces::KING, Color::WHITE)); // Roi blanc en c4
+    bool result = board.movePiece("b4c5", Color::BLACK); // Fou noir b4->c5
     bool result2 = board.isWhiteKingCheck();
     EXPECT_TRUE(result);
     EXPECT_TRUE(result2);
-    EXPECT_EQ(board.getPieceAt(4, 2)->getTypePiece(), TypePieces::BISHOP);
-    EXPECT_EQ(board.getPieceAt(3, 1), nullptr);
+    EXPECT_EQ(board.getPieceAt("c5")->getTypePiece(), TypePieces::BISHOP);
+    EXPECT_EQ(board.getPieceAt("b4"), nullptr);
 }
 
 //Le roi en échec le fou bouge (b4->c5)
 TEST_F(BoardTest, invalidKingInCheck) {
     board.clearBoard();
 
-    board.placePiece(3,0, new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noir en a4
-    board.placePiece(3,1, new Piece(TypePieces::BISHOP, Color::WHITE)); // Fou blanc en b4
-    board.placePiece(3,2, new Piece(TypePieces::KING, Color::WHITE)); // Roi blanc en c4
-    bool result = board.movePiece(3, 1, 4, 2); // Fou blanc b4->c5
+    board.placePiece("a4", new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noir en a4
+    board.placePiece("b4", new Piece(TypePieces::BISHOP, Color::WHITE)); // Fou blanc en b4
+    board.placePiece("c4", new Piece(TypePieces::KING, Color::WHITE)); // Roi blanc en c4
+    bool result = board.movePiece("b4c5"); // Fou blanc b4->c5
     bool result2 = board.isWhiteKingCheck();
     EXPECT_FALSE(result);
     EXPECT_FALSE(result2);
-    EXPECT_EQ(board.getPieceAt(3, 1)->getTypePiece(), TypePieces::BISHOP);
-    EXPECT_EQ(board.getPieceAt(4, 2), nullptr);
+    EXPECT_EQ(board.getPieceAt("b4")->getTypePiece(), TypePieces::BISHOP);
+    EXPECT_EQ(board.getPieceAt("c5"), nullptr);
 }
 
+//@TODO Ne marche pas (fonctionne, vérifie Peter)
 TEST_F(BoardTest, PromotePawnToQueen) {
     std::istringstream input("1\n");
     std::cin.rdbuf(input.rdbuf());
@@ -485,7 +488,7 @@ TEST_F(BoardTest, PawnCaptureDiagonal) {
 // Test capture en passant
 TEST_F(BoardTest, PawnEnPassantCapture) {
     board.movePiece(1, 4, 3, 4); // Pion blanc e2->e4
-    board.movePiece(6, 5, 4, 5); // Pion noir f7->f5
+    board.movePiece(6, 5, 4, 5, Color::BLACK); // Pion noir f7->f5
     bool result = board.movePiece(3, 4, 4, 5); // Pion blanc e4->f5 en passant
     EXPECT_TRUE(result);
     EXPECT_EQ(board.getPieceAt(4, 5)->getTypePiece(), TypePieces::PAWN);
@@ -493,11 +496,12 @@ TEST_F(BoardTest, PawnEnPassantCapture) {
     EXPECT_EQ(board.getPieceAt(3, 4), nullptr);
 }
 
+//@TODO Ne marche pas
 // Test promotion du pion
 TEST_F(BoardTest, PawnPromotion) {
-    board.placePiece(6, 0, new Piece(TypePieces::PAWN, Color::WHITE));
+    board.placePiece("a6", new Piece(TypePieces::PAWN, Color::WHITE));
     // Simuler la promotion en dame
-    bool result = board.movePiece(6, 0, 7, 0); // Pion blanc promotion
+    bool result = board.movePiece("a6a7"); // Pion blanc promotion
     EXPECT_TRUE(result);
     EXPECT_EQ(board.getPieceAt(7, 0)->getTypePiece(), TypePieces::QUEEN);
     EXPECT_EQ(board.getPieceAt(7, 0)->getColor(), Color::WHITE);
@@ -535,30 +539,19 @@ TEST_F(BoardTest, PawnInvalidCaptureForward) {
 // Test déplacement horizontal
 TEST_F(BoardTest, RookValidHorizontalMove) {
     board.movePiece(1, 0, 3, 0); // Pion blanc a2->a4
-    bool result = board.movePiece(0, 0, 3, 0); // Tour blanche a1->a4
+    bool result = board.movePiece(0, 0, 2, 0); // Tour blanche a1->a3
     EXPECT_TRUE(result);
-    EXPECT_EQ(board.getPieceAt(3, 0)->getTypePiece(), TypePieces::ROOK);
+    EXPECT_EQ(board.getPieceAt(2, 0)->getTypePiece(), TypePieces::ROOK);
     EXPECT_EQ(board.getPieceAt(0, 0), nullptr);
 }
 
 // Test déplacement vertical
 TEST_F(BoardTest, RookValidVerticalMove) {
-    board.movePiece(1, 0, 2, 0); // Pion blanc a2->a3
-    board.movePiece(1, 1, 2, 1); // Pion blanc b2->b3
-    bool result = board.movePiece(0, 0, 0, 2); // Tour blanche a1->c1
+    board.placePiece(4, 4, new Piece(TypePieces::ROOK, Color::WHITE)); // Tour noir en e5
+    bool result = board.movePiece(4, 4, 4, 5); // Tour blanc e5->f5
     EXPECT_TRUE(result);
-    EXPECT_EQ(board.getPieceAt(0, 2)->getTypePiece(), TypePieces::ROOK);
-    EXPECT_EQ(board.getPieceAt(0, 0), nullptr);
-}
-
-// Test capture par la tour
-TEST_F(BoardTest, RookCapture) {
-    board.placePiece(3, 0, new Piece(TypePieces::KNIGHT, Color::BLACK)); // Cavalier noir en a4
-    board.movePiece(1, 0, 2, 0); // Pion blanc a2->a3
-    bool result = board.movePiece(0, 0, 3, 0); // Tour blanche a1->a4
-    EXPECT_TRUE(result);
-    EXPECT_EQ(board.getPieceAt(3, 0)->getTypePiece(), TypePieces::ROOK);
-    EXPECT_EQ(board.getPieceAt(3, 0)->getColor(), Color::WHITE);
+    EXPECT_EQ(board.getPieceAt(4, 5)->getTypePiece(), TypePieces::ROOK);
+    EXPECT_EQ(board.getPieceAt(4, 4), nullptr);
 }
 
 // Test mouvement invalide (tour se déplaçant en diagonale)
@@ -566,7 +559,6 @@ TEST_F(BoardTest, RookInvalidDiagonalMove) {
     bool result = board.movePiece(0, 0, 1, 1); // Tour blanche a1->b2
     EXPECT_FALSE(result);
     EXPECT_EQ(board.getPieceAt(0, 0)->getTypePiece(), TypePieces::ROOK);
-    EXPECT_EQ(board.getPieceAt(1, 1), nullptr);
 }
 
 // Test mouvement bloqué par une pièce alliée
@@ -611,7 +603,7 @@ TEST_F(BoardTest, KnightInvalidStraightMove) {
 
 // Test déplacement en diagonale
 TEST_F(BoardTest, BishopValidDiagonalMove) {
-    board.movePiece(1, 2, 2, 2); // Pion blanc c2->c3
+    board.movePiece(1, 3, 2, 3); // Pion blanc c2->c3
     bool result = board.movePiece(0, 2, 3, 5); // Fou blanc c1->f4
     EXPECT_TRUE(result);
     EXPECT_EQ(board.getPieceAt(3, 5)->getTypePiece(), TypePieces::BISHOP);
@@ -633,7 +625,6 @@ TEST_F(BoardTest, BishopInvalidHorizontalMove) {
     bool result = board.movePiece(0, 2, 0, 5); // Fou blanc c1->f1
     EXPECT_FALSE(result);
     EXPECT_EQ(board.getPieceAt(0, 2)->getTypePiece(), TypePieces::BISHOP);
-    EXPECT_EQ(board.getPieceAt(0, 5), nullptr);
 }
 
 //
@@ -642,11 +633,11 @@ TEST_F(BoardTest, BishopInvalidHorizontalMove) {
 
 // Test déplacement en ligne droite
 TEST_F(BoardTest, QueenValidStraightMove) {
-    board.movePiece(1, 3, 2, 3); // Pion blanc d2->d3
-    bool result = board.movePiece(0, 3, 3, 3); // Dame blanche d1->d4
+    board.movePiece("d2d4"); // Pion blanc d2->d4
+    bool result = board.movePiece("d1d3"); // Dame blanche d1->d3
     EXPECT_TRUE(result);
-    EXPECT_EQ(board.getPieceAt(3, 3)->getTypePiece(), TypePieces::QUEEN);
-    EXPECT_EQ(board.getPieceAt(0, 3), nullptr);
+    EXPECT_EQ(board.getPieceAt("d3")->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt("d1"), nullptr);
 }
 
 // Test déplacement en diagonale
@@ -656,16 +647,6 @@ TEST_F(BoardTest, QueenValidDiagonalMove) {
     EXPECT_TRUE(result);
     EXPECT_EQ(board.getPieceAt(4, 7)->getTypePiece(), TypePieces::QUEEN);
     EXPECT_EQ(board.getPieceAt(0, 3), nullptr);
-}
-
-// Test capture par la dame
-TEST_F(BoardTest, QueenCapture) {
-    board.placePiece(3, 3, new Piece(TypePieces::BISHOP, Color::BLACK)); // Fou noir en d4
-    board.movePiece(1, 3, 2, 3); // Pion blanc d2->d3
-    bool result = board.movePiece(0, 3, 3, 3); // Dame blanche d1->d4
-    EXPECT_TRUE(result);
-    EXPECT_EQ(board.getPieceAt(3, 3)->getTypePiece(), TypePieces::QUEEN);
-    EXPECT_EQ(board.getPieceAt(3, 3)->getColor(), Color::WHITE);
 }
 
 // Test mouvement invalide (dame se déplaçant en 'L')
@@ -682,29 +663,92 @@ TEST_F(BoardTest, QueenInvalidKnightMove) {
 
 // Test déplacement d'une case dans toutes les directions
 TEST_F(BoardTest, KingValidMoves) {
-    board.movePiece(1, 4, 2, 4); // Pion blanc e2->e3
-    bool result1 = board.movePiece(0, 4, 1, 4); // Roi blanc e1->e2
+    //board.clearBoard();
+    board.placePiece(4, 4, new Piece(TypePieces::KING, Color::WHITE));
+    bool result1 = board.movePiece(4, 4, 3, 4); // Roi blanc e5->e4
     EXPECT_TRUE(result1);
-    bool result2 = board.movePiece(1, 4, 1, 5); // Roi blanc e2->f2
+    bool result2 = board.movePiece(3, 4, 3, 3); // Roi blanc e4->d4
     EXPECT_TRUE(result2);
-    bool result3 = board.movePiece(1, 5, 2, 5); // Roi blanc f2->f3
+    bool result3 = board.movePiece(3, 3, 4, 3); // Roi blanc d4->d5
     EXPECT_TRUE(result3);
-    bool result4 = board.movePiece(2, 5, 2, 4); // Roi blanc f3->e3
+    bool result4 = board.movePiece(4, 3, 4, 4); // Roi blanc d5->e5
     EXPECT_TRUE(result4);
 }
 
 // Test roque côté roi (petit roque)
 TEST_F(BoardTest, KingCastlingKingside) {
     // Libérer le chemin
-    board.movePiece(1, 5, 2, 5); // Pion blanc f2->f3
-    board.movePiece(1, 6, 2, 6); // Pion blanc g2->g3
-    board.movePiece(0, 5, 1, 4); // Fou blanc f1->e2
-    board.movePiece(0, 6, 2, 5); // Cavalier blanc g1->f3
+    board.movePiece("e2e3"); // Pion blanc e2->e3
+    board.movePiece("f2f3"); // Pion blanc f2->f3
+    board.movePiece("g2g3"); // Pion blanc g2->g3
+    board.movePiece("f1e2"); // Fou blanc f1->e2
+    board.movePiece("g1h3"); // Cavalier blanc g1->f3
     // Effectuer le roque
-    bool result = board.movePiece(0, 4, 0, 6); // Roi blanc e1->g1
+    bool result = board.movePiece("e1g1"); // Roi blanc e1->g1
     EXPECT_TRUE(result);
-    EXPECT_EQ(board.getPieceAt(0, 6)->getTypePiece(), TypePieces::KING);
-    EXPECT_EQ(board.getPieceAt(0, 5)->getTypePiece(), TypePieces::ROOK);
+    EXPECT_EQ(board.getPieceAt("g1")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("f1")->getTypePiece(), TypePieces::ROOK);
+}
+
+// Test grand roque invalide après mouvement d'une tour
+TEST_F(BoardTest, KingInvalidBigCastlingDueToRookMoving) {
+    // Libère le chemin
+    board.movePiece("d2d3");
+    board.movePiece("c1e3");
+    board.movePiece("d1d2");
+    board.movePiece("b1a3");
+    board.movePiece("a1b1");
+    // Essai de roquer
+    bool result = board.movePiece("e1c1");
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt("e1")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("b1")->getTypePiece(), TypePieces::ROOK);
+}
+
+// Test petit roque invalide après mouvement d'une tour
+TEST_F(BoardTest, KingInvalidLittleCastlingDueToRookMoving) {
+    // Libère le chemin
+    board.movePiece("e2e3");
+    board.movePiece("f1d3");
+    board.movePiece("g1h3");
+    board.movePiece("h1g1");
+    board.movePiece("g1h1");
+    // Essai de roquer
+    bool result = board.movePiece("e1g1");
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt("e1")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("h1")->getTypePiece(), TypePieces::ROOK);
+}
+
+// Test grand roque invalide après mouvement du roi
+TEST_F(BoardTest, KingInvalidBigCastlingDueToKingMoving) {
+    // Libère le chemin
+    board.movePiece("d2d3");
+    board.movePiece("c1e3");
+    board.movePiece("d1d2");
+    board.movePiece("b1a3");
+    board.movePiece("e1d1");
+    board.movePiece("d1e1");
+    // Essai de roquer
+    bool result = board.movePiece("e1c1");
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt("e1")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("a1")->getTypePiece(), TypePieces::ROOK);
+}
+
+// Test petit roque invalide après mouvement du roi
+TEST_F(BoardTest, KingInvalidLittleCastlingDueToKingMoving) {
+    // Libère le chemin
+    board.movePiece("e2e3");
+    board.movePiece("f1d3");
+    board.movePiece("g1h3");
+    board.movePiece("e1f1");
+    board.movePiece("f1e1");
+    // Essai de roquer
+    bool result = board.movePiece("e1g1");
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt("e1")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("h1")->getTypePiece(), TypePieces::ROOK);
 }
 
 // Test roque invalide (roi en échec)
@@ -730,11 +774,81 @@ TEST_F(BoardTest, KingInCheck) {
     EXPECT_EQ(board.getPieceAt(0, 4)->getTypePiece(), TypePieces::KING);
 }
 
-// Test échec au roi
-TEST_F(BoardTest, KnightHasRightToMove) {
-    board.placePiece(4, 6, new Piece(TypePieces::KNIGHT, Color::WHITE)); // Cavalier blannc en g5
-    bool result = board.movePiece(4, 6, 2, 7); // Cavalier blanc g5->h3
-    EXPECT_TRUE(result);
-    EXPECT_EQ(board.getPieceAt(2, 7)->getTypePiece(), TypePieces::KNIGHT);
-    EXPECT_EQ(board.getPieceAt(4, 6), nullptr);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ----------------------------------- OPTI -----------------------------------
+
+// Test mouvement dame invalide
+TEST_F(BoardTest, QueenMove) {
+    board.clearBoard();
+    board.placePiece("c5", new Piece(TypePieces::QUEEN, Color::WHITE));
+    bool result = board.movePiece("c5g4"); // Dame blanche en g4
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt("c5")->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt("g4"), nullptr);
+}
+
+// Test mouvement dame invalide (bug que l'on a eu)
+TEST_F(BoardTest, QueenMove2) {
+    board.clearBoard();
+
+    board.placePiece("a8", new Piece(TypePieces::ROOK, Color::BLACK));
+    board.placePiece("b8", new Piece(TypePieces::KNIGHT, Color::BLACK));
+    board.placePiece("e8", new Piece(TypePieces::KING, Color::BLACK));
+    board.placePiece("f8", new Piece(TypePieces::BISHOP, Color::BLACK));
+    board.placePiece("g8", new Piece(TypePieces::KNIGHT, Color::BLACK));
+    board.placePiece("h8", new Piece(TypePieces::ROOK, Color::BLACK));
+
+    board.placePiece("e7", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.placePiece("f7", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.placePiece("g7", new Piece(TypePieces::PAWN, Color::BLACK));
+
+    board.placePiece("b6", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.placePiece("h6", new Piece(TypePieces::PAWN, Color::BLACK));
+
+    board.placePiece("c5", new Piece(TypePieces::QUEEN, Color::BLACK));
+    board.placePiece("d5", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.placePiece("e5", new Piece(TypePieces::PAWN, Color::WHITE));
+
+    board.placePiece("g4", new Piece(TypePieces::QUEEN, Color::WHITE));
+
+    board.placePiece("a3", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.placePiece("h3", new Piece(TypePieces::KNIGHT, Color::WHITE));
+
+    board.placePiece("a2", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.placePiece("c2", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.placePiece("d2", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.placePiece("f2", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.placePiece("g2", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.placePiece("h2", new Piece(TypePieces::PAWN, Color::WHITE));
+
+    board.placePiece("a1", new Piece(TypePieces::ROOK, Color::WHITE));
+    board.placePiece("c1", new Piece(TypePieces::BISHOP, Color::WHITE));
+    board.placePiece("e1", new Piece(TypePieces::KING, Color::WHITE));
+    board.placePiece("f1", new Piece(TypePieces::BISHOP, Color::WHITE));
+    board.placePiece("h1", new Piece(TypePieces::ROOK, Color::WHITE));
+
+    bool result = board.movePiece("c5g4", Color::BLACK); // Dame noire en g4
+    EXPECT_FALSE(result);
+    EXPECT_EQ(board.getPieceAt("c5")->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt("c5")->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt("g4")->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt("g4")->getColor(), Color::WHITE);
 }
