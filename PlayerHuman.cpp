@@ -37,15 +37,15 @@ void PlayerHuman::getInput(std::string& input) {
 }
 
 bool PlayerHuman::isInputValid(const std::string& in_sInput, Coordinate& out_start, Coordinate& out_end) {
-    if (in_sInput.length() != 5 || in_sInput[2] != ' ') {
-        std::cout << "Erreur: L'entree doit etre au format 'e2 e4'." << std::endl;
+    if (in_sInput.length() != 4) {
+        std::cout << "Erreur: L'entree doit etre au format 'e2e4'." << std::endl;
         return false;
     }
 
     char startCol = in_sInput[0];
     char startRow = in_sInput[1];
-    char endCol = in_sInput[3];
-    char endRow = in_sInput[4];
+    char endCol = in_sInput[2];
+    char endRow = in_sInput[3];
 
     if (!isValidCoordinate(startCol, startRow) || !isValidCoordinate(endCol, endRow)) {
         return false;
