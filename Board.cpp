@@ -692,7 +692,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                         break;
                     }
 
-                    putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
+                    //putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                     if (m_tabpiBoard[nextPosition] == nullptr) {
                         putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                         //in_vectPossibleMoves.push_back(nextPosition);
