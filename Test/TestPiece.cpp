@@ -499,12 +499,12 @@ TEST_F(BoardTest, PawnEnPassantCapture) {
 //@TODO Ne marche pas
 // Test promotion du pion
 TEST_F(BoardTest, PawnPromotion) {
-    board.placePiece("a6", new Piece(TypePieces::PAWN, Color::WHITE));
-    // Simuler la promotion en dame
-    bool result = board.movePiece("a6a7"); // Pion blanc promotion
+    board.placePiece("a7", new Piece(TypePieces::PAWN, Color::WHITE));
+    //bool result = board.movePiece("a7b8"); // Pion blanc promotion
+    bool result = board.movePiece(48,57,Color::WHITE,nullptr, TypePieces::QUEEN); // Pion blanc promotion a7 -> b7
     EXPECT_TRUE(result);
-    EXPECT_EQ(board.getPieceAt(7, 0)->getTypePiece(), TypePieces::QUEEN);
-    EXPECT_EQ(board.getPieceAt(7, 0)->getColor(), Color::WHITE);
+    EXPECT_EQ(board.getPieceAt(7, 1)->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt(7, 1)->getColor(), Color::WHITE);
 }
 
 // Test mouvement invalide (pion reculant)
