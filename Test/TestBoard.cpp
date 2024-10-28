@@ -79,10 +79,12 @@ TEST(TestBoard, isBlackKingCheckmated) {
     board->movePiece("f1c4",Color::WHITE);// fou blanc f1->c4
     board->movePiece("d1h5",Color::WHITE);// dame blanche d1->h5
     board->movePiece("h5f7",Color::WHITE);// dame blanche capture pion f7
-    bool roiNoirEchec = board->isCheckmated(7,4,Color::BLACK);
+
+    Color colWinner = Color::NONE;
+    bool bIsCheckMated = board->isGameOver(Color::BLACK,colWinner);
     bool bIsBlackKingChecked = board->isBlackKingCheck();
+    EXPECT_TRUE(bIsCheckMated);
     EXPECT_TRUE(bIsBlackKingChecked);
-    EXPECT_TRUE(roiNoirEchec);
 }
 
 //Test de vérification echec et mat pour roi blanc

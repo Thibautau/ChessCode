@@ -33,6 +33,19 @@ Color Piece::getEnemyColor() const
     }
 }
 
+Color Piece::getEnemyColor(Color in_colPiece)
+{
+    switch (in_colPiece)
+    {
+        case Color::WHITE:
+            return Color::BLACK;
+        case Color::BLACK:
+            return Color::WHITE;
+        default:
+            return Color::NONE;
+    }
+}
+
 char Piece::getColorAsChar() const {
     switch (m_colColorPiece) {
         case Color::WHITE:

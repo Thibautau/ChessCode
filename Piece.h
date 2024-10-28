@@ -23,6 +23,7 @@ public:
     void setTypePiece(TypePieces type);
     Color getColor() const;
     Color getEnemyColor() const;
+    static Color getEnemyColor(Color in_colPiece);
     char getColorAsChar() const;
     char getDisplayChar() const;
     static int getColumnOfRookAfterRock(int in_iColumn);
