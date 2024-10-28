@@ -603,14 +603,12 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             int forwardMove = in_iPositionToSeeMoves + direction * 8;
             if (isValidPosition(forwardMove) && m_tabpiBoard[forwardMove] == nullptr) {
                 putNextMoveIfValid(forwardMove, pPieceToSeeMoves, in_vectPossibleMoves);
-                //in_vectPossibleMoves.push_back(forwardMove);
             }
 
             int twoSteps = in_iPositionToSeeMoves + (direction * 16);
             if (in_iPositionToSeeMoves/8 == startRow) {
                 if (isValidPosition(twoSteps) && m_tabpiBoard[forwardMove] == nullptr && m_tabpiBoard[twoSteps] == nullptr) {
                     putNextMoveIfValid(twoSteps, pPieceToSeeMoves, in_vectPossibleMoves);
-                    //in_vectPossibleMoves.push_back(twoSteps);
                 }
             }
 
@@ -619,20 +617,16 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             int captureRight = in_iPositionToSeeMoves + direction * 8 + 1;
             if (isValidPosition(captureLeft) && in_iPositionToSeeMoves % 8 != 0 && m_tabpiBoard[captureLeft] != nullptr && m_tabpiBoard[captureLeft]->getColor() != colPieceToSeeMoves) {
                 putNextMoveIfValid(captureLeft, pPieceToSeeMoves, in_vectPossibleMoves);
-                //in_vectPossibleMoves.push_back(captureLeft);
             }
             if (isValidPosition(captureRight) && in_iPositionToSeeMoves % 8 != 7 && m_tabpiBoard[captureRight] != nullptr && m_tabpiBoard[captureRight]->getColor() != colPieceToSeeMoves) {
                 putNextMoveIfValid(captureRight, pPieceToSeeMoves, in_vectPossibleMoves);
-                //in_vectPossibleMoves.push_back(captureRight);
             }
             if(m_ipositionEnPassant!=-1) {
                 if(captureLeft==m_ipositionEnPassant) {
                     putNextMoveIfValid(captureLeft, pPieceToSeeMoves, in_vectPossibleMoves);
-                    //in_vectPossibleMoves.push_back(captureLeft);
                 }
                 if(captureRight == m_ipositionEnPassant) {
                     putNextMoveIfValid(captureRight, pPieceToSeeMoves, in_vectPossibleMoves);
-                    //in_vectPossibleMoves.push_back(captureRight);
                 }
             }
             break;
@@ -652,11 +646,9 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
 
                     if (m_tabpiBoard[nextPosition] == nullptr) {
                         putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
-                        //in_vectPossibleMoves.push_back(nextPosition);
                     } else {
                         if (m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
                             putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
-                            //in_vectPossibleMoves.push_back(nextPosition);
                         }
                         break;
                     }
@@ -674,7 +666,6 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                 if (pPieceToSeeMoves->isNextPositionValid(knightMoves[i], in_iPositionToSeeMoves, nextPosition)) {
                     if (m_tabpiBoard[nextPosition] == nullptr || m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
                         putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
-                        //in_vectPossibleMoves.push_back(nextPosition);
                     }
                 }
             }
@@ -692,14 +683,11 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                         break;
                     }
 
-                    //putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                     if (m_tabpiBoard[nextPosition] == nullptr) {
                         putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
-                        //in_vectPossibleMoves.push_back(nextPosition);
                     } else {
                         if (m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
                             putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
-                            //in_vectPossibleMoves.push_back(nextPosition);
                         }
                         break;
                     }
@@ -721,11 +709,9 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
 
                     if (m_tabpiBoard[nextPosition] == nullptr) {
                         putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
-                        //in_vectPossibleMoves.push_back(nextPosition);
                     } else {
                         if (m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
                             putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
-                            //in_vectPossibleMoves.push_back(nextPosition);
                         }
                         break;
                     }
