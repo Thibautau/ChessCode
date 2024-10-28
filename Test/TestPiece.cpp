@@ -347,7 +347,7 @@ TEST_F(BoardTest, invalidKingMove2) {
     EXPECT_EQ(board.getPieceAt(3, 5), nullptr);
 }
 
-//@TODO Ne marche pas
+
 //Le roi en échec s'il bouge (b4->c4)
 TEST_F(BoardTest, invalidKingMove3) {
     board.placePiece(3,0, new Piece(TypePieces::ROOK, Color::BLACK)); // Tour noir en a4
@@ -358,7 +358,7 @@ TEST_F(BoardTest, invalidKingMove3) {
     EXPECT_EQ(board.getPieceAt(3, 2), nullptr);
 }
 
-//@TODO Ne marche pas
+
 //Le roi en échec si le fou bouge (b4->c5)
 TEST_F(BoardTest, kingInCheck) {
     board.clearBoard();
@@ -389,7 +389,7 @@ TEST_F(BoardTest, invalidKingInCheck) {
     EXPECT_EQ(board.getPieceAt("c5"), nullptr);
 }
 
-//@TODO Ne marche pas (fonctionne, vérifie Peter)
+
 TEST_F(BoardTest, PromotePawnToQueen) {
     std::istringstream input("1\n");
     std::cin.rdbuf(input.rdbuf());
@@ -460,7 +460,7 @@ TEST_F(BoardTest, PawnEnPassantCapture) {
     EXPECT_EQ(board.getPieceAt(3, 4), nullptr);
 }
 
-//@TODO Ne marche pas
+
 // Test promotion du pion
 TEST_F(BoardTest, PawnPromotion) {
     board.placePiece("a7", new Piece(TypePieces::PAWN, Color::WHITE));
