@@ -962,12 +962,13 @@ int Board::evaluateMove(const std::pair<int, int>& move, Color color) {
 
 
 
-bool Board::isGameOver(Color colCurrent_player) {
+bool Board::isGameOver(Color colCurrent_player, Color& winner) {
     std::vector<std::pair<int, int>> possibleMoves = listOfPossibleMoves(colCurrent_player);
     if(possibleMoves.empty()) {
         //@TODO Système d'échec
         //Si mis en echec alors winner chicken dinner pour le joueur de l'autre couleur
         if (false) {
+            winner = (colCurrent_player == Color::WHITE) ? Color::BLACK : Color::WHITE;
             return true;
         }
         //Si peux pas jouer de coup et est pas en echec alors PAT

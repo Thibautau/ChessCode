@@ -29,7 +29,7 @@ public:
     void playTurn();
     void changeCurrentPlayer();
 
-    bool isGameOver() const;
+    bool isGameOver();
     Color getColorWinner() const;
 
     Player* getCurrentPlayer() const;

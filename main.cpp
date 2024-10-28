@@ -14,9 +14,11 @@ int main() {
     const Color colWinner = game->getColorWinner();
     if (colWinner == Color::WHITE) {
         std::cout << "Les Blancs ont gagné !" << std::endl;
-    } else if (colWinner == Color::BLACK) {
+    }
+    else if (colWinner == Color::BLACK) {
         std::cout << "Les Noirs ont gagné !" << std::endl;
-    } else {
+    }
+    else {
         std::cout << "Match nul !" << std::endl;
     }
 

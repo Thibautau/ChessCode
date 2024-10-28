@@ -82,9 +82,9 @@ void MainChessGame::changeCurrentPlayer()
     std::swap(m_currentPlayer, m_waitingPlayer);
 }
 
-bool MainChessGame::isGameOver() const
+bool MainChessGame::isGameOver()
 {
-    return m_isGameOver;
+    return m_board->isGameOver(m_currentPlayer->getPlayerColor(), m_colorWinner);
 }
 
 Color MainChessGame::getColorWinner() const
