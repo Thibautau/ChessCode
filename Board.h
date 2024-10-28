@@ -61,6 +61,17 @@ public:
     Coordinate findKing(Color in_colorToFind) const;
     void promotePawn(int in_iEndRow, int in_iEndCol, Color in_colPlayer, Piece** ppPiece);
     void putNextMoveIfValid(Coordinate& in_coordKing, bool in_isKingInCheck, Coordinate& in_coordNextMove, Piece* in_pPieceToMove, Piece* pPieceFoundOnNextMove, std::vector<Coordinate>& in_vectMoveToFill);
+
+    //To Simplify Tests
+    Piece* getPieceAt(const std::string& in_sPosition) const;
+    int convertToPosition(char col, char row);
+    void convertMoveToPositions(const std::string& move, int& startPos, int& endPos);
+    bool movePiece(const std::string& move, Color in_colPlayer = Color::WHITE);
+    bool placePiece(const std::string& move, Piece* in_pPiece);
+    int convertToPositionColumn(char col) const;
+    int convertToPositionRow(char row) const;
+    void convertMoveToCoordinates(const std::string& move, int& iStartRow, int& iStartCol, int& iEndRow, int& iEndCol) const;
+    //end To Simplify Tests
 };
 
 #endif //BOARD_H

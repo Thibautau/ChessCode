@@ -114,6 +114,62 @@ bool Board::isBlackKingCheck() const
     return isBlackKingChecked;
 }
 
+//NEW
+Piece* Board::getPieceAt(const std::string& in_sPosition) const
+{
+    int iRow = convertToPositionRow(in_sPosition[0]);
+    int iCol = convertToPositionColumn(in_sPosition[1]);
+    return getPieceAt(iRow, iCol);
+}
+
+int Board::convertToPositionColumn(char col) const
+{
+    int column = col - 'a';
+    return column;
+}
+
+int Board::convertToPositionRow(char row) const
+{
+    int line = row - '1';
+    return line * 8;
+}
+
+int Board::convertToPosition(char col, char row)
+{
+    int column = col - 'a';
+    int line = row - '1';
+    return column + line * 8;
+}
+
+void Board::convertMoveToPositions(const std::string& move, int& startPos, int& endPos)
+{
+    startPos = convertToPosition(move[0], move[1]);
+    endPos = convertToPosition(move[2], move[3]);
+}
+
+void Board::convertMoveToCoordinates(const std::string& move, int& iStartRow, int& iStartCol, int& iEndRow, int& iEndCol) const
+{
+    iStartRow = convertToPositionRow(move[0]);
+    iStartCol = convertToPositionColumn(move[1]);
+    iEndRow = convertToPositionRow(move[2]);
+    iEndCol = convertToPositionColumn(move[3]);
+}
+
+bool Board::movePiece(const std::string& move, Color in_colPlayer)
+{
+    int iStartRow, iStartCol, iEndRow, iEndCol;
+    convertMoveToCoordinates(move, iStartRow, iStartCol, iEndRow, iEndCol);
+    return movePiece(iStartRow, iStartCol, iEndRow, iEndCol, in_colPlayer);
+}
+
+bool Board::placePiece(const std::string& move, Piece* in_pPiece)
+{
+    int iStartRow = convertToPositionRow(move[0]);
+    int iStartCol = convertToPositionColumn(move[1]);
+    return placePiece(iStartRow, iStartCol, in_pPiece);
+}
+//NEW
+
 bool Board::placePiece(int in_iRow, int in_iCol, Piece* in_pPiece)
 {
     if(in_iRow < 0 || in_iRow >= 8 || in_iCol < 0 || in_iCol >= 8)
