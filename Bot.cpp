@@ -70,7 +70,7 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
             board.undoMove(coup.first, coup.second, capturedPiece, isPromotion);
             meilleurScore = std::max(meilleurScore, score);
             alpha = std::max(alpha, meilleurScore);
-            if (beta <= alpha) {
+            if (score >= beta) {
                 break;
             }
         }
@@ -87,7 +87,7 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
             board.undoMove(coup.first, coup.second, capturedPiece, isPromotion);
             meilleurScore = std::min(meilleurScore, score);
             beta = std::min(beta, meilleurScore);
-            if (beta <= alpha) {
+            if (score <= alpha) {
                 break;
             }
         }

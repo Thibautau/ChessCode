@@ -962,12 +962,6 @@ int Board::evaluateMove(const std::pair<int, int>& move, Color color) {
         moveValue += getPieceValue(capturedPiece->getTypePiece());
     }
 
-    // Tu peux ajouter d'autres critères pour évaluer la valeur d'un coup
-    // Par exemple :
-    // - La mobilité des pièces après le coup
-    // - La protection des pièces importantes
-    // - La création de menaces contre le roi adverse
-
     return moveValue;
 }
 
