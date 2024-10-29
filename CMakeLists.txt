@@ -34,6 +34,8 @@ add_executable(ChessCode
         Bot.cpp
         Player.h
         Player.cpp
+        Zobrist.cpp
+        Zobrist.h
 )
 
 # Créer l'exécutable pour les tests
