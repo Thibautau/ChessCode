@@ -739,22 +739,59 @@ TEST_F(BoardTest, KingInCheck) {
 }
 
 
+// ----------------------------------- UndoMove -----------------------------------
 
+// Test déplacement normal
+TEST_F(BoardTest, UndoNormalMove) {
+    board.placePiece("e2", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.movePiece("e2e4", Color::WHITE);
+    EXPECT_EQ(board.getPieceAt("e4")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("e2"), nullptr);
 
+    board.undoMove(12,28 ,nullptr, false);
+    EXPECT_EQ(board.getPieceAt("e2")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("e4"), nullptr);
+}
 
+// Test d'une capture
+TEST_F(BoardTest, UndoCaptureMove) {
+    board.placePiece("d4", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.placePiece("e5", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.movePiece("d4e5", Color::WHITE);
+    EXPECT_EQ(board.getPieceAt("e5")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("d4"), nullptr);
 
+    board.undoMove(27, 36, new Piece(TypePieces::PAWN, Color::BLACK), false);
+    EXPECT_EQ(board.getPieceAt("d4")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("e5")->getTypePiece(), TypePieces::PAWN);
+}
 
+// Test d'une promotion avec undo
+TEST_F(BoardTest, UndoPromotionMove) {
+    board.placePiece("a7", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.movePiece(48,57, Color::WHITE, nullptr,TypePieces::QUEEN); //a7->b8
+    EXPECT_EQ(board.getPieceAt("b8")->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt("a7"), nullptr);
 
+    board.undoMove(48, 57, new Piece(TypePieces::KNIGHT, Color::WHITE), true);
+    EXPECT_EQ(board.getPieceAt("a7")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("b8")->getTypePiece(), TypePieces::KNIGHT);
+}
 
+// Test d'une prise en passant avec undo
+TEST_F(BoardTest, UndoEnPassantMove) {
+    board.placePiece("e5", new Piece(TypePieces::PAWN, Color::WHITE));
+    board.movePiece("f7f5", Color::BLACK);
+    board.movePiece("e5f6", Color::WHITE);
+    EXPECT_EQ(board.getPieceAt("f6")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("e5"), nullptr);
+    EXPECT_EQ(board.getPieceAt("f5"), nullptr);
 
-
-
-
-
-
-
-
-
+    board.undoMove(36, 45, new Piece(TypePieces::PAWN, Color::BLACK), false);
+    EXPECT_EQ(board.getPieceAt("e5")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("f5")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("f6"), nullptr);
+}
 
 
 // ----------------------------------- OPTI -----------------------------------
