@@ -36,7 +36,9 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
     for (const std::pair<int, int>& coup : possibleMoves) {
         Piece* capturedPiece = nullptr;
         bool isPromotion = board.isPromotionMove(coup.first, coup.second, m_color);
-        board.movePiece(coup.first, coup.second, m_color, &capturedPiece, TypePieces::QUEEN);
+        int enPassantPos = -1;
+
+        board.movePiece(coup.first, coup.second, m_color, &capturedPiece, TypePieces::QUEEN,&enPassantPos);
         int score = minimax(board, profondeur_max - 1, false, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
         board.undoMove(coup.first, coup.second, capturedPiece, isPromotion);
         if (score > meilleurScore) {
@@ -61,7 +63,9 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
         for (const std::pair<int, int>& coup : possibleMoves) {
             Piece* capturedPiece = nullptr;
             bool isPromotion = board.isPromotionMove(coup.first, coup.second, m_color);
-            board.movePiece(coup.first, coup.second, m_color, &capturedPiece, TypePieces::QUEEN);
+            int enPassantPos = -1;
+
+            board.movePiece(coup.first, coup.second, m_color, &capturedPiece, TypePieces::QUEEN,&enPassantPos);
             int score = minimax(board, profondeur - 1, false, alpha, beta);
             board.undoMove(coup.first, coup.second, capturedPiece, isPromotion);
             meilleurScore = std::max(meilleurScore, score);
@@ -76,7 +80,9 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
         for (const std::pair<int, int>& coup : possibleMoves) {
             Piece* capturedPiece = nullptr;
             bool isPromotion = board.isPromotionMove(coup.first, coup.second, m_color);
-            board.movePiece(coup.first, coup.second, (m_color == Color::WHITE) ? Color::BLACK : Color::WHITE, &capturedPiece, TypePieces::QUEEN);
+            int enPassantPos = -1;
+
+            board.movePiece(coup.first, coup.second, (m_color == Color::WHITE) ? Color::BLACK : Color::WHITE, &capturedPiece, TypePieces::QUEEN,&enPassantPos);
             int score = minimax(board, profondeur - 1, true, alpha, beta);
             board.undoMove(coup.first, coup.second, capturedPiece, isPromotion);
             meilleurScore = std::min(meilleurScore, score);
