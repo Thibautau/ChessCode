@@ -190,7 +190,7 @@ bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition)
     return false;
 }
 
-bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer,Piece** piece, TypePieces promotionType)
+bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer,Piece** piece, TypePieces promotionType, int* enPassantPos)
 {
     Piece* pPiece = getPieceAt(in_iStartPosition);
     bool wasEnPassant = false;
@@ -215,6 +215,9 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
             if(abs(in_iEndPosition - in_iStartPosition) == 16) {
                 int direction = (in_colPlayer == Color::WHITE) ? 1 : -1;
                 m_ipositionEnPassant = in_iStartPosition + direction * 8;
+                if (enPassantPos) {
+                    *enPassantPos = in_iEndPosition;
+                }
                 wasEnPassant = true;
             }
             if(in_iEndPosition/8 == 0 || in_iEndPosition/8 == 7) {
@@ -979,7 +982,7 @@ bool Board::isGameOver(Color colCurrent_player, Color& out_colWinner) {
     return false;
 }
 
-bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion) {
+bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion,int enPassantPos) {
     Piece* movingPiece = getPieceAt(in_iEndPosition);
     if(movingPiece == nullptr) {
         return false;
@@ -992,7 +995,10 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
         movingPiece->setTypePiece(TypePieces::PAWN);
     }
 
-    if(capturedPiece) {
+    if (enPassantPos!=-1) {
+        placePiece(enPassantPos, capturedPiece);
+    }
+    else if(capturedPiece) {
         placePiece(in_iEndPosition, capturedPiece);
     }
 

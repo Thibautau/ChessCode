@@ -43,7 +43,7 @@ public:
     bool placePiece(int in_iPositionPiece, Piece* in_pPiece);
     Piece* getPieceAt(int  in_iPositionPiece) const;
     Piece* getPieceAt(const std::string& in_sPosition) const;
-    bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE, Piece** piece = nullptr,TypePieces promotionType = TypePieces::NONE);
+    bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE, Piece** piece = nullptr,TypePieces promotionType = TypePieces::NONE, int* enPassantPos = nullptr);
 
     void removeRockPossibility(Color in_colPlayer, int i_columnRook);
 
@@ -85,7 +85,7 @@ public:
     std::vector<std::pair<int, int>> listOfPossibleMoves(Color in_colColor);
     int evaluate(Color in_colPlayer) const;
     bool isGameOver(Color colCurrent_player, Color& out_colWinner);
-    bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion=false);
+    bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion=false,int enPassantPos=-1);
 
     bool isPromotionMove(int start, int end, Color color);
     int getPieceValue(TypePieces type);
