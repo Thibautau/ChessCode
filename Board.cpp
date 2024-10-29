@@ -969,6 +969,7 @@ int Board::evaluateMove(const std::pair<int, int>& move, Color color) {
 
 bool Board::isGameOver(Color colCurrent_player, Color& out_colWinner) {
     std::vector<std::pair<int, int>> possibleMoves = listOfPossibleMoves(colCurrent_player);
+
     if(possibleMoves.empty()) {
         bool bisKingChecked = isKingInCheck(colCurrent_player);
         if(bisKingChecked)
@@ -981,6 +982,23 @@ bool Board::isGameOver(Color colCurrent_player, Color& out_colWinner) {
         }
         return true;
     }
+
+    int pieceCount = 0;
+    for (int i = 0; i < 64; ++i) {
+        Piece* piece = getPieceAt(i);
+        if (piece != nullptr) {
+            if (piece->getTypePiece() != TypePieces::KING) {
+                return false;
+            }
+            pieceCount++;
+        }
+    }
+
+    if (pieceCount == 2) {
+        out_colWinner = Color::NONE;
+        return true;
+    }
+
     return false;
 }
 
