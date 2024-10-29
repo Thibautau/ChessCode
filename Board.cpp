@@ -352,29 +352,7 @@ void Board::removeRockPossibility(Color in_color, int i_columnRook) {
     }
 }
 
-void Board::findFirstPiecesOnEachRookMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
-{
-    if(! isValidPosition(in_iPosition))
-    {
-        return;
-    }
 
-    int iNbOfRepetition, iNbMovements;
-    int iNextMove = in_iPosition;
-    const int* itabRookMoves = Piece::getRookMoves(iNbOfRepetition, iNbMovements);
-
-    for (int iIndiceMove = 0; iIndiceMove < iNbMovements; ++iIndiceMove)
-    {
-        iNextMove = iNextMove + itabRookMoves[iIndiceMove];
-
-        int iPieceFoundPosition = -1;
-        Piece* pFirstPieceFound = findFirstPieceOnDirectionThatAttacksInitialPosition(in_iPosition, itabRookMoves[iIndiceMove], iNbOfRepetition, iPieceFoundPosition);
-        if(pFirstPieceFound != nullptr && iPieceFoundPosition != -1)
-        {
-            in_vectPositionPieceFound.push_back(iPieceFoundPosition);
-        }
-    }
-}
 
 int Board::getKingPosition(Color in_kingColor) const
 {
@@ -496,18 +474,16 @@ void Board::findFirstPiecesOnEachBishopMovementsThatAttacksInitialPosition(int i
     }
 
     int iNbOfRepetition, iNbMovements;
-    int iNextMove = in_iPosition;
     const int* itabBishopMoves = Piece::getBishopMoves(iNbOfRepetition, iNbMovements);
 
     for (int iIndiceMove = 0; iIndiceMove < iNbMovements; ++iIndiceMove)
     {
-        iNextMove = iNextMove + itabBishopMoves[iIndiceMove];
 
         int iPieceFoundPosition = -1;
         Piece* pFirstPieceFound = findFirstPieceOnDirectionThatAttacksInitialPosition(in_iPosition, itabBishopMoves[iIndiceMove], iNbOfRepetition, iPieceFoundPosition);
         if(pFirstPieceFound != nullptr && iPieceFoundPosition != -1)
         {
-            in_vectPositionPieceFound.push_back(iNextMove);
+            in_vectPositionPieceFound.push_back(iPieceFoundPosition);
         }
     }
 }
@@ -524,12 +500,35 @@ void Board::findFirstPiecesOnEachKnightMovementsThatAttacksInitialPosition(int i
 
     for (int iIndiceMove = 0; iIndiceMove < iNbMovements; ++iIndiceMove)
     {
-        int iNextMove = in_iPosition + itabKnightMoves[iIndiceMove];
         int iPieceFoundPosition = -1;
         Piece* pFirstPieceFound = findFirstPieceOnDirectionThatAttacksInitialPosition(in_iPosition, itabKnightMoves[iIndiceMove], iNbOfRepetition, iPieceFoundPosition);
         if(pFirstPieceFound != nullptr && iPieceFoundPosition != -1)
         {
-            in_vectPositionPieceFound.push_back(iNextMove);
+            in_vectPositionPieceFound.push_back(iPieceFoundPosition);
+        }
+    }
+}
+
+void Board::findFirstPiecesOnEachRookMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
+{
+    if(! isValidPosition(in_iPosition))
+    {
+        return;
+    }
+
+    int iNbOfRepetition, iNbMovements;
+    int iNextMove = in_iPosition;
+    const int* itabRookMoves = Piece::getRookMoves(iNbOfRepetition, iNbMovements);
+
+    for (int iIndiceMove = 0; iIndiceMove < iNbMovements; ++iIndiceMove)
+    {
+        iNextMove = iNextMove + itabRookMoves[iIndiceMove];
+
+        int iPieceFoundPosition = -1;
+        Piece* pFirstPieceFound = findFirstPieceOnDirectionThatAttacksInitialPosition(in_iPosition, itabRookMoves[iIndiceMove], iNbOfRepetition, iPieceFoundPosition);
+        if(pFirstPieceFound != nullptr && iPieceFoundPosition != -1)
+        {
+            in_vectPositionPieceFound.push_back(iPieceFoundPosition);
         }
     }
 }
