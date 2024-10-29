@@ -98,3 +98,5 @@ TEST(TestBoard, isWhiteKingCheckmated) {
     bool roiBlancEchec = board->isCheckmated(0,4,Color::WHITE);
     EXPECT_TRUE(roiBlancEchec);
 }
+
+

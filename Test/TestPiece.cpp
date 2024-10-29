@@ -853,3 +853,153 @@ TEST_F(BoardTest, QueenMove2) {
     EXPECT_EQ(board.getPieceAt("g4")->getTypePiece(), TypePieces::QUEEN);
     EXPECT_EQ(board.getPieceAt("g4")->getColor(), Color::WHITE);
 }
+
+
+
+
+// Test CheckMate
+
+TEST_F(BoardTest, BaiserDeLaMort)
+{
+    board.clearBoard();
+    board.placePiece("h8", new Piece(TypePieces::KING, Color::WHITE)); // It has to get a king (even if useless)
+
+    board.placePiece("b1", new Piece(TypePieces::KING, Color::BLACK));
+    board.placePiece("c3", new Piece(TypePieces::QUEEN, Color::WHITE));
+    board.placePiece("d3", new Piece(TypePieces::BISHOP, Color::WHITE));
+
+    Color colWinner = Color::NONE;
+
+    bool bResult = board.movePiece("c3b2", Color::WHITE);
+    bool bIsKingCheck = board.isBlackKingCheck();
+    bool bIsGameOver = board.isGameOver(Color::BLACK, colWinner);
+
+    EXPECT_TRUE(bResult);
+    EXPECT_TRUE(bIsKingCheck);
+    EXPECT_TRUE(bIsGameOver);
+    EXPECT_EQ(colWinner, Color::WHITE);
+}
+
+TEST_F(BoardTest, BaiserDeLaMortFailPatte)
+{
+    board.clearBoard();
+    board.placePiece("h8", new Piece(TypePieces::KING, Color::WHITE)); // It has to get a king (even if useless)
+
+    board.placePiece("b1", new Piece(TypePieces::KING, Color::BLACK));
+    board.placePiece("a3", new Piece(TypePieces::QUEEN, Color::WHITE));
+    board.placePiece("c4", new Piece(TypePieces::QUEEN, Color::WHITE));
+
+    Color colWinner = Color::WHITE;
+
+    bool bResult = board.movePiece("c4c3", Color::WHITE);
+    bool bIsKingCheck = board.isBlackKingCheck();
+    bool bIsGameOver = board.isGameOver(Color::BLACK, colWinner);
+
+    EXPECT_TRUE(bResult);
+    EXPECT_FALSE(bIsKingCheck);
+    EXPECT_TRUE(bIsGameOver);
+    EXPECT_EQ(colWinner, Color::NONE);
+}
+
+//Test exemple prof avec la tour qui protège et mets en échec
+TEST_F(BoardTest, RookProtectKingAndAttack)
+{
+    board.clearBoard();
+    board.placePiece("c2", new Piece(TypePieces::KING, Color::WHITE));
+    board.placePiece("h7", new Piece(TypePieces::ROOK, Color::WHITE));
+
+    board.placePiece("d7", new Piece(TypePieces::ROOK, Color::BLACK));
+    board.placePiece("b7", new Piece(TypePieces::KING, Color::BLACK));
+
+    bool bResult = board.movePiece("d7c7", Color::BLACK);
+    bool bIsBlackKingCheck = board.isBlackKingCheck();
+    bool bIsWhiteKingCheck = board.isWhiteKingCheck();
+
+    EXPECT_TRUE(bResult);
+    EXPECT_TRUE(bIsWhiteKingCheck);
+    EXPECT_FALSE(bIsBlackKingCheck);
+}
+
+//Test en passant mets en échec le roi adverse
+TEST_F(BoardTest, EnPassantMetEnEchecRoiAdverse)
+{
+    board.clearBoard();
+    board.placePiece("h8", new Piece(TypePieces::KING, Color::WHITE)); // It has to get a king (even if useless)
+
+    board.placePiece("e7", new Piece(TypePieces::KING, Color::BLACK));
+    board.placePiece("d7", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.placePiece("e5", new Piece(TypePieces::PAWN, Color::WHITE));
+
+    bool bResultBlackMove = board.movePiece("d7d5", Color::BLACK);
+    bool bResultWhiteMove = board.movePiece("e5d6", Color::WHITE);
+    bool bIsKingCheck = board.isBlackKingCheck();
+
+    EXPECT_TRUE(bResultBlackMove);
+    EXPECT_TRUE(bResultWhiteMove);
+    EXPECT_TRUE(bIsKingCheck);
+}
+
+//Test en passant interdit car mets en échec son roi
+TEST_F(BoardTest, EnPassantMetEnEchecSonRoiInterdit)
+{
+    board.clearBoard();
+    board.placePiece("e1", new Piece(TypePieces::KING, Color::WHITE)); // It has to get a king (even if useless)
+    board.placePiece("e5", new Piece(TypePieces::PAWN, Color::WHITE));
+
+    board.placePiece("e7", new Piece(TypePieces::KING, Color::BLACK));
+    board.placePiece("d7", new Piece(TypePieces::PAWN, Color::BLACK));
+    board.placePiece("e6", new Piece(TypePieces::ROOK, Color::BLACK));
+
+    bool bResultBlackMove = board.movePiece("d7d5", Color::BLACK);
+    bool bResultWhiteMove = board.movePiece("e5d6", Color::WHITE);
+    bool bIsBlackKingCheck = board.isBlackKingCheck();
+    bool bIsWhiteKingCheck = board.isWhiteKingCheck();
+
+    EXPECT_TRUE(bResultBlackMove);
+    EXPECT_FALSE(bResultWhiteMove);
+    EXPECT_FALSE(bIsBlackKingCheck);
+    EXPECT_FALSE(bIsWhiteKingCheck);
+}
+
+//Test promotion met en échec roi adverse
+TEST_F(BoardTest, PromotionDameMetRoiAdverseEchec)
+{
+    board.clearBoard();
+    board.placePiece("e1", new Piece(TypePieces::KING, Color::WHITE)); // It has to get a king (even if useless)
+    board.placePiece("e7", new Piece(TypePieces::PAWN, Color::WHITE));
+
+    board.placePiece("g7", new Piece(TypePieces::KING, Color::BLACK));
+    bool bResultWhiteMove = board.movePiece(Color::WHITE, "e7e8", nullptr, TypePieces::QUEEN);
+    bool bIsBlackKingCheck = board.isBlackKingCheck();
+
+    EXPECT_TRUE(bResultWhiteMove);
+    EXPECT_TRUE(bIsBlackKingCheck);
+}
+
+//Test roi qui essaie de manger un pion derrière un autre roi (invalid move)
+TEST_F(BoardTest, KingCantEatPawnDueToOtherKing)
+{
+    board.clearBoard();
+    board.placePiece("e3", new Piece(TypePieces::KING, Color::WHITE));
+    board.placePiece("e4", new Piece(TypePieces::PAWN, Color::WHITE));
+
+    board.placePiece("e5", new Piece(TypePieces::KING, Color::BLACK));
+
+    bool bResultBlackMove = board.movePiece("e5e4",Color::BLACK);
+    bool bIsBlackKingCheck = board.isBlackKingCheck();
+    bool bIsWhiteKingCheck = board.isWhiteKingCheck();
+
+    EXPECT_FALSE(bResultBlackMove);
+    EXPECT_FALSE(bIsBlackKingCheck);
+    EXPECT_FALSE(bIsWhiteKingCheck);
+}
+
+//Test NumberOfMove at the begining of the game
+TEST_F(BoardTest, GoodNumberOfMoveAtTheBeginingOfTheGame)
+{
+    std::vector<std::pair<int, int>> listOfPossibleWhiteMoves = board.listOfPossibleMoves(Color::WHITE);
+    std::vector<std::pair<int, int>> listOfPossibleBlackMoves = board.listOfPossibleMoves(Color::BLACK);
+
+    EXPECT_EQ(listOfPossibleWhiteMoves.size(), 20);
+    EXPECT_EQ(listOfPossibleBlackMoves.size(), 20);
+}

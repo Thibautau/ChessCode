@@ -44,6 +44,7 @@ public:
     Piece* getPieceAt(int  in_iPositionPiece) const;
     Piece* getPieceAt(const std::string& in_sPosition) const;
     bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE, Piece** piece = nullptr,TypePieces promotionType = TypePieces::NONE, int* enPassantPos = nullptr);
+    bool movePiece(Color in_colPlayer, const std::string& move, Piece** piece = nullptr,TypePieces promotionType = TypePieces::NONE, int* enPassantPos = nullptr); // overload of the function right above
 
     void removeRockPossibility(Color in_colPlayer, int i_columnRook);
 
@@ -102,9 +103,7 @@ public:
 
 
     bool placePiece(int in_iRow, int in_iCol, Piece* in_pPiece);
-    //bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     bool isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer);
-    // std::vector<Move> listOfPossibleMoves(Color in_colColor);
     std::vector<Coordinate> possibleMovesForPiece(const Coordinate& in_coordPiece);
     void displayBoard() const;
 

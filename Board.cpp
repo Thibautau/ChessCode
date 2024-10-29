@@ -141,6 +141,13 @@ bool Board::movePiece(const std::string& move, Color in_colPlayer)
     return movePiece(iStartPosition, iEndPosition, in_colPlayer);
 }
 
+bool Board::movePiece(Color in_colPlayer, const std::string& move, Piece** piece,TypePieces promotionType, int* enPassantPos)
+{
+    int iStartPosition, iEndPosition;
+    convertMoveToPositions(move, iStartPosition, iEndPosition);
+    return movePiece(iStartPosition, iEndPosition, in_colPlayer, piece, promotionType, enPassantPos);
+}
+
 bool Board::placePiece(const std::string& move, Piece* in_pPiece)
 {
     int iStartPos = convertToPosition(move[0], move[1]);
@@ -308,8 +315,10 @@ void Board::putOrRemoveKingInCheck(Color in_kingColor, bool in_bPutKingInCheck)
     switch (in_kingColor) {
         case Color::WHITE:
             m_isWhiteKingChecked = in_bPutKingInCheck;
+        break;
         case Color::BLACK:
             m_isBlackKingChecked = in_bPutKingInCheck;
+        break;
         default:
             return;
     }
@@ -974,7 +983,7 @@ bool Board::isGameOver(Color colCurrent_player, Color& out_colWinner) {
         }
         else
         {
-            out_colWinner = Color::WHITE;
+            out_colWinner = Color::NONE;
         }
         return true;
     }
