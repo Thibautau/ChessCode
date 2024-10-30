@@ -92,7 +92,9 @@ public:
     int getPieceValue(TypePieces type);
     int evaluateMove(const std::pair<int, int>& move, Color color);
 
+    std::vector<int> getBoardStateAsVector() const;
 
+    int getIndexByPiece(TypePieces type, Color color) const;
 
 
 

@@ -5,10 +5,10 @@
 #include "Zobrist.h"
 #include <random>
 
-std::vector<std::vector<uint64_t>> zobristTable(64, std::vector<uint64_t>(12));
-uint64_t zobristBlackTurn;
+std::vector<std::vector<uint64_t>> Zobrist::zobristTable(64, std::vector<uint64_t>(12));
+uint64_t Zobrist::zobristBlackTurn;
 
-void initZobrist() {
+void Zobrist::initZobrist() {
     std::random_device rd;
     std::mt19937_64 gen(rd());
     std::uniform_int_distribution<uint64_t> dis;
@@ -21,7 +21,7 @@ void initZobrist() {
     zobristBlackTurn = dis(gen);
 }
 
-uint64_t computeZobristHash(const std::vector<int>& board, bool isBlackTurn) {
+uint64_t Zobrist::computeZobristHash(const std::vector<int>& board, bool isBlackTurn) {
     uint64_t h = 0;
     if (isBlackTurn) {
         h ^= zobristBlackTurn;
