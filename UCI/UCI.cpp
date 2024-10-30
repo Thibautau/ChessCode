@@ -20,25 +20,24 @@ void UCI::uciCommunication()
 
         if (sInput == "uci") // Receive this input at the begining
         {
-            std::cout << "id name " << ENGINENAME << std::endl;
-            std::cout << "id author Thibaut" << std::endl;
-            std::cout << "uciok" << std::endl;
+            inputUCI();
         }
-        else if (sInput == "quit")
-        {
-            break; // Quitte la boucle si la commande "quit" est reçue
-        }
+
         else if (sInput == "isready")
         {
-            std::cout << "readyok" << std::endl;
+            inputIsReady();
+        }
+        else if (sInput == "ucinewgame")
+        {
+            inputUCINewGame();
         }
         else if (sInput == "position")
         {
-            //break; // Quitte la boucle si la commande "quit" est reçue
+            inputPosition();
         }
-        else if (sInput == "go")
+        else if (sInput == "go") // Best Move
         {
-            //break; // Quitte la boucle si la commande "quit" est reçue
+            inputGo();
         }
         else if (sInput == "stop")
         {
@@ -48,13 +47,41 @@ void UCI::uciCommunication()
         {
             //break; // Quitte la boucle si la commande "quit" est reçue
         }
-        else if (sInput == "ucinewgame")
-        {
-            //break; // Quitte la boucle si la commande "quit" est reçue
-        }
         else if (sInput == "setoptions")
         {
             //break; // Quitte la boucle si la commande "quit" est reçue
         }
+        else if (sInput == "quit")
+        {
+            break; // Quitte la boucle si la commande "quit" est reçue
+        }
     }
+}
+
+void UCI::inputUCI()
+{
+    std::cout << "id name " << ENGINENAME << std::endl;
+    std::cout << "id author Thibaut" << std::endl;
+    //Options here if needed
+    std::cout << "uciok" << std::endl;
+}
+
+void UCI::inputIsReady()
+{
+    std::cout << "readyok" << std::endl;
+}
+
+void UCI::inputUCINewGame()
+{
+
+}
+
+void UCI::inputPosition()
+{
+
+}
+
+void UCI::inputGo()
+{
+
 }

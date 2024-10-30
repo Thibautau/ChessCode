@@ -13,6 +13,11 @@ public:
     static std::string ENGINENAME;
 
     static void uciCommunication();
+    static void inputUCI();
+    static void inputIsReady();
+    static void inputUCINewGame();
+    static void inputPosition();
+    static void inputGo();
 };
 
 
