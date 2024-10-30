@@ -1003,3 +1003,25 @@ TEST_F(BoardTest, GoodNumberOfMoveAtTheBeginingOfTheGame)
     EXPECT_EQ(listOfPossibleWhiteMoves.size(), 20);
     EXPECT_EQ(listOfPossibleBlackMoves.size(), 20);
 }
+
+//Test Bug we had when the black moves, it promotes a white pawn to a queen
+TEST_F(BoardTest, BugPawnPromoteToQueenWhenEnemyMoves)
+{
+    bool bMove1 = board.movePiece("e2e4");
+    bool bMove2 = board.movePiece("f7f5", Color::BLACK);
+    bool bMove3 = board.movePiece("e4f5");
+    bool bMove4 = board.movePiece("g7g6", Color::BLACK);
+    bool bIsBlackKingCheck = board.isBlackKingCheck();
+    bool bIsWhiteKingCheck = board.isWhiteKingCheck();
+
+    EXPECT_TRUE(bMove1);
+    EXPECT_TRUE(bMove2);
+    EXPECT_TRUE(bMove3);
+    EXPECT_TRUE(bMove4);
+
+    EXPECT_EQ(board.getPieceAt("f5")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("f5")->getColor(), Color::WHITE);
+    EXPECT_FALSE(bIsBlackKingCheck);
+    EXPECT_FALSE(bIsWhiteKingCheck);
+}
+
