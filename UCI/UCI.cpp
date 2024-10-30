@@ -5,14 +5,18 @@
 #include "UCI.h"
 
 #include <iostream>
+#include <sstream>
 
+std::string UCI::m_engineName = "MonEngine v1";
+GameMode UCI::m_gameMode = GameMode::JVB;
+UCI::UCI()
+{
 
-std::string UCI::ENGINENAME = "MonEngine v1";
+    m_mainChessGame = new MainChessGame(m_gameMode);
+}
 
 void UCI::uciCommunication()
 {
-
-
     std::string sInput;
     while(true)
     {
@@ -33,7 +37,7 @@ void UCI::uciCommunication()
         }
         else if (sInput == "position")
         {
-            inputPosition();
+            inputPosition(sInput);
         }
         else if (sInput == "go") // Best Move
         {
@@ -60,7 +64,7 @@ void UCI::uciCommunication()
 
 void UCI::inputUCI()
 {
-    std::cout << "id name " << ENGINENAME << std::endl;
+    std::cout << "id name " << m_engineName << std::endl;
     std::cout << "id author Thibaut" << std::endl;
     //Options here if needed
     std::cout << "uciok" << std::endl;
@@ -73,15 +77,38 @@ void UCI::inputIsReady()
 
 void UCI::inputUCINewGame()
 {
-
+    m_mainChessGame = new MainChessGame(m_gameMode);
 }
 
-void UCI::inputPosition()
-{
+void UCI::inputPosition(std::string &in_sInput) const {
+    std::string token;
+    std::istringstream ss(in_sInput);
+    ss >> token; // Ignore "position"
+    ss >> token;
 
+    if (token == "startpos") {
+        m_mainChessGame->initChessGame();
+        ss >> token; // Move on to "moves" if present
+    }
+    else if (token == "fen") {
+        std::string fen;
+        while (ss >> token && token != "moves") {
+            fen += token + " ";
+        }
+        m_mainChessGame->setBoardFromFEN(fen);
+    }
+
+    while (ss >> token)
+    {
+        m_mainChessGame->playTurn(); // Play each move
+        std::cout << token << std::endl;
+    }
 }
+
 
 void UCI::inputGo()
 {
-
+    std::pair<int, int> bestMove = m_mainChessGame->findBestMoveForCurrentPlayer();
+    std::cout << "bestmove " << m_mainChessGame->indexToPosition(bestMove.first)
+              << m_mainChessGame->indexToPosition(bestMove.second) << std::endl;
 }

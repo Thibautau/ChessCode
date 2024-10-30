@@ -16,7 +16,7 @@ Color Bot::getPlayerColor() const {
 
 void Bot::play(Board& board, int& start, int& end) {
     std::pair<int, int> meilleurCoup;
-    int profondeur_max = 6;
+    int profondeur_max = 4;
 
     choisir_meilleur_coup(board, profondeur_max, meilleurCoup);
 

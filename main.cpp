@@ -12,7 +12,8 @@ int main() {
     /*bool bUseUCI = true;
     if(bUseUCI)
     {*/
-        UCI::uciCommunication();
+        UCI* uci = new UCI();
+        uci->uciCommunication();
     //}
 
     while (!game->isGameOver()) {

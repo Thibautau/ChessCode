@@ -6,6 +6,8 @@
 #include "Player.h"
 #include "PlayerHuman.h"
 #include "Bot.h"
+#include <sstream>
+#include <cctype>
 #include <iostream>
 
 MainChessGame::MainChessGame(GameMode mode)
@@ -50,7 +52,7 @@ void MainChessGame::playTurn()
 
     m_currentPlayer->play(*m_board, coordStart, coordEnd);
 
-    debugPrintMove(coordStart, coordEnd);
+    //debugPrintMove(coordStart, coordEnd);
 
     //std::cout << "CoordStart:" << coordStart << " | coordEnd: " << coordEnd << "\n";
     if (m_board->movePiece(coordStart, coordEnd, m_currentPlayer->getPlayerColor()))
@@ -71,6 +73,78 @@ std::string MainChessGame::indexToPosition(int pos) {
     char rowChar = '1' + row;
 
     return std::string{columnChar} + rowChar;
+}
+
+void MainChessGame::setBoardFromFEN(const std::string& fen) {
+    m_board->clearBoard(); // Commence par vider le plateau
+
+    std::istringstream fenStream(fen);
+    std::string boardPart, activeColor, castling, enPassant, halfMoveClock, fullMoveNumber;
+
+    // Divise les parties de la notation FEN
+    fenStream >> boardPart >> activeColor >> castling >> enPassant >> halfMoveClock >> fullMoveNumber;
+
+    // Place les pièces sur le plateau
+    int position = 0;
+    for (char ch : boardPart) {
+        if (ch == '/') {
+            continue; // Passe à la rangée suivante dans FEN
+        } else if (isdigit(ch)) {
+            position += ch - '0'; // Passe le nombre de cases vides indiqué
+        } else {
+            Color color = isupper(ch) ? Color::WHITE : Color::BLACK;
+            TypePieces type;
+
+            switch (tolower(ch)) {
+                case 'p': type = TypePieces::PAWN; break;
+                case 'r': type = TypePieces::ROOK; break;
+                case 'n': type = TypePieces::KNIGHT; break;
+                case 'b': type = TypePieces::BISHOP; break;
+                case 'q': type = TypePieces::QUEEN; break;
+                case 'k': type = TypePieces::KING; break;
+                default: continue;
+            }
+
+            m_board->placePiece(position, new Piece(type, color));
+            position++;
+        }
+    }
+
+    // Définit le joueur actif
+    if (activeColor == "w")
+    {
+        if(m_currentPlayer->getPlayerColor() != Color::WHITE) // If white is not the active player
+        {
+            changeCurrentPlayer();
+        }
+    }
+    else
+    {
+        if(m_currentPlayer->getPlayerColor() != Color::BLACK) // If white is not the active player
+        {
+            changeCurrentPlayer();
+        }
+    }
+
+    // Configure les droits de roque
+    m_board->setCastlingRightsForFenNotation(castling);
+
+    // Configure la position pour la prise en passant, si applicable
+    if (enPassant != "-") {
+        int enPassantPos = m_board->convertToPosition(enPassant[0], enPassant[1]);
+        m_board->setEnPassantPosition(enPassantPos);
+    }
+    else
+    {
+        m_board->setEnPassantPosition(-1); // Valeur par défaut si aucune prise en passant n'est possible
+    }
+}
+
+std::pair<int, int> MainChessGame::findBestMoveForCurrentPlayer()
+{
+    int iRow, iCol;
+    m_currentPlayer->play(*m_board, iRow, iCol);
+    return { iRow, iCol };
 }
 
 void MainChessGame::debugPrintMove(int start, int end) {

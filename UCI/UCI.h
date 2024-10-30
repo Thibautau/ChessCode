@@ -6,18 +6,26 @@
 #define UCI_H
 #include <string>
 
+#include "MainChessGame.h"
+
 
 class UCI {
+private:
+    //Attributs de classes
+    MainChessGame *m_mainChessGame;
+
 
 public:
-    static std::string ENGINENAME;
+    UCI();
 
-    static void uciCommunication();
-    static void inputUCI();
-    static void inputIsReady();
-    static void inputUCINewGame();
-    static void inputPosition();
-    static void inputGo();
+    static std::string m_engineName;
+    static GameMode m_gameMode;
+    void uciCommunication();
+    void inputUCI();
+    void inputIsReady();
+    void inputUCINewGame();
+    void inputPosition(std::string &in_sInput) const;
+    void inputGo();
 };
 
 

@@ -35,6 +35,9 @@ public:
     Player* getCurrentPlayer() const;
     Player* getWaitingPlayer() const;
 
+    void setBoardFromFEN(const std::string& fen);
+    std::pair<int, int> findBestMoveForCurrentPlayer();
+
     Board* getBoard() const;
 };
 

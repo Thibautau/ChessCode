@@ -154,6 +154,20 @@ bool Board::placePiece(const std::string& move, Piece* in_pPiece)
     return placePiece(iStartPos, in_pPiece);
 }
 
+void Board::setCastlingRightsForFenNotation(const std::string& castling)
+{
+    m_bWhiteKingCanLittleRock = (castling.find('K') != std::string::npos);
+    m_bWhiteKingCanBigRock = (castling.find('Q') != std::string::npos);
+    m_bBlackKingCanLittleRock = (castling.find('k') != std::string::npos);
+    m_bBlackKingCanBigRock = (castling.find('q') != std::string::npos);
+}
+
+void Board::setEnPassantPosition(int enPassantPos)
+{
+    m_ipositionEnPassant = enPassantPos;
+}
+
+
 bool Board::isKingInCheck(Color in_kingColor) const
 {
     if(in_kingColor == Color::WHITE)
