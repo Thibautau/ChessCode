@@ -24,7 +24,7 @@ public:
     void setScore(int in_iScore);
     void play(Board& board, int& start, int& end) override;
     static void getInput(std::string& input);
-    bool isInputValid(const std::string& in_sInput, int& out_start, int& out_end);
+    static bool isInputValid(const std::string& in_sInput, int& out_start, int& out_end);
     static bool isValidCoordinate(char col, char row);
 };
 

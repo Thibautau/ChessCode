@@ -11,6 +11,7 @@ class UCI {
 
 public:
     static std::string ENGINENAME;
+
     static void uciCommunication();
 };
 
