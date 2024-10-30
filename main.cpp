@@ -9,11 +9,11 @@ int main() {
     MainChessGame* game = new MainChessGame(mode);
     game->initChessGame();
 
-    bool bUseUCI = true;
+    /*bool bUseUCI = true;
     if(bUseUCI)
-    {
+    {*/
         UCI::uciCommunication();
-    }
+    //}
 
     while (!game->isGameOver()) {
         game->playTurn();
