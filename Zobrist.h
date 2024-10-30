@@ -24,11 +24,11 @@ private:
     const int FOU_NOIR = 10;
     const int DAME_NOIR = 11;
     const int ROI_NOIR = 12;
-    std::vector<std::vector<uint64_t>> zobristTable;
-    uint64_t zobristBlackTurn;
+    static std::vector<std::vector<uint64_t>> zobristTable;
+    static uint64_t zobristBlackTurn;
 public:
-    void initZobrist();
-    uint64_t computeZobristHash(const std::vector<int>& board, bool isBlackTurn);
+    static void initZobrist();
+    static uint64_t computeZobristHash(const std::vector<int>& board, bool isBlackTurn);
 
 };
 

@@ -8,10 +8,24 @@
 #include "Type.h"
 #include "Board.h"
 #include "Player.h"
+#include <unordered_map>
+#include <cstdint>
+
+const int EXACT = 0;
+const int ALPHA_CUT = -1;
+const int BETA_CUT = 1;
+
+struct TranspositionTableEntry {
+    int depth;
+    int score;
+    int flag; // 0: Exact, -1: Alpha cut, 1: Beta cut
+};
 
 class Bot : public Player {
 private:
     Color m_color;
+    std::unordered_map<uint64_t, TranspositionTableEntry> transpositionTable;
+    static int nodeCount;
 
 public:
     Bot(Color color);
