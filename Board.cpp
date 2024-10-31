@@ -290,7 +290,7 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
             m_ipositionEnPassant = -1;
         }
 
-        if(piece) {
+        if(piece && !wasEnPassant) {
             *piece = getPieceAt(in_iEndPosition);
         }
         placePiece(in_iEndPosition, pPiece);
@@ -958,12 +958,125 @@ int Board::evaluateMove(const std::pair<int, int>& move, Color color) {
     Piece* capturedPiece = getPieceAt(move.second);
     int moveValue = 0;
 
+    // Évaluation des pièces capturées
     if (capturedPiece != nullptr) {
         moveValue += getPieceValue(capturedPiece->getTypePiece());
     }
 
+    // // Évaluation de la structure des pions
+    Piece* movingPiece = getPieceAt(move.first);
+    if (movingPiece->getTypePiece() == TypePieces::PAWN) {
+        moveValue += evaluatePawnStructure(move.first, color);
+    }
+
+    moveValue += this->evaluateKingSafety(color);
+
     return moveValue;
 }
+
+
+
+//@TODO j'ai mis des cas et valeurs au pif (les vérifs sont pas très pertinentes pour l'intant)
+int Board::evaluateKingSafety(Color color) const {
+    // Identifiez la position du roi
+    int kingPosition = (color == Color::WHITE) ? m_iWhiteKingPosition : m_iBlackKingPosition;
+    if (kingPosition == -1) {
+        return 0;
+    }
+
+    int score = 0;
+
+    // Vérifiez les cases adjacentes du roi
+    std::vector<int> adjacentSquares = {kingPosition - 9, kingPosition - 8, kingPosition - 7,
+                                        kingPosition - 1, kingPosition + 1,
+                                        kingPosition + 7, kingPosition + 8, kingPosition + 9};
+
+    for (int pos : adjacentSquares) {
+        if (pos >= 0 && pos < 64) {
+            Piece* piece = getPieceAt(pos);
+            if (piece != nullptr) {
+                if (piece->getColor() != color) {
+                    score -= 5;
+                }
+            }
+        }
+    }
+
+    for (int pos : adjacentSquares) {
+        if (pos >= 0 && pos < 64) {
+            Piece* piece = getPieceAt(pos);
+            if (piece != nullptr && piece->getColor() == color) {
+                score += 3;
+            }
+        }
+    }
+
+    return score;
+}
+
+
+//@TODO j'ai mis des cas et valeurs au pif (mais de ce que j'ai lu la structure des pions est importantes dans le jeu)
+int Board::evaluatePawnStructure(int position, Color color) const {
+    int score = 0;
+
+    // Déterminer la colonne du pion
+    int column = position % 8;
+    int row = position / 8;
+
+    // Définir la direction en fonction de la couleur
+    int direction = (color == Color::WHITE) ? 1 : -1;
+
+    // Vérifier les pions adjacents
+    bool hasLeftNeighbor = (column > 0) && (getPieceAt(position - 1) != nullptr && getPieceAt(position - 1)->getTypePiece() == TypePieces::PAWN);
+    bool hasRightNeighbor = (column < 7) && (getPieceAt(position + 1) != nullptr && getPieceAt(position + 1)->getTypePiece() == TypePieces::PAWN);
+
+    // Évaluation des pions isolés
+    if (hasLeftNeighbor || hasRightNeighbor) {
+        score -= 3;
+    }
+
+    // Évaluation des pions doublés
+    if (hasLeftNeighbor && hasRightNeighbor) {
+        score -= 5;
+    }
+
+    // Pions avancés
+    if ((color == Color::WHITE && position / 8 > 2) || (color == Color::BLACK && position / 8 < 5)) {
+        score += 5; // Pion avancé
+    }
+
+    // Protection diagonale gauche
+    if (column > 0 && row >= 0 && row < 7) { // Vérifie que le pion n'est pas en dehors des limites
+        Piece* leftDiagonalPiece = getPieceAt(position + (direction * 8) - 1); // position + direction * 8 (pour ligne) - 1 (pour colonne)
+        if (leftDiagonalPiece != nullptr && leftDiagonalPiece->getColor() == color) {
+            score += 2; // Protège un allié en diagonale gauche
+        }
+    }
+
+    // Protection diagonale droite
+    if (column < 7 && row >= 0 && row < 7) { // Vérifie que le pion n'est pas en dehors des limites
+        Piece* rightDiagonalPiece = getPieceAt(position + (direction * 8) + 1); // position + direction * 8 (pour ligne) + 1 (pour colonne)
+        if (rightDiagonalPiece != nullptr && rightDiagonalPiece->getColor() == color) {
+            score += 2; // Protège un allié en diagonale droite
+        }
+    }
+
+
+    // Vérifier les colonnes ouvertes
+    bool isOpenColumn = true;
+    for (int row = 0; row < 8; ++row) {
+        if (getPieceAt(row * 8 + column) != nullptr) {
+            isOpenColumn = false;
+            break;
+        }
+    }
+    if (isOpenColumn) {
+        score += 2; // Pion sur une colonne ouverte
+    }
+
+    return score;
+}
+
 
 
 

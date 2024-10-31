@@ -95,6 +95,8 @@ public:
     std::vector<int> getBoardStateAsVector() const;
 
     int getIndexByPiece(TypePieces type, Color color) const;
+    int evaluatePawnStructure(int position, Color color) const;
+    int evaluateKingSafety(Color color) const;
 
 
 
