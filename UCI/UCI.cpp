@@ -45,11 +45,7 @@ void UCI::uciCommunication()
         }
         else if (sInput == "stop")
         {
-            //break; // Quitte la boucle si la commande "quit" est reçue
-        }
-        else if (sInput == "bestmove")
-        {
-            //break; // Quitte la boucle si la commande "quit" est reçue
+            inputStop();
         }
         else if (sInput == "setoptions")
         {
@@ -108,7 +104,18 @@ void UCI::inputPosition(std::string &in_sInput) const {
 
 void UCI::inputGo()
 {
-    std::pair<int, int> bestMove = m_mainChessGame->findBestMoveForCurrentPlayer();
+    findBestMove();
+}
+
+void UCI::inputStop() {
+    findBestMove();
+}
+
+
+void UCI::findBestMove() {
+    std::pair<int,int> bestMove = m_mainChessGame->findBestMoveForCurrentPlayer();
     std::cout << "bestmove " << m_mainChessGame->indexToPosition(bestMove.first)
               << m_mainChessGame->indexToPosition(bestMove.second) << std::endl;
 }
+
+
