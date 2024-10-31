@@ -25,9 +25,9 @@ public:
     void inputIsReady();
     void inputUCINewGame();
     void inputPosition(std::string &in_sInput) const;
-    void inputGo();
+    void inputGo(std::string &in_sInput);
     void inputStop();
-    void findBestMove();
+    void findBestMove(int depth);
 };
 
 

@@ -16,6 +16,7 @@ private:
 public:
     Bot(Color color);
     void play(Board& board, int& start, int& end) override;
+    void playWithDepth(Board& board, int& start, int& end, int depth);
     Color getPlayerColor() const override;
     void choisir_meilleur_coup(Board& board, int profondeur_max,std::pair<int, int>& meilleurCoup);
     int minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta);

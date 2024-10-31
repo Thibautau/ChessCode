@@ -140,12 +140,18 @@ void MainChessGame::setBoardFromFEN(const std::string& fen) {
     }
 }
 
-std::pair<int, int> MainChessGame::findBestMoveForCurrentPlayer()
-{
+std::pair<int, int> MainChessGame::findBestMoveForCurrentPlayer(int depth = -1) {
     int iRow, iCol;
-    m_currentPlayer->play(*m_board, iRow, iCol);
-    return { iRow, iCol };
+    if(depth > 0) {
+        m_currentPlayer->playWithDepth(*m_board, iRow, iCol, depth);
+    }
+    else {
+        m_currentPlayer->play(*m_board, iRow, iCol);
+    }
+    return {iRow, iCol};
 }
+
+
 
 void MainChessGame::debugPrintMove(int start, int end) {
     std::cout << "Deplacement de " << indexToPosition(start) << " a " << indexToPosition(end) << std::endl;

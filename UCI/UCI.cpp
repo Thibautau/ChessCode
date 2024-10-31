@@ -41,7 +41,7 @@ void UCI::uciCommunication()
         }
         else if (sInput == "go") // Best Move
         {
-            inputGo();
+            inputGo(sInput);
         }
         else if (sInput == "stop")
         {
@@ -102,20 +102,29 @@ void UCI::inputPosition(std::string &in_sInput) const {
 }
 
 
-void UCI::inputGo()
-{
-    findBestMove();
+void UCI::inputGo(std::string &in_sInput) {
+    int depth = -1;
+    std::istringstream iss(in_sInput);
+    std::string token;
+
+    while (iss >> token) {
+        if (token == "depth") {
+            iss >> depth;
+        }
+    }
+    findBestMove(depth);
 }
+
 
 void UCI::inputStop() {
-    findBestMove();
+    int depth = -1;
+    findBestMove(depth);
 }
 
-
-void UCI::findBestMove() {
-    std::pair<int,int> bestMove = m_mainChessGame->findBestMoveForCurrentPlayer();
-    std::cout << "bestmove " << m_mainChessGame->indexToPosition(bestMove.first)
-              << m_mainChessGame->indexToPosition(bestMove.second) << std::endl;
+void UCI::findBestMove(int depth) {
+    std::pair<int, int> bestMove = m_mainChessGame->findBestMoveForCurrentPlayer(depth);
+    std::cout << "bestmove" << m_mainChessGame->indexToPosition(bestMove.first)
+            << m_mainChessGame->indexToPosition(bestMove.second) << std::endl;
 }
 
 

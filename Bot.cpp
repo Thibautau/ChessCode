@@ -24,6 +24,13 @@ void Bot::play(Board& board, int& start, int& end) {
     end = meilleurCoup.second;
 }
 
+void Bot::playWithDepth(Board& board, int& start, int& end, int depth) {
+    std::pair<int, int> meilleurCoup;
+    choisir_meilleur_coup(board, depth, meilleurCoup);
+    start = meilleurCoup.first;
+    end = meilleurCoup.second;
+}
+
 void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int, int>& meilleurCoup) {
     int meilleurScore = std::numeric_limits<int>::min();
     meilleurCoup = { -1, -1 };
