@@ -19,6 +19,7 @@ public:
     UCI();
 
     static std::string m_engineName;
+    static std::string m_engineCode;
     static GameMode m_gameMode;
     void uciCommunication();
     void inputUCI();
@@ -28,6 +29,7 @@ public:
     void inputGo(std::string &in_sInput);
     void inputStop();
     void findBestMove(int depth);
+    void inputRegister(const std::string &in_sInput);
 };
 
 

@@ -51,6 +51,10 @@ void UCI::uciCommunication()
         {
             //break; // Quitte la boucle si la commande "quit" est reçue
         }
+        else if (sInput == "register")
+        {
+            inputRegister(sInput);
+        }
         else if (sInput == "quit")
         {
             break; // Quitte la boucle si la commande "quit" est reçue
@@ -125,6 +129,43 @@ void UCI::findBestMove(int depth) {
     std::pair<int, int> bestMove = m_mainChessGame->findBestMoveForCurrentPlayer(depth);
     std::cout << "bestmove" << m_mainChessGame->indexToPosition(bestMove.first)
             << m_mainChessGame->indexToPosition(bestMove.second) << std::endl;
+}
+
+
+void UCI::inputRegister(const std::string &in_sInput) {
+    std::istringstream ss(in_sInput);
+    std::string command, token;
+
+    ss >> command;
+
+    if (command == "later") {
+        std::cout << "registration later" << std::endl;
+        return;
+    }
+
+    std::string name, code;
+
+    while (ss >> token) {
+        if (token == "name") {
+            ss >> name;
+        }
+        else if (token == "code") {
+            ss >> code;
+        }
+    }
+
+    if (!name.empty() || !code.empty()) {
+        std::cout << "registration success" << std::endl;
+        if (!name.empty()) {
+            m_engineName = name;
+        }
+        else {
+            m_engineCode = code;
+        }
+    }
+    else {
+        std::cout << "registration error" << std::endl;
+    }
 }
 
 
