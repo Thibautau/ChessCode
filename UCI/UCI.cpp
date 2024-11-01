@@ -11,8 +11,8 @@ std::string UCI::m_engineName = "MonEngine v1";
 GameMode UCI::m_gameMode = GameMode::JVB;
 UCI::UCI()
 {
-
     m_mainChessGame = new MainChessGame(m_gameMode);
+    m_debugMode = false;
 }
 
 void UCI::uciCommunication()
@@ -30,6 +30,9 @@ void UCI::uciCommunication()
         else if (sInput == "isready")
         {
             inputIsReady();
+        }
+        else if (sInput == "debug") {
+            inputDebug(sInput);
         }
         else if (sInput == "ucinewgame")
         {
@@ -73,6 +76,17 @@ void UCI::inputUCI()
 void UCI::inputIsReady()
 {
     std::cout << "readyok" << std::endl;
+}
+
+void UCI::inputDebug(const std::string &in_sInput) {
+    if(in_sInput == "on") {
+        m_debugMode = true;
+        std::cout << "debug mode activated" << std::endl;
+    }
+    else if(in_sInput == "off") {
+        m_debugMode = false;
+        std::cout << "debug mode deactivated" << std::endl;
+    }
 }
 
 void UCI::inputUCINewGame()

@@ -13,6 +13,7 @@ class UCI {
 private:
     //Attributs de classes
     MainChessGame *m_mainChessGame;
+    bool m_debugMode;
 
 
 public:
@@ -24,6 +25,7 @@ public:
     void uciCommunication();
     void inputUCI();
     void inputIsReady();
+    void inputDebug(const std::string &in_sInput);
     void inputUCINewGame();
     void inputPosition(std::string &in_sInput) const;
     void inputGo(std::string &in_sInput);
