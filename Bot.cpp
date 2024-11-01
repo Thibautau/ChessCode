@@ -11,6 +11,7 @@
 
 //@TODO Vérification de l'implémentation des table de transposition (docs sur le discord)
 //@TODO Ajout des opération XOR pour le changement des hash avec Zobrist plutôt que tout recalculer (docs sur le discord)
+//@TODO L'ordering+nouveau système d'évaluation = suppression de pions et ralentissement (2x moins de noeud à évaluer mais 2,5x fois moins de nodes/s)
 
 
 /* Actuellement implémenter
@@ -29,7 +30,7 @@ Color Bot::getPlayerColor() const {
 
 void Bot::play(Board& board, int& start, int& end) {
     std::pair<int, int> meilleurCoup;
-    int profondeur_max = 4;
+    int profondeur_max = 6;
 
     choisir_meilleur_coup(board, profondeur_max, meilleurCoup);
 
@@ -85,9 +86,9 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
     }
 
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE));
-    std::sort(possibleMoves.begin(), possibleMoves.end(), [&](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+    /*std::sort(possibleMoves.begin(), possibleMoves.end(), [&](const std::pair<int, int>& a, const std::pair<int, int>& b) {
         return board.evaluateMove(a, m_color) > board.evaluateMove(b, m_color);
-    });
+    });*/
 
     if (estMaximisant) {
         int meilleurScore = std::numeric_limits<int>::min();
@@ -108,7 +109,8 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
         }
         transpositionTable[zobristHash] = {profondeur, meilleurScore, EXACT};
         return meilleurScore;
-    } else {
+    }
+    else {
         int meilleurScore = std::numeric_limits<int>::max();
         for (const std::pair<int, int>& coup : possibleMoves) {
             Piece* capturedPiece = nullptr;

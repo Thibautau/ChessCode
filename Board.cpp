@@ -1019,63 +1019,89 @@ int Board::evaluateKingSafety(Color color) const {
 int Board::evaluatePawnStructure(int position, Color color) const {
     int score = 0;
 
-    // Déterminer la colonne du pion
+    // Déterminer la colonne et la ligne du pion
     int column = position % 8;
     int row = position / 8;
 
     // Définir la direction en fonction de la couleur
     int direction = (color == Color::WHITE) ? 1 : -1;
 
-    // Vérifier les pions adjacents
-    bool hasLeftNeighbor = (column > 0) && (getPieceAt(position - 1) != nullptr && getPieceAt(position - 1)->getTypePiece() == TypePieces::PAWN);
-    bool hasRightNeighbor = (column < 7) && (getPieceAt(position + 1) != nullptr && getPieceAt(position + 1)->getTypePiece() == TypePieces::PAWN);
-
-    // Évaluation des pions isolés
-    if (hasLeftNeighbor || hasRightNeighbor) {
-        score -= 3;
+    // Vérifier les pions isolés
+    bool isIsolated = true;
+    if (column > 0) {
+        for (int r = 0; r < 8; ++r) {
+            Piece* neighbor = getPieceAt(r * 8 + column - 1);
+            if (neighbor != nullptr && neighbor->getTypePiece() == TypePieces::PAWN && neighbor->getColor() == color) {
+                isIsolated = false;
+                break;
+            }
+        }
+    }
+    if (column < 7) {
+        for (int r = 0; r < 8; ++r) {
+            Piece* neighbor = getPieceAt(r * 8 + column + 1);
+            if (neighbor != nullptr && neighbor->getTypePiece() == TypePieces::PAWN && neighbor->getColor() == color) {
+                isIsolated = false;
+                break;
+            }
+        }
+    }
+    if (isIsolated) {
+        score -= 10;
     }
 
-    // Évaluation des pions doublés
-    if (hasLeftNeighbor && hasRightNeighbor) {
+    // Vérifier les pions doublés dans la même colonne
+    bool isDoubled = false;
+    for (int r = 0; r < 8; ++r) {
+        if (r != row) {
+            Piece* neighbor = getPieceAt(r * 8 + column);
+            if (neighbor != nullptr && neighbor->getTypePiece() == TypePieces::PAWN && neighbor->getColor() == color) {
+                isDoubled = true;
+                break;
+            }
+        }
+    }
+    if (isDoubled) {
         score -= 5;
     }
 
     // Pions avancés
-    if ((color == Color::WHITE && position / 8 > 2) || (color == Color::BLACK && position / 8 < 5)) {
-        score += 5; // Pion avancé
+    if ((color == Color::WHITE && row > 2) || (color == Color::BLACK && row < 5)) {
+        score += 5;
     }
 
     // Protection diagonale gauche
-    if (column > 0 && row >= 0 && row < 7) { // Vérifie que le pion n'est pas en dehors des limites
-        Piece* leftDiagonalPiece = getPieceAt(position + (direction * 8) - 1); // position + direction * 8 (pour ligne) - 1 (pour colonne)
+    if (column > 0 && row >= 0 && row < 7) {
+        Piece* leftDiagonalPiece = getPieceAt(position + (direction * 8) - 1);
         if (leftDiagonalPiece != nullptr && leftDiagonalPiece->getColor() == color) {
-            score += 2; // Protège un allié en diagonale gauche
+            score += 2;
         }
     }
 
     // Protection diagonale droite
-    if (column < 7 && row >= 0 && row < 7) { // Vérifie que le pion n'est pas en dehors des limites
-        Piece* rightDiagonalPiece = getPieceAt(position + (direction * 8) + 1); // position + direction * 8 (pour ligne) + 1 (pour colonne)
+    if (column < 7 && row >= 0 && row < 7) {
+        Piece* rightDiagonalPiece = getPieceAt(position + (direction * 8) + 1);
         if (rightDiagonalPiece != nullptr && rightDiagonalPiece->getColor() == color) {
-            score += 2; // Protège un allié en diagonale droite
+            score += 2;
         }
     }
 
-
-    // Vérifier les colonnes ouvertes
+    // Vérifier les colonnes ouvertes (sans pions adverses)
     bool isOpenColumn = true;
-    for (int row = 0; row < 8; ++row) {
-        if (getPieceAt(row * 8 + column) != nullptr) {
+    for (int r = 0; r < 8; ++r) {
+        Piece* piece = getPieceAt(r * 8 + column);
+        if (piece != nullptr && piece->getColor() != color) {
             isOpenColumn = false;
             break;
         }
     }
     if (isOpenColumn) {
-        score += 2; // Pion sur une colonne ouverte
+        score += 3;
     }
 
     return score;
 }
+
 
 
 
