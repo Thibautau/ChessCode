@@ -26,7 +26,7 @@ public:
     std::string indexToPosition(int pos);
     void debugPrintMove(int start, int end);
 
-    void playTurn();
+    void playTurn(const std::string& move = "", char promotion = 0);
     void changeCurrentPlayer();
 
     bool isGameOver();

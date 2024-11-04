@@ -42,27 +42,43 @@ void MainChessGame::initChessGame() const
     m_board->initializeBoard();
 }
 
-void MainChessGame::playTurn()
+void MainChessGame::playTurn(const std::string& move, char promotion)
 {
     std::cout << "C'est au tour de " << (m_currentPlayer->getPlayerColor() == Color::WHITE ? "Blanc" : "Noir") << std::endl;
 
     //m_board->displayBoard();
-    int coordStart;
-    int coordEnd;
 
-    m_currentPlayer->play(*m_board, coordStart, coordEnd);
+    if (move.empty()) {
+        m_board->displayBoard();
+        int coordStart;
+        int coordEnd;
+        m_currentPlayer->play(*m_board, coordStart, coordEnd);
+        if (m_board->movePiece(coordStart, coordEnd, m_currentPlayer->getPlayerColor()))
+        {
+            changeCurrentPlayer();
+        }
+        else
+        {
+            std::cout << "Mouvement invalide. Essayez encore." << std::endl;
+        }
+    }
+    else {
+        if (m_board->movePiece(move,m_currentPlayer->getPlayerColor(),Piece::charToPieceType(promotion)))
+        {
+            changeCurrentPlayer();
+            m_board->displayBoard();
+        }
+        else
+        {
+            std::cout << "Mouvement invalide. Essayez encore." << std::endl;
+        }
+
+    }
 
     //debugPrintMove(coordStart, coordEnd);
 
     //std::cout << "CoordStart:" << coordStart << " | coordEnd: " << coordEnd << "\n";
-    if (m_board->movePiece(coordStart, coordEnd, m_currentPlayer->getPlayerColor()))
-    {
-        changeCurrentPlayer();
-    }
-    else
-    {
-        std::cout << "Mouvement invalide. Essayez encore." << std::endl;
-    }
+
 }
 
 std::string MainChessGame::indexToPosition(int pos) {

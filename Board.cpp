@@ -139,11 +139,11 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
     return movePiece((in_iStartRow * 8) + in_iStartCol, (in_iEndRow * 8) + in_iEndCol, in_colPlayer);
 }
 
-bool Board::movePiece(const std::string& move, Color in_colPlayer)
+bool Board::movePiece(const std::string& move, Color in_colPlayer, TypePieces promotionType)
 {
     int iStartPosition, iEndPosition;
     convertMoveToPositions(move, iStartPosition, iEndPosition);
-    return movePiece(iStartPosition, iEndPosition, in_colPlayer);
+    return movePiece(iStartPosition, iEndPosition, in_colPlayer, nullptr, promotionType);
 }
 
 bool Board::movePiece(Color in_colPlayer, const std::string& move, Piece** piece,TypePieces promotionType, int* enPassantPos)
