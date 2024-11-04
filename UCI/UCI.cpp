@@ -165,7 +165,7 @@ void UCI::inputStop() {
 
 void UCI::findBestMove(int depth) {
     std::pair<int, int> bestMove = m_mainChessGame->findBestMoveForCurrentPlayer(depth);
-    std::cout << "bestmove" << m_mainChessGame->indexToPosition(bestMove.first)
+    std::cout << "bestmove " << m_mainChessGame->indexToPosition(bestMove.first)
             << m_mainChessGame->indexToPosition(bestMove.second) << std::endl;
 }
 
