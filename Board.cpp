@@ -173,31 +173,54 @@ void Board::setupFromFEN(const std::string& fen) {
     int row = 7;
     int col = 0;
 
-    for (char c : fen) {
-        if (c == ' ') {
+    for (char c : fen)
+    {
+        if (c == ' ')
+        {
             break;
         }
-        if (c == '/') {
+        if (c == '/')
+        {
             row--;
             col = 0;
         }
-        else if (isdigit(c)) {
+        else if (isdigit(c))
+        {
             int emptySquares = c - '0';
             col += emptySquares;
         }
-        else {
+        else
+        {
             Color color = isupper(c) ? Color::WHITE : Color::BLACK;
             TypePieces pieceType = Piece::charToPieceType(tolower(c));
-            if (col >= 0 && col < 8) {
+            if (col >= 0 && col < 8)
+            {
+                if(pieceType == TypePieces::KING)
+                {
+                    if(color == Color::WHITE)
+                    {
+                        m_iWhiteKingPosition = (row * 8) + col;
+                    }
+                    else
+                    {
+                        m_iBlackKingPosition = (row * 8) + col;
+                    }
+                }
+
                 placePiece(row, col, new Piece(pieceType, color));
                 col++;
             }
-            else {
+            else
+            {
                 std::cerr << "Column overflow at row " << row << std::endl;
             }
         }
     }
-    displayBoard();
+
+    std::vector<int> uselessVector;
+    m_isWhiteKingChecked = isCaseAttackedByColor(m_iWhiteKingPosition, Color::BLACK, uselessVector);
+    uselessVector.clear();
+    m_isBlackKingChecked = isCaseAttackedByColor(m_iBlackKingPosition, Color::WHITE, uselessVector);
 }
 
 void Board::setEnPassantPosition(int enPassantPos)

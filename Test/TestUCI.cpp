@@ -2,6 +2,7 @@
 #include "UCI/UCI.cpp"
 #include "MainChessGame.cpp"
 #include "Board.h"
+#include "Bot.cpp"
 
 class MainChessGameTest : public ::testing::Test {
 protected:
@@ -39,6 +40,8 @@ TEST_F(MainChessGameTest, SetBoardFromFEN_StartPosition) {
 TEST_F(MainChessGameTest, SetBoardFromFEN_MidgamePosition) {
     std::string midFEN = "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 4 3";
     game->setBoardFromFEN(midFEN);
+
+    //TODO FINIR LE TEST
 
     EXPECT_EQ(game->getPieceAt("b1"), nullptr);
     EXPECT_EQ(game->getPieceAt("f8")->getTypePiece(), TypePieces::BISHOP);
@@ -96,4 +99,15 @@ TEST_F(MainChessGameTest, SetBoardFromFEN_AdvancedPosition) {
     EXPECT_EQ(game->getPieceAt("c7")->getColor(), Color::BLACK);
     EXPECT_EQ(game->getPieceAt("d6")->getTypePiece(), TypePieces::PAWN);
     EXPECT_EQ(game->getPieceAt("d6")->getColor(), Color::WHITE);
+}
+
+//TODO faire test où roi en en échec
+TEST_F(MainChessGameTest, SetBoardFromFEN_WhiteKingInCheck) {
+    // FEN où le roi blanc en e1 est en échec par la reine noire en e5
+    std::string checkFEN = "4k3/8/8/4q3/8/8/8/4K3 w - - 0 1";
+    game->setBoardFromFEN(checkFEN);
+
+    EXPECT_TRUE(game->getBoard()->isKingInCheck(Color::WHITE));
+    EXPECT_FALSE(game->getBoard()->isKingInCheck(Color::BLACK));
+    EXPECT_FALSE(game->getBoard()->isKingInCheck(Color::BLACK));
 }
