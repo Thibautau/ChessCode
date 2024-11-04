@@ -5,7 +5,7 @@
 #include "MainChessGame.h"
 #include "Player.h"
 #include "PlayerHuman.h"
-#include "Bot.cpp"
+#include "Bot.h"
 #include <sstream>
 #include <cctype>
 #include <iostream>
