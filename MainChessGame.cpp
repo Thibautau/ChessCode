@@ -5,7 +5,7 @@
 #include "MainChessGame.h"
 #include "Player.h"
 #include "PlayerHuman.h"
-#include "Bot.h"
+#include "Bot.cpp"
 #include <sstream>
 #include <cctype>
 #include <iostream>
@@ -84,18 +84,32 @@ void MainChessGame::setBoardFromFEN(const std::string& fen) {
     // Divise les parties de la notation FEN
     fenStream >> boardPart >> activeColor >> castling >> enPassant >> halfMoveClock >> fullMoveNumber;
 
+    m_board->clearBoard();
+
+    int row = 7;
+    int col = 0;
     // Place les pièces sur le plateau
-    int position = 0;
     for (char ch : boardPart) {
-        if (ch == '/') {
-            continue; // Passe à la rangée suivante dans FEN
-        } else if (isdigit(ch)) {
-            position += ch - '0'; // Passe le nombre de cases vides indiqué
-        } else {
+        if (ch == ' ' || row < 0 && col >= 8)
+        {
+            break;
+        }
+        else if (ch == '/')
+        {
+            row--;
+            col = 0;
+        }
+        else if (isdigit(ch))
+        {
+            col += ch - '0'; // Passe le nombre de cases vides indiqué
+        }
+        else
+        {
             Color color = isupper(ch) ? Color::WHITE : Color::BLACK;
             TypePieces type;
 
-            switch (tolower(ch)) {
+            switch (tolower(ch))
+            {
                 case 'p': type = TypePieces::PAWN; break;
                 case 'r': type = TypePieces::ROOK; break;
                 case 'n': type = TypePieces::KNIGHT; break;
@@ -105,8 +119,8 @@ void MainChessGame::setBoardFromFEN(const std::string& fen) {
                 default: continue;
             }
 
-            m_board->placePiece(position, new Piece(type, color));
-            position++;
+            m_board->placePiece(row, col, new Piece(type, color));
+            col++;
         }
     }
 
@@ -198,4 +212,15 @@ MainChessGame::~MainChessGame() {
     m_board= nullptr;
 }
 
+Piece* MainChessGame::getPieceAt(const std::string& in_sPosition) const
+{
+    int iStartPos = convertToPosition(in_sPosition[0], in_sPosition[1]);
+    return m_board->getPieceAt(iStartPos);
+}
 
+int MainChessGame::convertToPosition(char col, char row) const
+{
+    int column = col - 'a';
+    int line = row - '1';
+    return column + line * 8;
+}

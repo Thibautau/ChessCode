@@ -49,6 +49,11 @@ public:
     void setEnPassantPosition(int enPassantPos);
     static int convertToPosition(char col, char row);
 
+    // Getters
+    int getEnPassantPosition() const;
+
+
+
     void removeRockPossibility(Color in_colPlayer, int i_columnRook);
 
     bool isMovementPossible(int in_iStartPosition, int in_iTargetPosition);

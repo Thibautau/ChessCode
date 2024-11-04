@@ -64,6 +64,11 @@ void Board::clearBoard()
     m_isBlackKingChecked = false;
 }
 
+int Board::getEnPassantPosition() const
+{
+    return m_ipositionEnPassant;
+}
+
 bool Board::isWhiteKingCheck() const
 {
     return m_isWhiteKingChecked;

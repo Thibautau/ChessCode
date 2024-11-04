@@ -39,6 +39,9 @@ public:
     std::pair<int, int> findBestMoveForCurrentPlayer(int depth = -1);
 
     Board* getBoard() const;
+
+    Piece* getPieceAt(const std::string& in_sPosition) const;
+    int convertToPosition(char col, char row) const;
 };
 
 #endif //MAINCHESSGAME_H
