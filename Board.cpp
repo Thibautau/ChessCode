@@ -1521,7 +1521,6 @@ std::vector<std::pair<int, std::vector<int>>> Board::listOfPossibleMovements(Col
     return vectPossibleMoves;
 }
 
-//@TODO A completer et corriger
 void Board::setupFromFEN(const std::string& fen) {
     clearBoard();
 
@@ -1537,11 +1536,12 @@ void Board::setupFromFEN(const std::string& fen) {
             col = 0;
         }
         else if (isdigit(c)) {
-            col += c - '0';
+            int emptySquares = c - '0';
+            col += emptySquares;
         }
         else {
             Color color = isupper(c) ? Color::WHITE : Color::BLACK;
-            TypePieces pieceType = Piece::charToPieceType(std::tolower(c));
+            TypePieces pieceType = Piece::charToPieceType(tolower(c));
             if (col >= 0 && col < 8) {
                 placePiece(row, col, new Piece(pieceType, color));
                 col++;
@@ -1551,8 +1551,26 @@ void Board::setupFromFEN(const std::string& fen) {
             }
         }
     }
+    displayBoard();
 }
 
+void Board::setCastlingRightsForFenNotation(const std::string& castling)
+{
+    m_bWhiteKingCanLittleRock = (castling.find('K') != std::string::npos);
+    m_bWhiteKingCanBigRock = (castling.find('Q') != std::string::npos);
+    m_bBlackKingCanLittleRock = (castling.find('k') != std::string::npos);
+    m_bBlackKingCanBigRock = (castling.find('q') != std::string::npos);
+}
+
+
+void Board::setEnPassantPosition(int pos) {
+    m_ipositionEnPassant = pos;
+}
+
+int Board::getEnPassantPosition() const
+{
+    return m_ipositionEnPassant;
+}
 
 
 

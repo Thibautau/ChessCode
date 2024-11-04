@@ -122,11 +122,16 @@ public:
 
     Coordinate findKing(Color in_colorToFind) const;
     void putNextMoveIfValid(Coordinate& in_coordKing, bool in_isKingInCheck, Coordinate& in_coordNextMove, Piece* in_pPieceToMove, Piece* pPieceFoundOnNextMove, std::vector<Coordinate>& in_vectMoveToFill);
+
+    //Include load FEN system
     void setupFromFEN(const std::string& fen);
+    static int convertToPosition(char col, char row);
+    int getEnPassantPosition() const;
+    void setEnPassantPosition(int pos);
+    void setCastlingRightsForFenNotation(const std::string& castling);
 
 
 private:
-    static int convertToPosition(char col, char row);
     static void convertMoveToPositions(const std::string& move, int& startPos, int& endPos);
 };
 
