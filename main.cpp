@@ -17,7 +17,7 @@ int main() {
     //}
 
     while (!game->isGameOver()) {
-        game->playTurn();
+        //game->playTurn();
     }
 
     const Color colWinner = game->getColorWinner();

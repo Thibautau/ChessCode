@@ -8,11 +8,13 @@
 #include <sstream>
 
 std::string UCI::m_engineName = "MonEngine v1";
+std::string UCI::m_engineCode = "";
 GameMode UCI::m_gameMode = GameMode::JVB;
 UCI::UCI()
 {
     m_mainChessGame = new MainChessGame(m_gameMode);
     m_debugMode = false;
+
 }
 
 void UCI::uciCommunication()
