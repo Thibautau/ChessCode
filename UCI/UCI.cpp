@@ -33,8 +33,11 @@ void UCI::uciCommunication()
         {
             inputIsReady();
         }
-        else if (sInput == "debug") {
-            inputDebug(sInput);
+        else if (sInput.find("debug") == 0) {
+            std::istringstream ss(sInput);
+            std::string cmd, debugMode;
+            ss >> cmd >> debugMode;
+            inputDebug(debugMode);
         }
         else if (sInput == "ucinewgame")
         {
@@ -80,12 +83,12 @@ void UCI::inputIsReady()
     std::cout << "readyok" << std::endl;
 }
 
-void UCI::inputDebug(const std::string &in_sInput) {
-    if(in_sInput == "on") {
+void UCI::inputDebug(const std::string &debugMode) {
+    if(debugMode == "on") {
         m_debugMode = true;
         std::cout << "debug mode activated" << std::endl;
     }
-    else if(in_sInput == "off") {
+    else if(debugMode == "off") {
         m_debugMode = false;
         std::cout << "debug mode deactivated" << std::endl;
     }
