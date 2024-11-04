@@ -25,9 +25,10 @@ class Bot : public Player {
 private:
     Color m_color;
     std::unordered_map<uint64_t, TranspositionTableEntry> transpositionTable;
-    static int nodeCount;
+
 
 public:
+    static int nodeCount;
     Bot(Color color);
     void play(Board& board, int& start, int& end) override;
     Color getPlayerColor() const override;

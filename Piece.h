@@ -26,6 +26,7 @@ public:
     static Color getEnemyColor(Color in_colPiece);
     char getColorAsChar() const;
     char getDisplayChar() const;
+    static TypePieces charToPieceType(char piece);
     static int getColumnOfRookAfterRock(int in_iColumn);
     TypeOfPieceAttack typeOfAttack() const;
     bool attackStraight() const;

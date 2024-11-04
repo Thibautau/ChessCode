@@ -7,6 +7,8 @@
 #include "PlayerHuman.h"
 #include "Bot.h"
 #include <iostream>
+#include <sstream>
+#include <string>
 
 MainChessGame::MainChessGame(GameMode mode)
 {
@@ -71,6 +73,11 @@ std::string MainChessGame::indexToPosition(int pos) {
     char rowChar = '1' + row;
 
     return std::string{columnChar} + rowChar;
+}
+
+//@TODO A completer
+void MainChessGame::initChessGameFromFEN(const std::string& fen) {
+    m_board->setupFromFEN(fen);
 }
 
 void MainChessGame::debugPrintMove(int start, int end) {

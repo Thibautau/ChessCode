@@ -49,7 +49,14 @@ add_executable(runTests Test/Test.cpp
         Test/TestBoard.h
         Test/TestBoard.cpp
         Test/TestPiece.cpp
-        Test/TestPlayer.cpp)
+        Test/TestPlayer.cpp
+)
+
+# Créer l'exécutable pour les perf
+add_executable(runPerf
+        Test/TestPerf.cpp
+        Test/TestPerf.h
+)
 
 # Lier GoogleTest à l'exécutable de tests
 target_link_libraries(runTests gtest gtest_main)

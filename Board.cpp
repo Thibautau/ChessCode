@@ -1521,6 +1521,40 @@ std::vector<std::pair<int, std::vector<int>>> Board::listOfPossibleMovements(Col
     return vectPossibleMoves;
 }
 
+//@TODO A completer et corriger
+void Board::setupFromFEN(const std::string& fen) {
+    clearBoard();
+
+    int row = 7;
+    int col = 0;
+
+    for (char c : fen) {
+        if (c == ' ') {
+            break;
+        }
+        if (c == '/') {
+            row--;
+            col = 0;
+        }
+        else if (isdigit(c)) {
+            col += c - '0';
+        }
+        else {
+            Color color = isupper(c) ? Color::WHITE : Color::BLACK;
+            TypePieces pieceType = Piece::charToPieceType(std::tolower(c));
+            if (col >= 0 && col < 8) {
+                placePiece(row, col, new Piece(pieceType, color));
+                col++;
+            }
+            else {
+                std::cerr << "Column overflow at row " << row << std::endl;
+            }
+        }
+    }
+}
+
+
+
 
 
 

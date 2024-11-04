@@ -35,6 +35,8 @@ public:
     Player* getCurrentPlayer() const;
     Player* getWaitingPlayer() const;
 
+    void initChessGameFromFEN(const std::string& fen);
+
     Board* getBoard() const;
 };
 
