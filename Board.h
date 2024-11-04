@@ -46,6 +46,9 @@ public:
     bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE, Piece** piece = nullptr,TypePieces promotionType = TypePieces::NONE, int* enPassantPos = nullptr);
     bool movePiece(Color in_colPlayer, const std::string& move, Piece** piece = nullptr,TypePieces promotionType = TypePieces::NONE, int* enPassantPos = nullptr); // overload of the function right above
     void setCastlingRightsForFenNotation(const std::string& castling);
+
+    void setupFromFEN(const std::string &fen);
+
     void setEnPassantPosition(int enPassantPos);
     static int convertToPosition(char col, char row);
 

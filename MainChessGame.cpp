@@ -76,7 +76,7 @@ std::string MainChessGame::indexToPosition(int pos) {
 }
 
 void MainChessGame::setBoardFromFEN(const std::string& fen) {
-    m_board->clearBoard(); // Commence par vider le plateau
+    m_board->setupFromFEN(fen);
 
     std::istringstream fenStream(fen);
     std::string boardPart, activeColor, castling, enPassant, halfMoveClock, fullMoveNumber;
@@ -84,60 +84,12 @@ void MainChessGame::setBoardFromFEN(const std::string& fen) {
     // Divise les parties de la notation FEN
     fenStream >> boardPart >> activeColor >> castling >> enPassant >> halfMoveClock >> fullMoveNumber;
 
-    m_board->clearBoard();
+    // Vérifier et configurer le joueur actif
+    Color currentPlayerColor = m_currentPlayer->getPlayerColor();
+    Color newActiveColor = (activeColor == "w") ? Color::WHITE : Color::BLACK;
 
-    int row = 7;
-    int col = 0;
-    // Place les pièces sur le plateau
-    for (char ch : boardPart) {
-        if (ch == ' ' || row < 0 && col >= 8)
-        {
-            break;
-        }
-        else if (ch == '/')
-        {
-            row--;
-            col = 0;
-        }
-        else if (isdigit(ch))
-        {
-            col += ch - '0'; // Passe le nombre de cases vides indiqué
-        }
-        else
-        {
-            Color color = isupper(ch) ? Color::WHITE : Color::BLACK;
-            TypePieces type;
-
-            switch (tolower(ch))
-            {
-                case 'p': type = TypePieces::PAWN; break;
-                case 'r': type = TypePieces::ROOK; break;
-                case 'n': type = TypePieces::KNIGHT; break;
-                case 'b': type = TypePieces::BISHOP; break;
-                case 'q': type = TypePieces::QUEEN; break;
-                case 'k': type = TypePieces::KING; break;
-                default: continue;
-            }
-
-            m_board->placePiece(row, col, new Piece(type, color));
-            col++;
-        }
-    }
-
-    // Définit le joueur actif
-    if (activeColor == "w")
-    {
-        if(m_currentPlayer->getPlayerColor() != Color::WHITE) // If white is not the active player
-        {
-            changeCurrentPlayer();
-        }
-    }
-    else
-    {
-        if(m_currentPlayer->getPlayerColor() != Color::BLACK) // If white is not the active player
-        {
-            changeCurrentPlayer();
-        }
+    if (currentPlayerColor != newActiveColor) {
+        changeCurrentPlayer();
     }
 
     // Configure les droits de roque
@@ -145,7 +97,7 @@ void MainChessGame::setBoardFromFEN(const std::string& fen) {
 
     // Configure la position pour la prise en passant, si applicable
     if (enPassant != "-") {
-        int enPassantPos = m_board->convertToPosition(enPassant[0], enPassant[1]);
+        int enPassantPos = Board::convertToPosition(enPassant[0], enPassant[1]);
         m_board->setEnPassantPosition(enPassantPos);
     }
     else

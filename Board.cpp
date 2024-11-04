@@ -167,6 +167,39 @@ void Board::setCastlingRightsForFenNotation(const std::string& castling)
     m_bBlackKingCanBigRock = (castling.find('q') != std::string::npos);
 }
 
+void Board::setupFromFEN(const std::string& fen) {
+    clearBoard();
+
+    int row = 7;
+    int col = 0;
+
+    for (char c : fen) {
+        if (c == ' ') {
+            break;
+        }
+        if (c == '/') {
+            row--;
+            col = 0;
+        }
+        else if (isdigit(c)) {
+            int emptySquares = c - '0';
+            col += emptySquares;
+        }
+        else {
+            Color color = isupper(c) ? Color::WHITE : Color::BLACK;
+            TypePieces pieceType = Piece::charToPieceType(tolower(c));
+            if (col >= 0 && col < 8) {
+                placePiece(row, col, new Piece(pieceType, color));
+                col++;
+            }
+            else {
+                std::cerr << "Column overflow at row " << row << std::endl;
+            }
+        }
+    }
+    displayBoard();
+}
+
 void Board::setEnPassantPosition(int enPassantPos)
 {
     m_ipositionEnPassant = enPassantPos;
