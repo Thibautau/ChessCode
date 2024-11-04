@@ -11,8 +11,8 @@
 class Player {
 public:
     virtual void play(Board& board, int& start, int& end) = 0;
-    virtual void playWithDepth(Board& board, int& start, int& end, int depth) = 0;
-    virtual Color getPlayerColor() const = 0;
+    virtual void playWithDepth(Board& board, int& start, int& end, int depth);
+    virtual Color getPlayerColor() const;
     //virtual ~Player();
 };
 
