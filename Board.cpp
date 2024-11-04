@@ -62,6 +62,17 @@ void Board::clearBoard()
 
     m_isWhiteKingChecked = false;
     m_isBlackKingChecked = false;
+
+    m_bWhiteKingCanLittleRock = true;
+    m_bWhiteKingCanBigRock = true;
+    m_bBlackKingCanLittleRock = true;
+    m_bBlackKingCanBigRock = true;
+
+    m_isWhiteKingChecked = false;
+    m_isBlackKingChecked = false;
+
+    m_iBlackKingPosition = 60;
+    m_iWhiteKingPosition = 4;
 }
 
 int Board::getEnPassantPosition() const

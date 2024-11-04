@@ -112,6 +112,7 @@ void UCI::inputPosition(std::string &in_sInput) const {
     ss >> token;
 
     if (token == "startpos") {
+        m_mainChessGame->getBoard()->clearBoard();
         m_mainChessGame->initChessGame();
         ss >> token; // Move on to "moves" if present
     }
@@ -123,22 +124,25 @@ void UCI::inputPosition(std::string &in_sInput) const {
         m_mainChessGame->setBoardFromFEN(fen);
     }
 
-    if (token == "moves") {
-        ss >> token;
-        std::string move = token.substr(0, 4); // Par exemple, "e2"
-        char promotion = 0;
+    if (token == "moves")
+    {
+        while(ss >> token)
+        {
+            std::string move = token.substr(0, 4); // Par exemple, "e2"
+            char promotion = 0;
 
-        // Si la longueur est de 5, cela signifie qu'il y a une promotion
-        if (token.length() == 5) {
-            promotion = token.at(4);
-        }
+            // Si la longueur est de 5, cela signifie qu'il y a une promotion
+            if (token.length() == 5) {
+                promotion = token.at(4);
+            }
 
-        std::string movePlayed;
-        if (!promotion) {
-            m_mainChessGame->playTurn(move, promotion);
-        }
-        else {
-            m_mainChessGame->playTurn(move);
+            std::string movePlayed;
+            if (!promotion) {
+                m_mainChessGame->playTurn(move, promotion);
+            }
+            else {
+                m_mainChessGame->playTurn(move);
+            }
         }
     }
 }

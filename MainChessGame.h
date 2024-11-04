@@ -21,7 +21,7 @@ public:
     explicit MainChessGame(GameMode mode);
     ~MainChessGame();
 
-    void initChessGame() const;
+    void initChessGame();
 
     std::string indexToPosition(int pos);
     void debugPrintMove(int start, int end);

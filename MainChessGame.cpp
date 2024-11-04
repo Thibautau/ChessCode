@@ -37,9 +37,14 @@ MainChessGame::MainChessGame(GameMode mode)
 }
 
 
-void MainChessGame::initChessGame() const
+void MainChessGame::initChessGame()
 {
     m_board->initializeBoard();
+
+    if(m_waitingPlayer->getPlayerColor() == Color::WHITE)
+    {
+        changeCurrentPlayer();
+    }
 }
 
 void MainChessGame::playTurn(const std::string& move, char promotion)
@@ -59,7 +64,7 @@ void MainChessGame::playTurn(const std::string& move, char promotion)
         }
         else
         {
-            std::cout << "Mouvement invalide. Essayez encore." << std::endl;
+            std::cout << "Mouvement invalide. Essayez encore.1" << std::endl;
         }
     }
     else {
@@ -70,7 +75,8 @@ void MainChessGame::playTurn(const std::string& move, char promotion)
         }
         else
         {
-            std::cout << "Mouvement invalide. Essayez encore." << std::endl;
+            std::string sCol = m_currentPlayer->getPlayerColor() == Color::WHITE? "Blanc" : "Noir";
+            std::cout << "Mouvement invalide. Essayez encore.2" << move << sCol << std::endl;
         }
 
     }
