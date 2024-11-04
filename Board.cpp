@@ -633,7 +633,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                 putNextMoveIfValid(captureRight, pPieceToSeeMoves, in_vectPossibleMoves);
             }
 
-            int iPositionPawnEnPassant = m_ipositionEnPassant + (8 * direction);
+            int iPositionPawnEnPassant = m_ipositionEnPassant + (8 * direction * -1);
             Piece* pPiecePawnEnPassant = getPieceAt(iPositionPawnEnPassant);
             if(m_ipositionEnPassant!=-1 && pPiecePawnEnPassant != nullptr && pPiecePawnEnPassant->getColor() != colPieceToSeeMoves && pPiecePawnEnPassant->getTypePiece() == TypePieces::PAWN) // Verify that it is not a pawn of the same color
             {

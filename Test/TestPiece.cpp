@@ -49,12 +49,12 @@ TEST_F(BoardTest, PawnSecondMove) {
 
 // Test de capture en passant
 TEST_F(BoardTest, EnPassantCapture) {
-    board.movePiece(1, 4, 3, 4);// Pion blanc e2->e4
-    board.movePiece(3, 4, 4, 4);// Pion blanc e4->e5
-    board.movePiece(6, 5, 4, 5, Color::BLACK);// Pion noir f7->f5
+    board.movePiece("e2e4");// Pion blanc e2->e4
+    board.movePiece("e4e5");// Pion blanc e4->e5
+    board.movePiece("f7f5", Color::BLACK);// Pion noir f7->f5
 
     // Pion blanc de e5 capture en passant f6
-    bool result = board.movePiece(4, 4, 5, 5);
+    bool result = board.movePiece("e5f6");
     EXPECT_TRUE(result);
     EXPECT_EQ(board.getPieceAt(5, 5)->getTypePiece(), TypePieces::PAWN);
     EXPECT_EQ(board.getPieceAt(4, 5), nullptr); // Pion noir capturé
