@@ -6,8 +6,9 @@
 #include "Player.h"
 #include "PlayerHuman.h"
 #include "Bot.h"
-#include <iostream>
 #include <sstream>
+#include <cctype>
+#include <iostream>
 
 MainChessGame::MainChessGame(GameMode mode)
 {
@@ -36,31 +37,48 @@ MainChessGame::MainChessGame(GameMode mode)
 }
 
 
-void MainChessGame::initChessGame() const
+void MainChessGame::initChessGame()
 {
     m_board->initializeBoard();
-}
 
-void MainChessGame::playTurn()
-{
-    std::cout << "C'est au tour de " << (m_currentPlayer->getPlayerColor() == Color::WHITE ? "Blanc" : "Noir") << std::endl;
-
-    m_board->displayBoard();
-    int coordStart;
-    int coordEnd;
-
-    m_currentPlayer->play(*m_board, coordStart, coordEnd);
-
-    debugPrintMove(coordStart, coordEnd);
-
-    //std::cout << "CoordStart:" << coordStart << " | coordEnd: " << coordEnd << "\n";
-    if (m_board->movePiece(coordStart, coordEnd, m_currentPlayer->getPlayerColor()))
+    if(m_waitingPlayer->getPlayerColor() == Color::WHITE)
     {
         changeCurrentPlayer();
     }
-    else
-    {
-        std::cout << "Mouvement invalide. Essayez encore." << std::endl;
+}
+
+void MainChessGame::playTurn(const std::string& move, char promotion)
+{
+    std::cout << "C'est au tour de " << (m_currentPlayer->getPlayerColor() == Color::WHITE ? "Blanc" : "Noir") << std::endl;
+
+    //m_board->displayBoard();
+
+    if (move.empty()) {
+        m_board->displayBoard();
+        int coordStart;
+        int coordEnd;
+        m_currentPlayer->play(*m_board, coordStart, coordEnd);
+        if (m_board->movePiece(coordStart, coordEnd, m_currentPlayer->getPlayerColor()))
+        {
+            changeCurrentPlayer();
+        }
+        else
+        {
+            std::cout << "Mouvement invalide. Essayez encore.1" << std::endl;
+        }
+    }
+    else {
+        if (m_board->movePiece(move,m_currentPlayer->getPlayerColor(),Piece::charToPieceType(promotion)))
+        {
+            changeCurrentPlayer();
+            m_board->displayBoard();
+        }
+        else
+        {
+            std::string sCol = m_currentPlayer->getPlayerColor() == Color::WHITE? "Blanc" : "Noir";
+            std::cout << "Mouvement invalide. Essayez encore.2" << move << sCol << std::endl;
+        }
+
     }
 }
 
@@ -107,6 +125,52 @@ void MainChessGame::initChessGameFromFEN(const std::string& fen) {
 }
 
 
+void MainChessGame::setBoardFromFEN(const std::string& fen) {
+    m_board->setupFromFEN(fen);
+
+    std::istringstream fenStream(fen);
+    std::string boardPart, activeColor, castling, enPassant, halfMoveClock, fullMoveNumber;
+
+    // Divise les parties de la notation FEN
+    fenStream >> boardPart >> activeColor >> castling >> enPassant >> halfMoveClock >> fullMoveNumber;
+
+    // Vérifier et configurer le joueur actif
+    Color currentPlayerColor = m_currentPlayer->getPlayerColor();
+    Color newActiveColor = (activeColor == "w") ? Color::WHITE : Color::BLACK;
+
+    if (currentPlayerColor != newActiveColor) {
+        changeCurrentPlayer();
+    }
+
+    // Configure les droits de roque
+    m_board->setCastlingRightsForFenNotation(castling);
+
+    // Configure la position pour la prise en passant, si applicable
+    if (enPassant != "-") {
+        int enPassantPos = Board::convertToPosition(enPassant[0], enPassant[1]);
+        m_board->setEnPassantPosition(enPassantPos);
+    }
+    else
+    {
+        m_board->setEnPassantPosition(-1); // Valeur par défaut si aucune prise en passant n'est possible
+    }
+}
+
+std::pair<int, int> MainChessGame::findBestMoveForCurrentPlayer(int depth) {
+    int iRow, iCol;
+
+    Bot* botPlayer = dynamic_cast<Bot*>(m_currentPlayer);
+    if(depth > 0 && botPlayer != nullptr) {
+        botPlayer->playWithDepth(*m_board, iRow, iCol, depth);
+    }
+    else {
+        m_currentPlayer->play(*m_board, iRow, iCol);
+    }
+    return {iRow, iCol};
+}
+
+
+
 void MainChessGame::debugPrintMove(int start, int end) {
     std::cout << "Deplacement de " << indexToPosition(start) << " a " << indexToPosition(end) << std::endl;
 }
@@ -150,4 +214,15 @@ MainChessGame::~MainChessGame() {
     m_board= nullptr;
 }
 
+Piece* MainChessGame::getPieceAt(const std::string& in_sPosition) const
+{
+    int iStartPos = convertToPosition(in_sPosition[0], in_sPosition[1]);
+    return m_board->getPieceAt(iStartPos);
+}
 
+int MainChessGame::convertToPosition(char col, char row) const
+{
+    int column = col - 'a';
+    int line = row - '1';
+    return column + line * 8;
+}

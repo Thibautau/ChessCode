@@ -45,6 +45,17 @@ public:
     Piece* getPieceAt(const std::string& in_sPosition) const;
     bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE, Piece** piece = nullptr,TypePieces promotionType = TypePieces::NONE, int* enPassantPos = nullptr);
     bool movePiece(Color in_colPlayer, const std::string& move, Piece** piece = nullptr,TypePieces promotionType = TypePieces::NONE, int* enPassantPos = nullptr); // overload of the function right above
+    void setCastlingRightsForFenNotation(const std::string& castling);
+
+    void setupFromFEN(const std::string &fen);
+
+    void setEnPassantPosition(int enPassantPos);
+    static int convertToPosition(char col, char row);
+
+    // Getters
+    int getEnPassantPosition() const;
+
+
 
     void removeRockPossibility(Color in_colPlayer, int i_columnRook);
 
@@ -56,7 +67,7 @@ public:
     void findFirstPiecesOnEachBishopMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
     void findFirstPiecesOnEachKnightMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
 
-    bool movePiece(const std::string& move, Color in_colPlayer = Color::WHITE);
+    bool movePiece(const std::string& move, Color in_colPlayer = Color::WHITE, TypePieces promotionType = TypePieces::QUEEN);
     bool movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in_iEndCol, Color in_colPlayer = Color::WHITE);
     void possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& in_vectPossibleMoves);
     void getPieceMovementsPossible(int in_iPositionToFindMovement, int in_iDirectionMovement, int in_iNbOfRepetition, std::vector<int>& in_vectPositionPossible);

@@ -21,12 +21,12 @@ public:
     explicit MainChessGame(GameMode mode);
     ~MainChessGame();
 
-    void initChessGame() const;
+    void initChessGame();
 
     std::string indexToPosition(int pos);
     void debugPrintMove(int start, int end);
 
-    void playTurn();
+    void playTurn(const std::string& move = "", char promotion = 0);
     void changeCurrentPlayer();
 
     bool isGameOver();
@@ -35,9 +35,15 @@ public:
     Player* getCurrentPlayer() const;
     Player* getWaitingPlayer() const;
 
+    void setBoardFromFEN(const std::string& fen);
+    std::pair<int, int> findBestMoveForCurrentPlayer(int depth = -1);
+
     void initChessGameFromFEN(const std::string& fen);
 
     Board* getBoard() const;
+
+    Piece* getPieceAt(const std::string& in_sPosition) const;
+    int convertToPosition(char col, char row) const;
 };
 
 #endif //MAINCHESSGAME_H

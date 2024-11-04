@@ -62,6 +62,22 @@ void Board::clearBoard()
 
     m_isWhiteKingChecked = false;
     m_isBlackKingChecked = false;
+
+    m_bWhiteKingCanLittleRock = true;
+    m_bWhiteKingCanBigRock = true;
+    m_bBlackKingCanLittleRock = true;
+    m_bBlackKingCanBigRock = true;
+
+    m_isWhiteKingChecked = false;
+    m_isBlackKingChecked = false;
+
+    m_iBlackKingPosition = 60;
+    m_iWhiteKingPosition = 4;
+}
+
+int Board::getEnPassantPosition() const
+{
+    return m_ipositionEnPassant;
 }
 
 bool Board::isWhiteKingCheck() const
@@ -134,11 +150,11 @@ bool Board::movePiece(int in_iStartRow, int in_iStartCol, int in_iEndRow, int in
     return movePiece((in_iStartRow * 8) + in_iStartCol, (in_iEndRow * 8) + in_iEndCol, in_colPlayer);
 }
 
-bool Board::movePiece(const std::string& move, Color in_colPlayer)
+bool Board::movePiece(const std::string& move, Color in_colPlayer, TypePieces promotionType)
 {
     int iStartPosition, iEndPosition;
     convertMoveToPositions(move, iStartPosition, iEndPosition);
-    return movePiece(iStartPosition, iEndPosition, in_colPlayer);
+    return movePiece(iStartPosition, iEndPosition, in_colPlayer, nullptr, promotionType);
 }
 
 bool Board::movePiece(Color in_colPlayer, const std::string& move, Piece** piece,TypePieces promotionType, int* enPassantPos)
@@ -153,6 +169,76 @@ bool Board::placePiece(const std::string& move, Piece* in_pPiece)
     int iStartPos = convertToPosition(move[0], move[1]);
     return placePiece(iStartPos, in_pPiece);
 }
+
+void Board::setCastlingRightsForFenNotation(const std::string& castling)
+{
+    m_bWhiteKingCanLittleRock = (castling.find('K') != std::string::npos);
+    m_bWhiteKingCanBigRock = (castling.find('Q') != std::string::npos);
+    m_bBlackKingCanLittleRock = (castling.find('k') != std::string::npos);
+    m_bBlackKingCanBigRock = (castling.find('q') != std::string::npos);
+}
+
+void Board::setupFromFEN(const std::string& fen) {
+    clearBoard();
+
+    int row = 7;
+    int col = 0;
+
+    for (char c : fen)
+    {
+        if (c == ' ')
+        {
+            break;
+        }
+        if (c == '/')
+        {
+            row--;
+            col = 0;
+        }
+        else if (isdigit(c))
+        {
+            int emptySquares = c - '0';
+            col += emptySquares;
+        }
+        else
+        {
+            Color color = isupper(c) ? Color::WHITE : Color::BLACK;
+            TypePieces pieceType = Piece::charToPieceType(tolower(c));
+            if (col >= 0 && col < 8)
+            {
+                if(pieceType == TypePieces::KING)
+                {
+                    if(color == Color::WHITE)
+                    {
+                        m_iWhiteKingPosition = (row * 8) + col;
+                    }
+                    else
+                    {
+                        m_iBlackKingPosition = (row * 8) + col;
+                    }
+                }
+
+                placePiece(row, col, new Piece(pieceType, color));
+                col++;
+            }
+            else
+            {
+                std::cerr << "Column overflow at row " << row << std::endl;
+            }
+        }
+    }
+
+    std::vector<int> uselessVector;
+    m_isWhiteKingChecked = isCaseAttackedByColor(m_iWhiteKingPosition, Color::BLACK, uselessVector);
+    uselessVector.clear();
+    m_isBlackKingChecked = isCaseAttackedByColor(m_iBlackKingPosition, Color::WHITE, uselessVector);
+}
+
+void Board::setEnPassantPosition(int enPassantPos)
+{
+    m_ipositionEnPassant = enPassantPos;
+}
+
 
 bool Board::isKingInCheck(Color in_kingColor) const
 {

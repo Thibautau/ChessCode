@@ -2,13 +2,22 @@
 #include "MainChessGame.h"
 #include <iostream>
 
+#include "UCI/UCI.h"
+
 int main() {
     const GameMode mode = GameMode::JVB;
     MainChessGame* game = new MainChessGame(mode);
     game->initChessGame();
 
+    /*bool bUseUCI = true;
+    if(bUseUCI)
+    {*/
+        UCI* uci = new UCI();
+        uci->uciCommunication();
+    //}
+
     while (!game->isGameOver()) {
-        game->playTurn();
+        //game->playTurn();
     }
 
     const Color colWinner = game->getColorWinner();

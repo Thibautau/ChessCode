@@ -36,6 +36,8 @@ add_executable(ChessCode
         Player.cpp
         Zobrist.cpp
         Zobrist.h
+        UCI/UCI.cpp
+        UCI/UCI.h
 )
 
 # Créer l'exécutable pour les tests
@@ -50,6 +52,7 @@ add_executable(runTests Test/Test.cpp
         Test/TestBoard.cpp
         Test/TestPiece.cpp
         Test/TestPlayer.cpp
+        Test/TestUCI.cpp
 )
 
 # Créer l'exécutable pour les perf
