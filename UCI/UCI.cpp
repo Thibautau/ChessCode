@@ -45,12 +45,12 @@ void UCI::uciCommunication()
             std::cout << "[DEBUG] Command: ucinewgame" << std::endl;
             inputUCINewGame();
         }
-        else if (sInput.find("position"))
+        else if (sInput.find("position") == 0)
         {
             std::cout << "[DEBUG] Command: position" << std::endl;
             inputPosition(sInput);
         }
-        else if (sInput.find("go")) // Best Move
+        else if (sInput.find("go") == 0) // Best Move
         {
             std::cout << "[DEBUG] Command: go" << std::endl;
             inputGo(sInput);
@@ -60,11 +60,11 @@ void UCI::uciCommunication()
             std::cout << "[DEBUG] Command: stop" << std::endl;
             inputStop();
         }
-        else if (sInput.find("setoptions"))
+        else if (sInput.find("setoptions") == 0)
         {
             //break; // Quitte la boucle si la commande "quit" est reçue
         }
-        else if (sInput == "register")
+        else if (sInput.find("register") == 0)
         {
             inputRegister(sInput);
         }
