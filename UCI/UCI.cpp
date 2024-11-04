@@ -31,6 +31,7 @@ void UCI::uciCommunication()
 
         else if (sInput == "isready")
         {
+            std::cout << "[DEBUG] Command: isready" << std::endl;
             inputIsReady();
         }
         else if (sInput.find("debug") == 0) {
@@ -41,21 +42,25 @@ void UCI::uciCommunication()
         }
         else if (sInput == "ucinewgame")
         {
+            std::cout << "[DEBUG] Command: ucinewgame" << std::endl;
             inputUCINewGame();
         }
-        else if (sInput == "position")
+        else if (sInput.find("position"))
         {
+            std::cout << "[DEBUG] Command: position" << std::endl;
             inputPosition(sInput);
         }
-        else if (sInput == "go") // Best Move
+        else if (sInput.find("go")) // Best Move
         {
+            std::cout << "[DEBUG] Command: go" << std::endl;
             inputGo(sInput);
         }
         else if (sInput == "stop")
         {
+            std::cout << "[DEBUG] Command: stop" << std::endl;
             inputStop();
         }
-        else if (sInput == "setoptions")
+        else if (sInput.find("setoptions"))
         {
             //break; // Quitte la boucle si la commande "quit" est reçue
         }
@@ -65,6 +70,7 @@ void UCI::uciCommunication()
         }
         else if (sInput == "quit")
         {
+            std::cout << "[DEBUG] Command: quit" << std::endl;
             break; // Quitte la boucle si la commande "quit" est reçue
         }
     }
@@ -126,7 +132,7 @@ void UCI::inputPosition(std::string &in_sInput) const {
 
 
 void UCI::inputGo(std::string &in_sInput) {
-    int depth = -1;
+    int depth = 1;
     std::istringstream iss(in_sInput);
     std::string token;
 

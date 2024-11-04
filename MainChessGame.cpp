@@ -46,7 +46,7 @@ void MainChessGame::playTurn()
 {
     std::cout << "C'est au tour de " << (m_currentPlayer->getPlayerColor() == Color::WHITE ? "Blanc" : "Noir") << std::endl;
 
-    m_board->displayBoard();
+    //m_board->displayBoard();
     int coordStart;
     int coordEnd;
 
