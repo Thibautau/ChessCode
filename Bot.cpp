@@ -107,8 +107,8 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> duration = end - start;
 
-    std::cout << "Nodes evaluated: " << nodeCount << ", Time taken: " << duration.count() << " ms\n";
-    std::cout << "Nodes/s: "<<nodeCount/(duration.count()/1000)<<"\n";
+    /*std::cout << "Nodes evaluated: " << nodeCount << ", Time taken: " << duration.count() << " ms\n";
+    std::cout << "Nodes/s: "<<nodeCount/(duration.count()/1000)<<"\n";*/
 }
 
 int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta) {

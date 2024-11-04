@@ -1551,7 +1551,7 @@ void Board::setupFromFEN(const std::string& fen) {
             }
         }
     }
-    displayBoard();
+    //displayBoard();
 }
 
 void Board::setCastlingRightsForFenNotation(const std::string& castling)
