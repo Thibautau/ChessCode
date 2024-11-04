@@ -1025,3 +1025,15 @@ TEST_F(BoardTest, BugPawnPromoteToQueenWhenEnemyMoves)
     EXPECT_FALSE(bIsWhiteKingCheck);
 }
 
+//Test Bug we had when the white pawn can move in diagonal after e2e4
+TEST_F(BoardTest, BugPawnDiagonalMove)
+{
+    bool bMove1 = board.movePiece("e2e4");
+
+    std::vector<std::pair<int, int>> listOfPossibleWhiteMoves = board.listOfPossibleMoves(Color::WHITE);
+
+    EXPECT_EQ(listOfPossibleWhiteMoves.size(), 30);
+    EXPECT_TRUE(bMove1);
+}
+
+

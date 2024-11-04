@@ -38,6 +38,48 @@ void Bot::play(Board& board, int& start, int& end) {
     end = meilleurCoup.second;
 }
 
+std::string indexToPosition(int pos) {
+    int row = pos / 8;
+    int col = pos % 8;
+
+    char columnChar = 'a' + col;
+    char rowChar = '1' + row;
+
+    return std::string{columnChar} + rowChar;
+}
+
+void debugPrintMove(int start, int end) {
+    std::cout << indexToPosition(start) << " => " << indexToPosition(end) << std::endl;
+}
+
+void afficherPossibleMoves(const std::vector<std::pair<int, int>>& possibleMoves) {
+    for (const auto& move : possibleMoves) {
+        debugPrintMove(move.first, move.second);
+    }
+}
+
+void comparerVecteurs(const std::vector<std::pair<int, int>>& vec1, const std::vector<std::pair<int, int>>& vec2) {
+    size_t taille_min = std::min(vec1.size(), vec2.size());
+
+    for (size_t i = 0; i < taille_min; ++i)
+    {
+        if(vec1[i].first != vec2[i].first || vec1[i].second != vec2[i].second)
+        {
+            std::cout << "(" << indexToPosition(vec1[i].first) << " => " << indexToPosition(vec1[i].second) << ") != "
+                      << "(" << indexToPosition(vec2[i].first) << " => " << indexToPosition(vec2[i].second) << ")\n";
+        }
+    }
+
+    if (vec1.size() != vec2.size())
+    {
+        std::cout << "Les vecteurs ont des tailles différentes.\n" << std::endl;
+    }
+    else
+    {
+        std::cout << "Les vecteurs ont exactement la même taille.\n" << std::endl;
+    }
+}
+
 void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int, int>& meilleurCoup) {
     int meilleurScore = std::numeric_limits<int>::min();
     meilleurCoup = { -1, -1 };
@@ -47,9 +89,9 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
     auto start = std::chrono::high_resolution_clock::now();
 
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);
-    /*std::ranges::stable_sort(possibleMoves.begin(), possibleMoves.end(), std::greater<>{}, [&](const std::pair<int, int>& move) {
+    std::ranges::stable_sort(possibleMoves.begin(), possibleMoves.end(), std::greater<>{}, [&](const std::pair<int, int>& move) {
         return board.evaluateMove(move, m_color);
-    });*/
+    });
 
     for (const std::pair<int, int>& coup : possibleMoves) {
         uint64_t zobristHash = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false);
@@ -125,6 +167,8 @@ int Bot::evaluateMoveWithMinimax(Board& board, int profondeur, bool estMaximisan
     board.undoMove(move.first, move.second, capturedPiece, isPromotion);
     return score;
 }
+
+
 
 
 

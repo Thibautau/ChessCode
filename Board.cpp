@@ -632,7 +632,11 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             if (isValidPosition(captureRight) && in_iPositionToSeeMoves % 8 != 7 && m_tabpiBoard[captureRight] != nullptr && m_tabpiBoard[captureRight]->getColor() != colPieceToSeeMoves) {
                 putNextMoveIfValid(captureRight, pPieceToSeeMoves, in_vectPossibleMoves);
             }
-            if(m_ipositionEnPassant!=-1) {
+
+            int iPositionPawnEnPassant = m_ipositionEnPassant + (8 * direction);
+            Piece* pPiecePawnEnPassant = getPieceAt(iPositionPawnEnPassant);
+            if(m_ipositionEnPassant!=-1 && pPiecePawnEnPassant != nullptr && pPiecePawnEnPassant->getColor() != colPieceToSeeMoves && pPiecePawnEnPassant->getTypePiece() == TypePieces::PAWN) // Verify that it is not a pawn of the same color
+            {
                 if(captureLeft==m_ipositionEnPassant) {
                     putNextMoveIfValid(captureLeft, pPieceToSeeMoves, in_vectPossibleMoves);
                 }
@@ -955,6 +959,7 @@ int Board::getPieceValue(TypePieces type) {
 }
 
 int Board::evaluateMove(const std::pair<int, int>& move, Color color) {
+    //return 0;
     Piece* capturedPiece = getPieceAt(move.second);
     int moveValue = 0;
 
