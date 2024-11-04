@@ -126,7 +126,7 @@ std::pair<int, int> MainChessGame::findBestMoveForCurrentPlayer(int depth) {
     int iRow, iCol;
 
     Bot* botPlayer = dynamic_cast<Bot*>(m_currentPlayer);
-    if(depth > 0 || botPlayer != nullptr) {
+    if(depth > 0 && botPlayer != nullptr) {
         botPlayer->playWithDepth(*m_board, iRow, iCol, depth);
     }
     else {
