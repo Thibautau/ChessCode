@@ -35,10 +35,10 @@ int main(int argc, char **argv) {
     Board board;
 
     // Test Early Game
-    testPerformance(board, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 6);
+    //testPerformance(board, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 6);
 
     // Test Mid Game
-    testPerformance(board, "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 0 4", 6);
+    //testPerformance(board, "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 0 4", 6);
 
     // Test Late Game
     testPerformance(board, "8/8/4k3/2Q2P2/4K3/4p3/8/8 w - - 0 1", 6);

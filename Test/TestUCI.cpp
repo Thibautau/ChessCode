@@ -3,6 +3,7 @@
 #include "MainChessGame.cpp"
 #include "Board.h"
 #include "Bot.cpp"
+#include "Zobrist.cpp"
 
 class MainChessGameTest : public ::testing::Test {
 protected:
