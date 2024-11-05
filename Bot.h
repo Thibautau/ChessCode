@@ -31,10 +31,10 @@ public:
     static int nodeCount;
     Bot(Color color);
     void play(Board& board, int& start, int& end) override;
-    void playWithDepth(Board& board, int& start, int& end, int depth);
+    void playWithDepth(Board &board, int &start, int &end, int depth, char &promotion);
     Color getPlayerColor() const override;
-    void choisir_meilleur_coup(Board& board, int profondeur_max,std::pair<int, int>& meilleurCoup);
-    int minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta);
+    void choisir_meilleur_coup(Board &board, int profondeur_max, std::pair<int, int> &meilleurCoup, char *bestPromotion=nullptr);
+    int minimax(Board &board, int profondeur, bool estMaximisant, int alpha, int beta, char &bestPromotion);
     int evaluateMoveWithMinimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor,char& promotion);
 };
 

@@ -156,17 +156,23 @@ void MainChessGame::setBoardFromFEN(const std::string& fen) {
     }
 }
 
-std::pair<int, int> MainChessGame::findBestMoveForCurrentPlayer(int depth) {
-    int iRow, iCol;
+std::string MainChessGame::findBestMoveForCurrentPlayer(int depth) {
+    int start, end;
+    char promotion='\0';
 
     Bot* botPlayer = dynamic_cast<Bot*>(m_currentPlayer);
     if(depth > 0 && botPlayer != nullptr) {
-        botPlayer->playWithDepth(*m_board, iRow, iCol, depth);
+
+        botPlayer->playWithDepth(*m_board, start, end, depth, promotion);
     }
-    else {
-        m_currentPlayer->play(*m_board, iRow, iCol);
+    std::string move = indexToPosition(start);
+    std::string move2 = indexToPosition(end);
+    move += move2;
+    if (promotion != '\0') {
+        move += promotion;
     }
-    return {iRow, iCol};
+
+    return move;
 }
 
 

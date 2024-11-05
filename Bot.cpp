@@ -39,9 +39,9 @@ void Bot::play(Board& board, int& start, int& end) {
     end = meilleurCoup.second;
 }
 
-void Bot::playWithDepth(Board& board, int& start, int& end, int depth) {
+void Bot::playWithDepth(Board& board, int& start, int& end, int depth, char& promotion) {
     std::pair<int, int> meilleurCoup;
-    choisir_meilleur_coup(board, depth, meilleurCoup);
+    choisir_meilleur_coup(board, depth, meilleurCoup,&promotion);
     start = meilleurCoup.first;
     end = meilleurCoup.second;
 }
@@ -88,13 +88,12 @@ void comparerVecteurs(const std::vector<std::pair<int, int>>& vec1, const std::v
     }
 }
 
-void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int, int>& meilleurCoup) {
+void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int, int>& meilleurCoup, char* bestPromotion) {
     int meilleurScore = std::numeric_limits<int>::min();
     meilleurCoup = { -1, -1 };
     Zobrist::initZobrist();
 
     nodeCount = 0;
-    char bestPromotion = '0';
     char promotion = '0';
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -114,7 +113,7 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
                 if (score > meilleurScore) {
                     meilleurScore = score;
                     meilleurCoup = coup;
-                    bestPromotion = promotion;
+                    if (bestPromotion) *bestPromotion = promotion;
                 }
             }
         }
@@ -124,7 +123,7 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
             if (score > meilleurScore) {
                 meilleurScore = score;
                 meilleurCoup = coup;
-                bestPromotion = '0';
+                if (bestPromotion) *bestPromotion = promotion;
             }
         }
     }
@@ -135,7 +134,7 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
     std::cout << "Nodes/s: "<<nodeCount/(duration.count()/1000)<<"\n";*/
 }
 
-int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta) {
+int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, char &bestPromotion) {
     nodeCount++;
     if (profondeur == 0) {
         return board.evaluate(m_color);
@@ -156,18 +155,25 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
 
     int meilleurScore = estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
     char promotion = '0';
-    char bestPromotion = '0';
+    bestPromotion = '0';
 
     for (const std::pair<int, int>& coup : possibleMoves) {
         if(board.isPromotionMove(coup.first, coup.second, currentColor)) {
             for (char promoType : {'q', 'n', 'b', 'r'}) {
-                std::cout << "Promotion character: " << promoType << std::endl;
                 promotion = promoType;
                 int score = evaluateMoveWithMinimax(board, profondeur, estMaximisant, alpha, beta, coup, currentColor, promotion);
                 if (estMaximisant) {
+                    if (score > meilleurScore) {
+                        meilleurScore = score;
+                        bestPromotion = promoType;
+                    }
                     meilleurScore = std::max(meilleurScore, score);
                 }
                 else {
+                    if (score < meilleurScore) {
+                        meilleurScore = score;
+                        bestPromotion = promoType;
+                    }
                     meilleurScore = std::min(meilleurScore, score);
                 }
             }
@@ -189,6 +195,10 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
         else {
             int score = evaluateMoveWithMinimax(board, profondeur, estMaximisant, alpha, beta, coup, currentColor, promotion);
             if (estMaximisant) {
+                if (score > meilleurScore) {
+                    meilleurScore = score;
+                    bestPromotion = '0';
+                }
                 meilleurScore = std::max(meilleurScore, score);
                 alpha = std::max(alpha, meilleurScore);
                 if (meilleurScore >= beta) {
@@ -197,6 +207,10 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
                 }
             }
             else {
+                if (score < meilleurScore) {
+                    meilleurScore = score;
+                    bestPromotion = '0';
+                }
                 meilleurScore = std::min(meilleurScore, score);
                 beta = std::min(beta, meilleurScore);
                 if (meilleurScore <= alpha) {
@@ -217,10 +231,7 @@ int Bot::evaluateMoveWithMinimax(Board& board, int profondeur, bool estMaximisan
     bool isPromotion = board.isPromotionMove(move.first, move.second, currentColor);
     int enPassantPos = -1;
     board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promotion), &enPassantPos);
-    if(isPromotion) {
-        board.displayBoard();
-    }
-    int score = minimax(board, profondeur - 1, !estMaximisant, alpha, beta);
+    int score = minimax(board, profondeur - 1, !estMaximisant, alpha, beta, promotion);
     board.undoMove(move.first, move.second, capturedPiece, isPromotion);
     return score;
 }

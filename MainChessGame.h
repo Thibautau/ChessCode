@@ -36,7 +36,7 @@ public:
     Player* getWaitingPlayer() const;
 
     void setBoardFromFEN(const std::string& fen);
-    std::pair<int, int> findBestMoveForCurrentPlayer(int depth = -1);
+    std::string findBestMoveForCurrentPlayer(int depth = -1);
 
     void initChessGameFromFEN(const std::string& fen);
 

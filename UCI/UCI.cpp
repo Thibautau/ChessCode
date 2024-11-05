@@ -149,7 +149,7 @@ void UCI::inputPosition(std::string &in_sInput) const {
 
 
 void UCI::inputGo(std::string &in_sInput) {
-    int depth = 1;
+    int depth = 4;
     std::istringstream iss(in_sInput);
     std::string token;
 
@@ -168,9 +168,8 @@ void UCI::inputStop() {
 }
 
 void UCI::findBestMove(int depth) {
-    std::pair<int, int> bestMove = m_mainChessGame->findBestMoveForCurrentPlayer(depth);
-    std::cout << "bestmove " << m_mainChessGame->indexToPosition(bestMove.first)
-            << m_mainChessGame->indexToPosition(bestMove.second) << std::endl;
+    std::string bestMove = m_mainChessGame->findBestMoveForCurrentPlayer(depth);
+    std::cout << "bestmove " <<bestMove<< std::endl;
 }
 
 
