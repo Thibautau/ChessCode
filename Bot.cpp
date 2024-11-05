@@ -94,7 +94,7 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
     Zobrist::initZobrist();
 
     nodeCount = 0;
-    char promotion = '0';
+    char promotion = '\0';
     auto start = std::chrono::high_resolution_clock::now();
 
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);
@@ -154,8 +154,8 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
 
 
     int meilleurScore = estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
-    char promotion = '0';
-    bestPromotion = '0';
+    char promotion = '\0';
+    bestPromotion = '\0';
 
     for (const std::pair<int, int>& coup : possibleMoves) {
         if(board.isPromotionMove(coup.first, coup.second, currentColor)) {
@@ -197,7 +197,7 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
             if (estMaximisant) {
                 if (score > meilleurScore) {
                     meilleurScore = score;
-                    bestPromotion = '0';
+                    bestPromotion = '\0';
                 }
                 meilleurScore = std::max(meilleurScore, score);
                 alpha = std::max(alpha, meilleurScore);
@@ -209,7 +209,7 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
             else {
                 if (score < meilleurScore) {
                     meilleurScore = score;
-                    bestPromotion = '0';
+                    bestPromotion = '\0';
                 }
                 meilleurScore = std::min(meilleurScore, score);
                 beta = std::min(beta, meilleurScore);
