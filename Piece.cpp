@@ -77,8 +77,18 @@ TypePieces Piece::charToPieceType(char piece) {
         case 'r': return TypePieces::ROOK;
         case 'q': return TypePieces::QUEEN;
         case 'k': return TypePieces::KING;
-        default: return TypePieces::NONE; // ou lancer une erreur
+        default: return TypePieces::NONE;
     }
+}
+
+std::vector<TypePieces> Piece::pieceForPromotion() {
+    std::vector<TypePieces> promotionOptions = {
+        TypePieces::ROOK,
+        TypePieces::KNIGHT,
+        TypePieces::BISHOP,
+        TypePieces::QUEEN
+    };
+    return promotionOptions;
 }
 
 int Piece::getColumnOfRookAfterRock(int in_iColumn)

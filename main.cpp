@@ -12,12 +12,12 @@ int main() {
     /*bool bUseUCI = true;
     if(bUseUCI)
     {*/
-        UCI* uci = new UCI();
-        uci->uciCommunication();
+        /*UCI* uci = new UCI();
+        uci->uciCommunication();*/
     //}
 
     while (!game->isGameOver()) {
-        //game->playTurn();
+        game->playTurn();
     }
 
     const Color colWinner = game->getColorWinner();

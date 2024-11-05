@@ -52,6 +52,8 @@ public:
     bool isRockNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition) const;
 
     bool isNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
+
+    static std::vector<TypePieces> pieceForPromotion();
 };
 
 #endif //PIECE_H

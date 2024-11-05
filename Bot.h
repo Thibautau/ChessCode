@@ -35,7 +35,7 @@ public:
     Color getPlayerColor() const override;
     void choisir_meilleur_coup(Board& board, int profondeur_max,std::pair<int, int>& meilleurCoup);
     int minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta);
-    int evaluateMoveWithMinimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor);
+    int evaluateMoveWithMinimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor,char& promotion);
 };
 
 #endif //BOT_H
