@@ -576,10 +576,10 @@ Piece* Board::findFirstPieceOnDirectionThatAttacksInitialPosition(int in_iPositi
 
     if(pPieceFound != nullptr && in_iPositionPieceFound != -1)
     {
-        if(pPieceFound->isNextPositionValid(- in_iDirection, in_iPositionPieceFound, in_iPosition)) // We want to see if the piece can attack our initial position
+        if(pPieceFound->doesPieceMoveInDirection(- in_iDirection)) // We want to see if the piece can attack our initial position
         {
             int iPositionDifference = std::abs(in_iPosition - in_iPositionPieceFound);
-            if(pPieceFound->getTypePiece() == TypePieces::PAWN) // Un pion qui peut avancer n'est pas un pion qui peut attaquer
+            if(pPieceFound->getTypePiece() == TypePieces::PAWN) // Un pion qui peut avancer n'est pas un pion qui peut attaquer //TODO voir condition à l'intérieur et valeur de retour
             {
                 if(iPositionDifference == 7 || iPositionDifference == 9)
                 {
@@ -609,10 +609,18 @@ Piece* Board::findFirstPieceOnDirection(int in_iPosition,int in_iDirection, int 
     int iNextPosition = in_iPosition;
 
     for(int iNbMovement = 1; iNbMovement < in_iNbOfRepetition; iNbMovement++) {
-        iNextPosition = iNextPosition + in_iDirection;
+        if(Piece::isNextPositionNotOutOfBoard(in_iDirection, iNextPosition))
+        {
+            iNextPosition = iNextPosition + in_iDirection;
+        }
+        else
+        {
+            in_iPositionPieceFound = -1;
+            return nullptr;
+        }
+
 
         Piece* pPieceFound = getPieceAt(iNextPosition);
-
         if(pPieceFound != nullptr)
         {
             in_iPositionPieceFound = iNextPosition;

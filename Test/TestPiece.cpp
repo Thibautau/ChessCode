@@ -337,10 +337,10 @@ TEST_F(BoardTest, invalidKingMove) {
 
 //Le roi en échec s'il bouge (e3->f4)
 TEST_F(BoardTest, invalidKingMove2) {
-    board.movePiece(1, 4, 3, 4);//Pion blanc e2->e4
-    board.movePiece(6, 4, 4, 4, Color::BLACK);//Pion noir e2->e4
-    board.movePiece(0, 4, 1, 4); // Roi blanc e1->e2
-    board.movePiece(1, 4, 2, 4); // Roi blanc e2->e3
+    board.movePiece("e2e4");//Pion blanc e2->e4
+    board.movePiece("e7e5", Color::BLACK);//Pion noir e2->e4
+    board.movePiece("e1e2"); // Roi blanc e1->e2
+    board.movePiece("e2e3"); // Roi blanc e2->e3
     bool result = board.movePiece(2, 4, 3, 5); // Roi blanc e3->f4
     EXPECT_FALSE(result);
     EXPECT_EQ(board.getPieceAt(2, 4)->getTypePiece(), TypePieces::KING);
@@ -1001,12 +1001,14 @@ TEST_F(BoardTest, PromotionDameMetRoiAdverseEchec)
     board.placePiece("e1", new Piece(TypePieces::KING, Color::WHITE)); // It has to get a king (even if useless)
     board.placePiece("e7", new Piece(TypePieces::PAWN, Color::WHITE));
 
-    board.placePiece("g7", new Piece(TypePieces::KING, Color::BLACK));
+    board.placePiece("g8", new Piece(TypePieces::KING, Color::BLACK));
     bool bResultWhiteMove = board.movePiece(Color::WHITE, "e7e8", nullptr, TypePieces::QUEEN);
     bool bIsBlackKingCheck = board.isBlackKingCheck();
+    bool bIsWhiteKingCheck = board.isWhiteKingCheck();
 
     EXPECT_TRUE(bResultWhiteMove);
     EXPECT_TRUE(bIsBlackKingCheck);
+    EXPECT_FALSE(bIsWhiteKingCheck);
 }
 
 //Test roi qui essaie de manger un pion derrière un autre roi (invalid move)
@@ -1069,4 +1071,50 @@ TEST_F(BoardTest, BugPawnDiagonalMove)
     EXPECT_TRUE(bMove1);
 }
 
+// Bug que l'on a eu où le roi ne pouvait pas manger
+TEST_F(BoardTest, BugKingCantEat) {
+    // Libère le chemin pour le grand roque noir
+    board.setupFromFEN("rnbqkbn1/3ppp2/p1p3p1/1p6/3N2P1/4P1P1/PPPPPP2/RNB1Kr2 w kq - 0 1");
 
+    bool result2 = board.movePiece("e1f1");
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt("e1"), nullptr);
+    EXPECT_EQ(board.getPieceAt("f1")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("f1")->getColor(), Color::WHITE);
+}
+
+// Test pour voir si le pion attaque de loin en diagonale (plus d'une ligne)
+TEST_F(BoardTest, PawnAttackFromFarDistance)
+{
+    board.clearBoard();
+
+    board.placePiece("c2", new Piece(TypePieces::KING, Color::WHITE));
+    board.placePiece("e8", new Piece(TypePieces::KING, Color::BLACK));
+    board.placePiece("e5", new Piece(TypePieces::PAWN, Color::BLACK));
+
+    bool result2 = board.movePiece("c2b2");
+    int iPositionPieceFound = -1;
+    Piece* pPieceThatAttackKing = board.findFirstPieceOnDirectionThatAttacksInitialPosition(9, 9, 7, iPositionPieceFound); // Verify who attacks the king on the right up diagonal
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(pPieceThatAttackKing, nullptr);
+    EXPECT_EQ(iPositionPieceFound, -1);
+    EXPECT_EQ(board.getPieceAt("c2"), nullptr);
+    EXPECT_EQ(board.getPieceAt("b2")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("b2")->getColor(), Color::WHITE);
+}
+
+// Test pour voir si le pion attaque de loin en diagonale (plus d'une ligne)
+TEST_F(BoardTest, KingMoveBehindEnemyPAwn)
+{
+    board.clearBoard();
+
+    board.placePiece("e6", new Piece(TypePieces::KING, Color::WHITE));
+    board.placePiece("e8", new Piece(TypePieces::KING, Color::BLACK));
+    board.placePiece("e5", new Piece(TypePieces::PAWN, Color::BLACK));
+
+    bool result2 = board.movePiece("e6f6");
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt("e6"), nullptr);
+    EXPECT_EQ(board.getPieceAt("f6")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("f6")->getColor(), Color::WHITE);
+}

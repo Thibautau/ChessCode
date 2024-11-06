@@ -233,6 +233,7 @@ int* Piece::getQueenMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) 
 
 int* Piece::getPawnMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement, Color in_colPiece) {
     out_iNbOfRepetitionToDo = 2;
+    out_iNbOfMovement = 4;
     if(in_colPiece == Color::WHITE)
     {
         static int queenMoves[4] = {
@@ -424,7 +425,85 @@ bool Piece::isNextPositionValid(int in_iDirection, int in_iInitialPosition, int 
             return isKnightNextPositionValid(in_iDirection, in_iInitialPosition, in_iNextPosition);
         case TypePieces::PAWN:
             return isPawnNextPositionValid(in_iDirection, in_iInitialPosition, in_iNextPosition);
+        default:
+            return false;
     }
 
     return false;
+}
+
+bool Piece::isNextPositionNotOutOfBoard(int in_iDirection, int in_iInitialPosition)
+{
+    if(in_iInitialPosition < 0 || in_iInitialPosition >= 64)
+    {
+        return false;
+    }
+
+    int iNextPosition = in_iInitialPosition + in_iDirection;
+
+    switch (in_iDirection) {
+        case 16:
+        case -16:
+        case -8:
+        case 8:
+            return isValidPosition(iNextPosition); // POur en haut et en bas
+        case 9:
+        case -7:
+        case 1:
+            return iNextPosition % 8 != 0;  // Si on dépasse la bordure droite
+
+        case 7:
+        case -9:
+        case -1:
+            return iNextPosition % 8 != 7;  // Si on dépasse la bordure gauche
+        case 6:
+        case -6:
+        case 10:
+        case -10:
+        case 15:
+        case -15:
+        case 17:
+        case -17:
+            return isKnightNextPositionValid(in_iDirection, in_iInitialPosition, iNextPosition); // See if it can be replaced by return isValidPosition(iNextPosition); // POur en haut et en bas
+
+        default:
+            return false;  // Pour toute autre direction non gérée
+    }
+}
+
+bool Piece::doesPieceMoveInDirection(int in_iDirection)
+{
+    int iRepetition = 0;
+    int iNbMovements = 0;
+    int* itabDirections = nullptr;
+    switch (m_tpTypePiece) {
+        case TypePieces::BISHOP:
+             itabDirections = getBishopMoves(iRepetition, iNbMovements);
+            return elementEstDansTableau(in_iDirection, itabDirections, iNbMovements);
+        case TypePieces::ROOK:
+            itabDirections = getRookMoves(iRepetition, iNbMovements);
+            return elementEstDansTableau(in_iDirection, itabDirections, iNbMovements);
+        case TypePieces::QUEEN:
+        case TypePieces::KING:
+        {
+            int iRepetition2 = 0;
+            int iNbMovements2 = 0;
+            int* itabDirections2 = nullptr;
+            itabDirections = getRookMoves(iRepetition, iNbMovements);
+            itabDirections2 = getBishopMoves(iRepetition2, iNbMovements2);
+            return elementEstDansTableau(in_iDirection, itabDirections, iNbMovements) || elementEstDansTableau(in_iDirection, itabDirections2, iNbMovements2);
+        }
+        case TypePieces::KNIGHT:
+            itabDirections = getKnightMoves(iRepetition, iNbMovements);
+            return elementEstDansTableau(in_iDirection, itabDirections, iNbMovements);
+        case TypePieces::PAWN:
+            itabDirections = getPawnMoves(iRepetition, iNbMovements, m_colColorPiece);
+            return elementEstDansTableau(in_iDirection, itabDirections, iNbMovements);
+        default:
+            return false;
+    }
+}
+
+bool Piece::elementEstDansTableau(int element, const int tableau[], int nbElement) {
+    return std::find(tableau, tableau + nbElement, element) != tableau + nbElement;
 }

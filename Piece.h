@@ -11,6 +11,8 @@
 
 #include "Type.h"
 #include <vector>
+#include <algorithm>
+#include <iostream>
 
 class Piece {
 private:
@@ -215,7 +217,7 @@ public:
     * @param in_iNextPosition La position suivante à vérifier.
     * @return True si la position suivante est valide, sinon false.
     */
-    bool isKnightNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
+    static bool isKnightNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
     /**
     * Vérifie si la position suivante est valide pour un pion.
     *
@@ -244,7 +246,35 @@ public:
     */
     bool isNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition);
 
+    /**
+    * Vérifie si la position suivante est valide. C'est à dire qui ne sort pas des limites du plateau
+    *
+    * @param in_iDirection La direction du déplacement.
+    * @param in_iInitialPosition La position initiale de la pièce.
+    * @return True si la position suivante est valide, sinon false.
+    */
+    static bool isNextPositionNotOutOfBoard(int in_iDirection, int in_iInitialPosition);
 
+    /**
+    * Vérifie si la pièce peut bouger dans une direction donnée (directions de bases)
+    *
+    * @param in_iDirection La direction du déplacement.
+    * @return True si la pièce a le droit de bouger dans la direction donnée.
+    */
+    bool doesPieceMoveInDirection(int in_iDirection);
+
+
+
+private:
+    /**
+    * Vérifie l'élément donnée est dans le tableau
+    *
+    * @param element L'élément à trouver dans le tableau
+    * @param tableau Tableau dans lequel chercher l'élément
+    * @param nbElement Nombres d'éléments dans le tableau
+    * @return True si l'élément est dans le tableau, false sinon
+    */
+    bool elementEstDansTableau(int element, const int tableau[], int nbElement);
 };
 
 #endif //PIECE_H
