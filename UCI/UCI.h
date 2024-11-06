@@ -5,6 +5,7 @@
 #ifndef UCI_H
 #define UCI_H
 #include <string>
+#include <thread>
 
 #include "MainChessGame.h"
 
@@ -14,7 +15,9 @@ private:
     //Attributs de classes
     MainChessGame *m_mainChessGame;
     bool m_debugMode;
-
+    std::atomic<bool> m_stop;
+    std::thread m_searchThread;
+    void searchThread(int depth);
 
 public:
     /**
@@ -92,7 +95,7 @@ public:
     * @param depth La profondeur maximale pour la recherche du coup. Si `-1`, utilise
     * une profondeur par défaut.
     */
-    void findBestMove(int depth);
+    std::string findBestMove(int depth);
     /**
     * Gère la commande "register" pour enregistrer le moteur avec un nom ou un code.
     *

@@ -14,7 +14,7 @@ UCI::UCI()
 {
     m_mainChessGame = new MainChessGame(m_gameMode);
     m_debugMode = false;
-
+    m_stop = false;
 }
 
 void UCI::uciCommunication()
@@ -158,18 +158,31 @@ void UCI::inputGo(std::string &in_sInput) {
             iss >> depth;
         }
     }
-    findBestMove(depth);
+    m_stop = false;
+    if(m_searchThread.joinable()) {
+        m_searchThread.join();
+    }
+    m_searchThread = std::thread(&UCI::searchThread, this, depth);
 }
 
 //@TODO Faut coder ça
 void UCI::inputStop() {
-    int depth = -1;
-    findBestMove(depth);
+    m_stop = true;
+    if(m_searchThread.joinable()) {
+        m_searchThread.join();
+    }
 }
 
-void UCI::findBestMove(int depth) {
-    std::string bestMove = m_mainChessGame->findBestMoveForCurrentPlayer(depth);
-    std::cout << "bestmove " <<bestMove<< std::endl;
+std::string UCI::findBestMove(int depth) {
+    std::string bestMove;
+    for(int currentDepth = 1; currentDepth <= depth; ++currentDepth) {
+        if(m_stop) {
+            break;
+        }
+        bestMove = m_mainChessGame->findBestMoveForCurrentPlayer(currentDepth);
+        std::cout << "best move at depth: " << currentDepth << std::endl;
+    }
+    return bestMove;
 }
 
 void UCI::inputRegister(const std::string &in_sInput) {
@@ -205,6 +218,17 @@ void UCI::inputRegister(const std::string &in_sInput) {
     }
     else {
         std::cout << "registration error" << std::endl;
+    }
+}
+
+void UCI::searchThread(int depth) {
+    std::string bestMove = findBestMove(depth);
+    if(!m_stop) {
+        std::cout << "bestmove " << bestMove << std::endl;
+    }
+    else {
+        std::cout << "Search interrupted" << std::endl;
+        std::cout << "bestmove " << bestMove << std::endl;
     }
 }
 
