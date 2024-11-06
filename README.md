@@ -74,4 +74,6 @@ Par défaut, le jeu est jouable depuis la console. Cependant, pour le relier à 
 
 3. Une fois la compilation terminée, renseignez l'exécutable ChessCode du programme dans votre logiciel GUI, en vous assurant que le protocole UCI est bien activé pour l'échange de données.
 
+   ![Configuration du GUI pour UCI](doc/NewCheesEngine.PNG)
+
 Le bot devrait désormais être opérationnel dans votre interface graphique.
