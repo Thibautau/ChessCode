@@ -10,13 +10,6 @@ std::string UCI::m_engineName = "MonEngine v1";
 std::string UCI::m_engineCode = "";
 GameMode UCI::m_gameMode = GameMode::JVB;
 
-/**
- * @brief Initialise un moteur UCI pour la communication.
- *
- * Ce constructeur initialise une nouvelle instance de la classe `UCI`.
- * Par défaut, il initialise le mode de jeu en Joueur contre Bot (JVB) et
- * désactive le mode debug.
- */
 UCI::UCI()
 {
     m_mainChessGame = new MainChessGame(m_gameMode);
@@ -24,13 +17,6 @@ UCI::UCI()
 
 }
 
-/**
- * @brief Gère la communication UCI avec l'interface d'échecs.
- *
- * Cette fonction lit les commandes de l'interface UCI en boucle et appelle les
- * fonctions correspondantes en fonction des commandes reçues. Elle s'arrête
- * lorsque la commande "quit" est reçue.
- */
 void UCI::uciCommunication()
 {
     std::string sInput;
@@ -91,12 +77,6 @@ void UCI::uciCommunication()
 }
 
 
-/**
- * @brief Répond à la commande UCI "uci".
- *
- * Affiche les informations sur le moteur, y compris son nom et l'auteur, puis
- * signale que le moteur est prêt avec "uciok".
- */
 void UCI::inputUCI()
 {
     std::cout << "id name " << m_engineName << std::endl;
@@ -105,22 +85,11 @@ void UCI::inputUCI()
     std::cout << "uciok" << std::endl;
 }
 
-/**
- * @brief Répond à la commande "isready".
- *
- * Indique que le moteur est prêt en envoyant "readyok" à l'interface.
- */
 void UCI::inputIsReady()
 {
     std::cout << "readyok" << std::endl;
 }
 
-/**
- * @brief Active ou désactive le mode debug en fonction de l'argument fourni.
- *
- * @param debugMode "on" pour activer le mode debug, "off" pour le désactiver.
- * Si activé, des informations de débogage sont affichées.
- */
 void UCI::inputDebug(const std::string &debugMode) {
     if(debugMode == "on") {
         m_debugMode = true;
@@ -132,26 +101,11 @@ void UCI::inputDebug(const std::string &debugMode) {
     }
 }
 
-/**
- * @brief Initialise une nouvelle partie d'échecs.
- *
- * Cette fonction réinitialise l'instance de `MainChessGame` pour démarrer une
- * nouvelle partie.
- */
 void UCI::inputUCINewGame()
 {
     m_mainChessGame = new MainChessGame(m_gameMode);
 }
 
-/**
- * @brief Définit la position du plateau en fonction de l'entrée UCI.
- *
- * Cette fonction prend en charge la définition de la position initiale (avec
- * "startpos") ou une position spécifique en FEN (avec "fen"). Elle applique
- * ensuite une série de coups si fournie.
- *
- * @param in_sInput Commande de position, sous la forme de "position [startpos|fen] moves ..."
- */
 void UCI::inputPosition(std::string &in_sInput) const {
     std::string token;
     std::istringstream ss(in_sInput);
@@ -194,12 +148,6 @@ void UCI::inputPosition(std::string &in_sInput) const {
     }
 }
 
-/**
- * @brief Déclenche le calcul du meilleur coup en fonction de la profondeur.
- *
- * @param in_sInput Commande "go" optionnellement suivie de "depth [n]", pour
- * spécifier la profondeur de recherche.
- */
 void UCI::inputGo(std::string &in_sInput) {
     int depth = 4;
     std::istringstream iss(in_sInput);
@@ -213,36 +161,17 @@ void UCI::inputGo(std::string &in_sInput) {
     findBestMove(depth);
 }
 
-/**
- * @brief Arrête la recherche du meilleur coup et retourne immédiatement un coup.
- *
- * Cette fonction est généralement utilisée pour arrêter la recherche du moteur
- * en cours de calcul.
- */
 //@TODO Faut coder ça
 void UCI::inputStop() {
     int depth = -1;
     findBestMove(depth);
 }
 
-/**
- * @brief Recherche et envoie le meilleur coup trouvé à l'interface.
- *
- * @param depth La profondeur maximale pour la recherche du coup. Si `-1`, utilise
- * une profondeur par défaut.
- */
 void UCI::findBestMove(int depth) {
     std::string bestMove = m_mainChessGame->findBestMoveForCurrentPlayer(depth);
     std::cout << "bestmove " <<bestMove<< std::endl;
 }
 
-/**
- * @brief Gère la commande "register" pour enregistrer le moteur avec un nom ou un code.
- *
- * @param in_sInput La commande "register" suivie de "name" ou "code" et les
- * informations d'enregistrement. Affiche "registration success" ou "registration error"
- * selon le résultat.
- */
 void UCI::inputRegister(const std::string &in_sInput) {
     std::istringstream ss(in_sInput);
     std::string command, token;
