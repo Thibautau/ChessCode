@@ -40,20 +40,4 @@ struct Coordinate {
     }
 };
 
-struct Move {
-    Coordinate coordStart;
-    Coordinate coordEnd;
-};
-
-struct Vector {
-    int iRow;
-    int iColumn;
-    int iLength;
-
-    Vector() : iRow(0), iColumn(0), iLength(0) {}
-    // Constructeur pour initialiser iRow, iColumn et iLength
-    Vector(int in_iRow, int in_iColumn, int in_iLength)
-        : iRow(in_iRow), iColumn(in_iColumn), iLength(in_iLength) {}
-};
-
 #endif //TYPE_H
