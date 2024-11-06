@@ -57,7 +57,6 @@ public:
     bool doesKingCanRock(Color in_colKing, int in_iDirectionForRock) const;
     bool kingCanLittleRock(Color in_kingColor) const;
     bool kingCanBigRock(Color in_kingColor) const;
-    static bool doesPieceHaveGoodTypeOfAttack(Piece* in_pPieceToVerifyAttack, TypeOfPieceAttack in_typeOfAttack);
 
     //Attack and Threat Detection Functions
     bool isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound) const;
@@ -73,7 +72,6 @@ public:
     void getPieceMovementsPossible(int in_iPositionToFindMovement, int in_iDirectionMovement, int in_iNbOfRepetition, std::vector<int>& in_vectPositionPossible);
     void getAllPossibleMovementsForAPiece(int in_iPositionToFindMovement, std::vector<int>& out_vectDirectionToFill);
     bool putNextMoveIfValid(int in_iNextPosition, Piece* in_pPieceToMove, std::vector<int>& in_vectMoveToFill);
-    std::vector<std::pair<int, std::vector<int>>> listOfPossibleMovements(Color in_colColor);
     std::vector<std::pair<int, int>> listOfPossibleMoves(Color in_colColor);
     bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion=false,int enPassantPos=-1);
 

@@ -516,29 +516,6 @@ bool Board::kingCanBigRock(Color in_kingColor) const
     }
 }
 
-bool Board::doesPieceHaveGoodTypeOfAttack(Piece* in_pPieceToVerifyAttack, TypeOfPieceAttack in_typeOfAttack)
-{
-    if(in_pPieceToVerifyAttack == nullptr)
-    {
-        return false;
-    }
-
-    bool bGoodTypeOfAttackResearched = false;
-    if(in_typeOfAttack == TypeOfPieceAttack::STRAIGHT)
-    {
-        bGoodTypeOfAttackResearched = in_pPieceToVerifyAttack->attackStraight();
-    }
-    else if(in_typeOfAttack == TypeOfPieceAttack::DIAGONAL)
-    {
-        bGoodTypeOfAttackResearched = in_pPieceToVerifyAttack->attackDiagonal();
-    }
-    else if(in_typeOfAttack == TypeOfPieceAttack::L)
-    {
-        bGoodTypeOfAttackResearched = in_pPieceToVerifyAttack->attackKnight();
-    }
-    return bGoodTypeOfAttackResearched;
-}
-
 //************************************************************************************//
 
 //************************* Attack and Threat Detection Functions ********************//
@@ -1092,26 +1069,6 @@ bool Board::putNextMoveIfValid(int in_iNextPosition, Piece* in_pPieceToMove, std
     }
     m_tabpiBoard[in_iNextPosition] = pPieceOnNextMove; // We put it back to normal
     return bIsMoveValid;
-}
-
-std::vector<std::pair<int, std::vector<int>>> Board::listOfPossibleMovements(Color in_colColor)
-{
-    std::vector<std::pair<int, std::vector<int>>> vectPossibleMoves;
-
-    for (int iPosition = 0; iPosition < 64; iPosition++)
-    {
-        Piece* pPieceToGetMovements = getPieceAt(iPosition);
-        if (pPieceToGetMovements != nullptr)
-        {
-            std::vector<int> vectPieceMoves;
-            getAllPossibleMovementsForAPiece(iPosition, vectPieceMoves);
-
-            // Ajouter la position et les mouvements sous forme de paire
-            vectPossibleMoves.emplace_back(iPosition, vectPieceMoves);
-        }
-    }
-
-    return vectPossibleMoves;
 }
 
 std::vector<std::pair<int, int>> Board::listOfPossibleMoves(Color in_colPlayer) {
