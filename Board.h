@@ -26,8 +26,6 @@ private:
     int m_iWhiteKingPosition = 4;
     int m_ipositionEnPassant = -1;
 
-    static bool isCoordinateInVector(const Coordinate& coordTargetPoint, const std::vector<Coordinate>& vectPossibleMoves);
-
 
 
 public:
