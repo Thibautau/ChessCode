@@ -12,7 +12,6 @@
 class Board {
 private:
     Piece* m_tabpiBoard[64]{};
-    Coordinate m_enPassantPosition;
     bool m_isGameOver = false;
     bool m_isWhiteKingChecked = false;
     bool m_isBlackKingChecked = false;

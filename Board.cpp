@@ -10,7 +10,7 @@
 #include <limits>
 
 //************************ Initialisation and Setup Functions ************************//
-Board::Board(): m_enPassantPosition{-1, -1}
+Board::Board()
 {
     for(int iIndiceRow = 0; iIndiceRow < 64; iIndiceRow++ )
     {
