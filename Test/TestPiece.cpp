@@ -641,17 +641,23 @@ TEST_F(BoardTest, KingValidMoves) {
 
 // Test roque côté roi (petit roque)
 TEST_F(BoardTest, KingCastlingKingside) {
-    // Libérer le chemin
-    board.movePiece("e2e3"); // Pion blanc e2->e3
-    board.movePiece("f2f3"); // Pion blanc f2->f3
-    board.movePiece("g2g3"); // Pion blanc g2->g3
-    board.movePiece("f1e2"); // Fou blanc f1->e2
-    board.movePiece("g1h3"); // Cavalier blanc g1->f3
-    // Effectuer le roque
-    bool result = board.movePiece("e1g1"); // Roi blanc e1->g1
+    // Libère le chemin pour le grand roque noir
+    board.setupFromFEN("rnbqk2r/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R w KQkq - 0 1");
+
+    // Essai de roquer
+    bool result = board.movePiece("e8g8", Color::BLACK);
     EXPECT_TRUE(result);
+    EXPECT_EQ(board.getPieceAt("g8")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("g8")->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt("f8")->getTypePiece(), TypePieces::ROOK);
+    EXPECT_EQ(board.getPieceAt("f8")->getColor(), Color::BLACK);
+
+    bool result2 = board.movePiece("e1g1");
+    EXPECT_TRUE(result2);
     EXPECT_EQ(board.getPieceAt("g1")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("g1")->getColor(), Color::WHITE);
     EXPECT_EQ(board.getPieceAt("f1")->getTypePiece(), TypePieces::ROOK);
+    EXPECT_EQ(board.getPieceAt("f1")->getColor(), Color::WHITE);
 }
 
 // Test grand roque invalide après mouvement d'une tour
@@ -713,6 +719,33 @@ TEST_F(BoardTest, KingInvalidLittleCastlingDueToKingMoving) {
     EXPECT_FALSE(result);
     EXPECT_EQ(board.getPieceAt("e1")->getTypePiece(), TypePieces::KING);
     EXPECT_EQ(board.getPieceAt("h1")->getTypePiece(), TypePieces::ROOK);
+}
+
+// Test petit roque invalide après mouvement du roi
+TEST_F(BoardTest, KingBigCastling) {
+    // Libère le chemin pour le grand roque blanc
+    board.setupFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/R3KBNR w KQkq - 0 1");
+
+    // Essai de roquer
+    bool result = board.movePiece("e1c1");
+    EXPECT_TRUE(result);
+    EXPECT_EQ(board.getPieceAt("c1")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("c1")->getColor(), Color::WHITE);
+    EXPECT_EQ(board.getPieceAt("d1")->getTypePiece(), TypePieces::ROOK);
+    EXPECT_EQ(board.getPieceAt("d1")->getColor(), Color::WHITE);
+
+
+    board.clearBoard();
+    // Libère le chemin pour le grand roque noir
+    board.setupFromFEN("r3kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+
+    // Essai de roquer
+    bool result2 = board.movePiece("e8c8", Color::BLACK);
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt("c8")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("c8")->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt("d8")->getTypePiece(), TypePieces::ROOK);
+    EXPECT_EQ(board.getPieceAt("d8")->getColor(), Color::BLACK);
 }
 
 // Test roque invalide (roi en échec)

@@ -272,7 +272,7 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
             else if(bKingWentLeftForRock)
             {
                 int iFirstPositionOnTheRow = in_iStartPosition - in_iStartPosition%8;
-                pRookForRock = getPieceAt(in_iStartPosition);
+                pRookForRock = getPieceAt(iFirstPositionOnTheRow);
 
                 if(pRookForRock != nullptr)
                 {
