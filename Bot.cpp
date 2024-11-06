@@ -191,7 +191,9 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
                 meilleurScore = std::max(meilleurScore, score);
                 alpha = std::max(alpha, meilleurScore);
                 if (meilleurScore >= beta) {
-                    //transpositionTable[zobristHash] = {profondeur, meilleurScore, ALPHA_CUT};
+                    if (!(transpositionTable.find(zobristHash) != transpositionTable.end())) {
+                        transpositionTable[zobristHash] = {profondeur, meilleurScore, ALPHA_CUT};
+                    }
                     return meilleurScore;
                 }
             }
@@ -203,7 +205,9 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
                 meilleurScore = std::min(meilleurScore, score);
                 beta = std::min(beta, meilleurScore);
                 if (meilleurScore <= alpha) {
-                    //transpositionTable[zobristHash] = {profondeur, meilleurScore, BETA_CUT};
+                    if (!(transpositionTable.find(zobristHash) != transpositionTable.end())) {
+                        transpositionTable[zobristHash] = {profondeur, meilleurScore, BETA_CUT};
+                    }
                     return meilleurScore;
                 }
             }
