@@ -190,13 +190,6 @@ MainChessGame::~MainChessGame() {
 
 Piece* MainChessGame::getPieceAt(const std::string& in_sPosition) const
 {
-    int iStartPos = convertToPosition(in_sPosition[0], in_sPosition[1]);
+    int iStartPos = Board::convertToPosition(in_sPosition[0], in_sPosition[1]);
     return m_board->getPieceAt(iStartPos);
-}
-
-int MainChessGame::convertToPosition(char col, char row) const
-{
-    int column = col - 'a';
-    int line = row - '1';
-    return column + line * 8;
 }
