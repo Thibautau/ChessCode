@@ -131,6 +131,8 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> duration = end - start;
 
+    transpositionTable.clear();
+
     /*std::cout << "Nodes evaluated: " << nodeCount << ", Time taken: " << duration.count() << " ms\n";
     std::cout << "Nodes/s: "<<nodeCount/(duration.count()/1000)<<"\n";*/
 }
@@ -149,9 +151,9 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
     Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(currentColor);
 
-    /*std::ranges::stable_sort(possibleMoves.begin(), possibleMoves.end(), std::greater<>{}, [&](const std::pair<int, int>& move) {
+    std::ranges::stable_sort(possibleMoves.begin(), possibleMoves.end(), std::greater<>{}, [&](const std::pair<int, int>& move) {
         return board.evaluateMove(move, m_color);
-    });*/
+    });
 
 
     int meilleurScore = estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
@@ -178,20 +180,6 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
                     meilleurScore = std::min(meilleurScore, score);
                 }
             }
-            if(estMaximisant) {
-                alpha = std::max(alpha, meilleurScore);
-                if (meilleurScore >= beta) {
-                    transpositionTable[zobristHash] = {profondeur, meilleurScore, ALPHA_CUT};
-                    return meilleurScore;
-                }
-            }
-            else {
-                beta = std::min(beta, meilleurScore);
-                if (meilleurScore <= alpha) {
-                    transpositionTable[zobristHash] = {profondeur, meilleurScore, BETA_CUT};
-                    return meilleurScore;
-                }
-            }
         }
         else {
             int score = evaluateMoveWithMinimax(board, profondeur, estMaximisant, alpha, beta, coup, currentColor, promotion);
@@ -203,7 +191,7 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
                 meilleurScore = std::max(meilleurScore, score);
                 alpha = std::max(alpha, meilleurScore);
                 if (meilleurScore >= beta) {
-                    transpositionTable[zobristHash] = {profondeur, meilleurScore, ALPHA_CUT};
+                    //transpositionTable[zobristHash] = {profondeur, meilleurScore, ALPHA_CUT};
                     return meilleurScore;
                 }
             }
@@ -215,7 +203,7 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
                 meilleurScore = std::min(meilleurScore, score);
                 beta = std::min(beta, meilleurScore);
                 if (meilleurScore <= alpha) {
-                    transpositionTable[zobristHash] = {profondeur, meilleurScore, BETA_CUT};
+                    //transpositionTable[zobristHash] = {profondeur, meilleurScore, BETA_CUT};
                     return meilleurScore;
                 }
             }
