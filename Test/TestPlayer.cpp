@@ -5,9 +5,7 @@
 //Initialisation du joueur
 TEST(PlayerTest, PlayerInitialisation) {
     PlayerHuman* player = new PlayerHuman(Color::WHITE);
-    player->setScore(3);
     EXPECT_EQ(player->getPlayerColor(), Color::WHITE);
-    EXPECT_EQ(player->getScore(), 3);
 }
 
 //Verification de l'input

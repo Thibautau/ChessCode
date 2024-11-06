@@ -5,7 +5,7 @@
 #include <string>
 
 PlayerHuman::PlayerHuman(Color color)
-    : m_colPlayerColor(color), m_iScore(0) {}
+    : m_colPlayerColor(color) {}
 
 Color PlayerHuman::getPlayerColor() const {
     return m_colPlayerColor;
@@ -13,14 +13,6 @@ Color PlayerHuman::getPlayerColor() const {
 
 void PlayerHuman::setPlayerColor(Color color) {
     m_colPlayerColor = color;
-}
-
-int PlayerHuman::getScore() const {
-    return m_iScore;
-}
-
-void PlayerHuman::setScore(int in_iScore) {
-    m_iScore = in_iScore;
 }
 
 void PlayerHuman::play(Board& board,int& start, int& end) {
