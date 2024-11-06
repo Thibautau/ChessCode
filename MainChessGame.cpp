@@ -92,38 +92,6 @@ std::string MainChessGame::indexToPosition(int pos) {
     return std::string{columnChar} + rowChar;
 }
 
-void MainChessGame::initChessGameFromFEN(const std::string& fen) {
-    // Configurer le plateau à partir du FEN
-    m_board->setupFromFEN(fen);
-
-    // Extraire les autres parties de la notation FEN
-    std::istringstream fenStream(fen);
-    std::string position,activeColor,castling,enPassant;
-
-    // Divise les parties de la notation FEN
-    fenStream >> position >> activeColor >> castling >> enPassant;
-
-
-    // Vérifier et configurer le joueur actif
-    Color currentPlayerColor = m_currentPlayer->getPlayerColor();
-    Color newActiveColor = (activeColor == "w") ? Color::WHITE : Color::BLACK;
-
-    if (currentPlayerColor != newActiveColor) {
-       changeCurrentPlayer();
-    }
-
-    // Configure les droits de roque
-    m_board->setCastlingRightsForFenNotation(castling);
-
-    // Gérer la position d'en passant
-    if (enPassant != "-") {
-        int enPassantPosition = Board::convertToPosition(enPassant[0], enPassant[1]);
-        m_board->setEnPassantPosition(enPassantPosition);
-    } else {
-        m_board->setEnPassantPosition(-1);
-    }
-}
-
 
 void MainChessGame::setBoardFromFEN(const std::string& fen) {
     m_board->setupFromFEN(fen);
