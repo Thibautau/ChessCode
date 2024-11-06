@@ -30,11 +30,81 @@ private:
 public:
     static int nodeCount;
     Bot(Color color);
+    /**
+    * Fonction qui fait jouer le bot en choisissant un mouvement sur l'échiquier.
+    *
+    * Cette fonction appelle la méthode `choisir_meilleur_coup` pour choisir le meilleur coup,
+    * puis affecte les cases de départ et d'arrivée aux paramètres `start` et `end`.
+    *
+    * @param board L'échiquier sur lequel le Bot joue.
+    * @param start La position de départ du coup choisi par le Bot.
+    * @param end La position d'arrivée du coup choisi par le Bot.
+    */
     void play(Board& board, int& start, int& end) override;
+    /**
+    * Fonction qui fait jouer le bot en choisissant un mouvement avec une profondeur spécifiée (utilisé par l'UCI).
+    *
+    * Cette fonction prend en compte une profondeur de recherche spécifique pour la minimisation
+    * ou maximisation de la recherche, ainsi que la gestion des promotions de pièces.
+    *
+    * @param board L'échiquier sur lequel le Bot joue.
+    * @param start La position de départ du coup choisi par le Bot.
+    * @param end La position d'arrivée du coup choisi par le Bot.
+    * @param depth La profondeur à laquelle le Bot doit jouer.
+    * @param promotion La promotion de la pièce si le coup est une promotion (si applicable).
+    */
     void playWithDepth(Board &board, int &start, int &end, int depth, char &promotion);
+    /**
+    * Retourne la couleur du joueur contrôlé par le bot.
+    *
+    * @return La couleur du joueur (Blanc ou Noir).
+    */
     Color getPlayerColor() const override;
+    /**
+    * Choisit le meilleur coup en fonction d'une profondeur maximale.
+    *
+    * Cette fonction explore les coups possibles, évalue leur score en utilisant un moteur minimax
+    * et sélectionne celui avec le meilleur score. La fonction prend également en compte les promotions.
+    *
+    * @param board L'échiquier sur lequel le Bot joue.
+    * @param profondeur_max La profondeur maximale à utiliser dans l'algorithme minimax.
+    * @param meilleurCoup La paire (start, end) représentant le meilleur coup choisi.
+    * @param bestPromotion (optionnel) permet de récupérer la promotion si besoin.
+    */
     void choisir_meilleur_coup(Board &board, int profondeur_max, std::pair<int, int> &meilleurCoup, char *bestPromotion=nullptr);
+    /**
+    * Fonction minimax pour évaluer le meilleur coup en fonction de la profondeur et des scores.
+    *
+    * Cette fonction implémente l'algorithme Minimax avec élagage alpha-bêta pour maximiser ou minimiser le score
+    * du bot en fonction de la couleur du joueur et des coups possibles.
+    *
+    * @param board L'échiquier à évaluer.
+    * @param profondeur La profondeur de recherche.
+    * @param estMaximisant Indique si c'est le tour du bot (maximisant) ou de l'adversaire (minimisant).
+    * @param alpha La borne inférieure pour l'élagage alpha-bêta.
+    * @param beta La borne supérieure pour l'élagage alpha-bêta.
+    * @param bestPromotion La meilleure promotion choisie (si applicable).
+    *
+    * @return Le score évalué pour le meilleur coup.
+    */
     int minimax(Board &board, int profondeur, bool estMaximisant, int alpha, int beta, char &bestPromotion);
+    /**
+    * Évalue un mouvement en utilisant l'algorithme Minimax, en prenant en compte les promotions.
+    *
+    * Cette fonction effectue un mouvement temporaire sur l'échiquier, évalue le score du coup en utilisant Minimax,
+    * puis annule le mouvement pour revenir à la position précédente. Elle gère également les promotions et captures.
+    *
+    * @param board L'échiquier sur lequel le coup doit être joué.
+    * @param profondeur La profondeur de recherche pour l'évaluation Minimax.
+    * @param estMaximisant Indique si c'est le tour du bot (maximisant) ou de l'adversaire (minimisant).
+    * @param alpha La borne inférieure pour l'élagage alpha-bêta.
+    * @param beta La borne supérieure pour l'élagage alpha-bêta.
+    * @param move Le coup à évaluer, représenté par une paire de positions (start, end).
+    * @param currentColor La couleur du joueur dont c'est le tour.
+    * @param promotion La promotion de la pièce si le coup est une promotion (si applicable).
+    *
+    * @return Le score du coup évalué.
+    */
     int evaluateMoveWithMinimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor,char& promotion);
 };
 

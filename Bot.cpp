@@ -13,6 +13,7 @@
 //@TODO Vérification de l'implémentation des table de transposition (docs sur le discord)
 //@TODO Ajout des opération XOR pour le changement des hash avec Zobrist plutôt que tout recalculer (docs sur le discord)
 //@TODO L'ordering+nouveau système d'évaluation = suppression de pions et ralentissement (2x moins de noeud à évaluer mais 2,5x fois moins de nodes/s)
+//@TODO Enlever les fonctions de debug (si inutile)
 
 
 /* Actuellement implémenter
