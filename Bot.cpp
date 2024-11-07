@@ -176,6 +176,7 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
                 int score = evaluateMoveWithMinimax(board, profondeur, estMaximisant, alpha, beta, coup, currentColor, promotion);
                 if (estMaximisant) {
                     if (score > meilleurScore) {
+                        meilleurScore = score;
                         bestPromotion = promoType;
                     }
                     meilleurScore = std::max(meilleurScore, score);
@@ -183,16 +184,15 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
                 }
                 else {
                     if (score < meilleurScore) {
+                        meilleurScore = score;
                         bestPromotion = promoType;
                     }
                     meilleurScore = std::min(meilleurScore, score);
                     beta = std::min(beta, meilleurScore);
                 }
-                if (beta <= alpha) {
-                    break;
-                }
             }
-        } else {
+        }
+        else {
             int score = evaluateMoveWithMinimax(board, profondeur, estMaximisant, alpha, beta, coup, currentColor, promotion);
             if (estMaximisant) {
                 if (score > meilleurScore) {
@@ -200,6 +200,9 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
                 }
                 meilleurScore = std::max(meilleurScore, score);
                 alpha = std::max(alpha, meilleurScore);
+                if (meilleurScore >= beta) {
+                    return meilleurScore;
+                }
             }
             else {
                 if (score < meilleurScore) {
@@ -207,9 +210,9 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
                 }
                 meilleurScore = std::min(meilleurScore, score);
                 beta = std::min(beta, meilleurScore);
-            }
-            if (beta <= alpha) {
-                break;
+                if (meilleurScore <= alpha) {
+                    return meilleurScore;
+                }
             }
         }
     }

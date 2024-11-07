@@ -1171,26 +1171,28 @@ int Board::evaluate(Color in_colPlayer) const {
 }
 
 int Board::evaluateMove(const std::pair<int, int>& move, Color color) {
-    //return 0;
     Piece* capturedPiece = getPieceAt(move.second);
+    Piece* playedPiece = getPieceAt(move.first);
     int moveValue = 0;
 
     // Évaluation des pièces capturées
     if (capturedPiece != nullptr) {
-        moveValue += getPieceValue(capturedPiece->getTypePiece());
+        moveValue += 10 * getPieceValue(capturedPiece->getTypePiece());
     }
 
-    // Évaluation de la structure des pions
-    /*Piece* movingPiece = getPieceAt(move.first);
-    if (movingPiece->getTypePiece() == TypePieces::PAWN) {
-        //moveValue += 10;
-        //moveValue += evaluatePawnStructure(move.first, color);
-    }*/
+    // Évaluation des mouvements de promotion
+    if (isPromotionMove(move.first, move.second, color)) {
+        moveValue += 9;
+    }
 
-    //moveValue += this->evaluateKingSafety(color);
+    // Évaluation des pièces déplacées (moins prioritaire que les captures)
+    if (playedPiece->getTypePiece() != TypePieces::KING) {
+        moveValue += getPieceValue(playedPiece->getTypePiece());
+    }
 
     return moveValue;
 }
+
 
 //@TODO j'ai mis des cas et valeurs au pif (mais de ce que j'ai lu la structure des pions est importantes dans le jeu)
 int Board::evaluatePawnStructure(int position, Color color) const {
