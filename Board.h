@@ -25,6 +25,16 @@ private:
     int m_iWhiteKingPosition = 4;
     int m_ipositionEnPassant = -1;
 
+    const int MVV_LVA[7][7] = {
+        { 0,  0,  0,  0,  0,  0, 0 },      // Victim K, Attacker K, Q, R, B, N, P, None
+        { 50, 51, 52, 53, 54, 55, 0 },    // Victim Q, Attacker K, Q, R, B, N, P, None
+        { 40, 41, 42, 43, 44, 45, 0 },    // Victim R, Attacker K, Q, R, B, N, P, None
+        { 30, 31, 32, 33, 34, 35, 0 },    // Victim B, Attacker K, Q, R, B, N, P, None
+        { 20, 21, 22, 23, 24, 25, 0 },    // Victim N, Attacker K, Q, R, B, N, P, None
+        { 10, 11, 12, 13, 14, 15, 0 },    // Victim P, Attacker K, Q, R, B, N, P, None
+        { 0,  0,  0,  0,  0,  0, 0 }      // Victim None, Attacker K, Q, R, B, N, P, None
+    };
+
 
 
 public:
@@ -437,6 +447,7 @@ public:
     *
     * @return Un vecteur d'entiers de taille 64 représentant l'état du plateau.
     */
+    static int getIndexForPiece(TypePieces type);
     std::vector<int> getBoardStateAsVector() const;
     /**
     * Convertit une position sur le plateau de notation alphanumérique (par exemple 'a1', 'h8') en une position interne.

@@ -1172,25 +1172,33 @@ int Board::evaluate(Color in_colPlayer) const {
 
 int Board::evaluateMove(const std::pair<int, int>& move, Color color) {
     Piece* capturedPiece = getPieceAt(move.second);
-    Piece* playedPiece = getPieceAt(move.first);
+    Piece* attackingPiece = getPieceAt(move.first);
     int moveValue = 0;
 
-    // Évaluation des pièces capturées
+    if (attackingPiece->getTypePiece() != TypePieces::KING) {
+        moveValue += getPieceValue(attackingPiece->getTypePiece());
+    }
+
     if (capturedPiece != nullptr) {
-        moveValue += 10 * getPieceValue(capturedPiece->getTypePiece());
-    }
+        int victimIndex = getIndexForPiece(capturedPiece->getTypePiece());
+        int attackerIndex = getIndexForPiece(attackingPiece->getTypePiece());
 
-    // Évaluation des mouvements de promotion
-    if (isPromotionMove(move.first, move.second, color)) {
-        moveValue += 9;
-    }
-
-    // Évaluation des pièces déplacées (moins prioritaire que les captures)
-    if (playedPiece->getTypePiece() != TypePieces::KING) {
-        moveValue += getPieceValue(playedPiece->getTypePiece());
+        moveValue += MVV_LVA[victimIndex][attackerIndex];
     }
 
     return moveValue;
+}
+
+int Board::getIndexForPiece(TypePieces type) {
+    switch(type) {
+        case TypePieces::KING: return 0;
+        case TypePieces::QUEEN: return 1;
+        case TypePieces::ROOK: return 2;
+        case TypePieces::BISHOP: return 3;
+        case TypePieces::KNIGHT: return 4;
+        case TypePieces::PAWN: return 5;
+        default: return 6; // None or empty square
+    }
 }
 
 
