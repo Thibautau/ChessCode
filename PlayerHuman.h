@@ -28,7 +28,7 @@ public:
     *
     * @param color La couleur à attribuer au joueur.
     */
-    void setPlayerColor(Color color);
+    void setPlayerColor(Color color) override;
     /**
     * Demande au joueur de saisir un mouvement et valide l'entrée.
     * Le mouvement est récupéré sous forme d'une chaîne de caractères,

@@ -113,6 +113,7 @@ public:
     * @return Un pointeur vers la pièce située à cette position, ou nullptr si la position est vide.
     */
     Piece* getPieceAt(const std::string& in_sPosition) const;
+    void switchPlayers();
 };
 
 #endif //MAINCHESSGAME_H

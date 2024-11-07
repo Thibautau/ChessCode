@@ -10,7 +10,7 @@
 enum class TypePieces { PAWN, KING, QUEEN, ROOK, BISHOP, KNIGHT, NONE };
 enum class Color { WHITE, BLACK, NONE };
 enum class PlayerType {HUMAN,BOT};
-enum class GameMode {JVJ, JVB, BVB};
+enum class GameMode {JVJ, JVB, BVJ, BVB};
 enum class TypeOfPieceAttack {STRAIGHT, DIAGONAL, L, STRAIGHT_AND_DIAGONAL};
 
 struct Coordinate {

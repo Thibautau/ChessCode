@@ -146,6 +146,9 @@ void UCI::inputPosition(std::string &in_sInput) const {
             }
         }
     }
+    else {
+        m_mainChessGame->switchPlayers();
+    }
 }
 
 void UCI::inputGo(std::string &in_sInput) {

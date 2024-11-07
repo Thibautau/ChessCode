@@ -60,6 +60,7 @@ public:
     * @return La couleur du joueur (Blanc ou Noir).
     */
     Color getPlayerColor() const override;
+    void setPlayerColor(Color color) override;
     /**
     * Choisit le meilleur coup en fonction d'une profondeur maximale.
     *

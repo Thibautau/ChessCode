@@ -23,6 +23,11 @@ MainChessGame::MainChessGame(GameMode mode)
             m_waitingPlayer = new Bot(Color::BLACK);
         break;
 
+        case GameMode::BVJ:
+            m_currentPlayer = new Bot(Color::WHITE);
+            m_waitingPlayer = new PlayerHuman(Color::BLACK);
+        break;
+
         case GameMode::BVB:
             m_currentPlayer = new Bot(Color::WHITE);
             m_waitingPlayer = new Bot(Color::BLACK);
@@ -45,6 +50,13 @@ void MainChessGame::initChessGame()
     {
         changeCurrentPlayer();
     }
+}
+
+void MainChessGame::switchPlayers() {
+    std::swap(m_currentPlayer, m_waitingPlayer);
+
+    m_currentPlayer->setPlayerColor(Color::WHITE);
+    m_waitingPlayer->setPlayerColor(Color::BLACK);
 }
 
 void MainChessGame::playTurn(const std::string& move, char promotion)
