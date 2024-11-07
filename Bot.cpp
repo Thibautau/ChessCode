@@ -49,6 +49,7 @@ void Bot::playWithDepth(Board& board, int& start, int& end, int depth, char& pro
     choisir_meilleur_coup(board, depth, meilleurCoup,&promotion);
     start = meilleurCoup.first;
     end = meilleurCoup.second;
+    std::cout << "coup: " << meilleurCoup.first << "  " <<meilleurCoup.second << "\n";
     std::cout << "promotion: " << promotion << "\n";
 }
 
@@ -156,6 +157,10 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
     Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(currentColor);
 
+    if(possibleMoves.empty()) {
+        return -100000;
+    }
+
     std::ranges::stable_sort(possibleMoves.begin(), possibleMoves.end(), std::greater<>{}, [&](const std::pair<int, int>& move) {
         return board.evaluateMove(move, m_color);
     });
@@ -171,7 +176,6 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
                 int score = evaluateMoveWithMinimax(board, profondeur, estMaximisant, alpha, beta, coup, currentColor, promotion);
                 if (estMaximisant) {
                     if (score > meilleurScore) {
-                        meilleurScore = score;
                         bestPromotion = promoType;
                     }
                     meilleurScore = std::max(meilleurScore, score);
@@ -179,7 +183,6 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
                 }
                 else {
                     if (score < meilleurScore) {
-                        meilleurScore = score;
                         bestPromotion = promoType;
                     }
                     meilleurScore = std::min(meilleurScore, score);

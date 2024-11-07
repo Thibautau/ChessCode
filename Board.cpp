@@ -1154,8 +1154,9 @@ int Board::evaluate(Color in_colPlayer) const {
                     pieceScore = 9;
                 break;
                 case TypePieces::KING:
-                    pieceScore = std::numeric_limits<int>::max();
+                    pieceScore = 10000;
                 break;
+                default: pieceScore = 0;
             }
 
             if(piece->getColor() == in_colPlayer) {
@@ -1179,13 +1180,14 @@ int Board::evaluateMove(const std::pair<int, int>& move, Color color) {
         moveValue += getPieceValue(capturedPiece->getTypePiece());
     }
 
-    // // Évaluation de la structure des pions
-    Piece* movingPiece = getPieceAt(move.first);
+    // Évaluation de la structure des pions
+    /*Piece* movingPiece = getPieceAt(move.first);
     if (movingPiece->getTypePiece() == TypePieces::PAWN) {
-        moveValue += evaluatePawnStructure(move.first, color);
-    }
+        //moveValue += 10;
+        //moveValue += evaluatePawnStructure(move.first, color);
+    }*/
 
-    moveValue += this->evaluateKingSafety(color);
+    //moveValue += this->evaluateKingSafety(color);
 
     return moveValue;
 }
