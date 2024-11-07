@@ -1120,7 +1120,7 @@ TEST_F(BoardTest, KingMoveBehindEnemyPAwn)
 }
 
 
-// Test pour voir si le pion attaque de loin en diagonale (plus d'une ligne)
+// Test pour voir si le roi attaque de loin (plus d'une ligne)
 TEST_F(BoardTest, PawnPromotion2Pawn2King)
 {
     board.clearBoard();
@@ -1131,4 +1131,20 @@ TEST_F(BoardTest, PawnPromotion2Pawn2King)
     EXPECT_EQ(board.getPieceAt("f2"), nullptr);
     EXPECT_EQ(board.getPieceAt("f3")->getTypePiece(), TypePieces::KING);
     EXPECT_EQ(board.getPieceAt("f3")->getColor(), Color::WHITE);
+}
+
+// Test pour voir si le pion attaque de loin en diagonale (plus d'une ligne)
+TEST_F(BoardTest, QueenMoveCrashesGame)
+{
+    board.clearBoard();
+    board.setupFromFEN("8/8/k7/2Q5/2K5/8/8/8 w - - 21 13");
+
+    bool result2 = board.movePiece("c5c6");
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt("c5"), nullptr);
+    EXPECT_EQ(board.getPieceAt("c6")->getTypePiece(), TypePieces::QUEEN);
+    EXPECT_EQ(board.getPieceAt("c6")->getColor(), Color::WHITE);
+
+    std::vector<std::pair<int,int>> listOfMove = board.listOfPossibleMoves(Color::BLACK);
+    EXPECT_EQ(listOfMove.size(), 2);
 }
