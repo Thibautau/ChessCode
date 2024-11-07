@@ -49,6 +49,7 @@ void Bot::playWithDepth(Board& board, int& start, int& end, int depth, char& pro
     choisir_meilleur_coup(board, depth, meilleurCoup,&promotion);
     start = meilleurCoup.first;
     end = meilleurCoup.second;
+    std::cout << "promotion: " << promotion << "\n";
 }
 
 std::string indexToPosition(int pos) {

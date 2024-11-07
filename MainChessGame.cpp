@@ -148,10 +148,11 @@ std::string MainChessGame::findBestMoveForCurrentPlayer(int depth) {
     std::string move = indexToPosition(start);
     std::string move2 = indexToPosition(end);
     move += move2;
+    std::cout << "promotion mainChessGame: " << promotion << "\n";
     if (promotion != '\0') {
-        move += promotion;
+        move +=std::string(1, promotion);
     }
-
+    std::cout << "move mainChessGame: " << move << "\n";
     return move;
 }
 
