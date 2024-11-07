@@ -579,7 +579,7 @@ Piece* Board::findFirstPieceOnDirectionThatAttacksInitialPosition(int in_iPositi
         if(pPieceFound->doesPieceMoveInDirection(- in_iDirection)) // We want to see if the piece can attack our initial position
         {
             int iPositionDifference = std::abs(in_iPosition - in_iPositionPieceFound);
-            if(pPieceFound->getTypePiece() == TypePieces::PAWN) // Un pion qui peut avancer n'est pas un pion qui peut attaquer //TODO voir condition à l'intérieur et valeur de retour
+            if(pPieceFound->getTypePiece() == TypePieces::PAWN) // Un pion qui peut avancer n'est pas un pion qui peut attaquer
             {
                 if(iPositionDifference == 7 || iPositionDifference == 9)
                 {
@@ -588,6 +588,16 @@ Piece* Board::findFirstPieceOnDirectionThatAttacksInitialPosition(int in_iPositi
                 in_iPositionPieceFound = -1;
                 return nullptr;
             }
+            if(pPieceFound->getTypePiece() == TypePieces::KING) // Un pion qui peut avancer n'est pas un pion qui peut attaquer
+            {
+                if(iPositionDifference == 1 || iPositionDifference == 7 || iPositionDifference == 8 || iPositionDifference == 9) // Comme c'est la valeur absolue, il n'y a que les 4 valeurs positives à vérifier
+                {
+                    return pPieceFound;
+                }
+                in_iPositionPieceFound = -1;
+                return nullptr;
+            }
+
             return pPieceFound;
         }
 

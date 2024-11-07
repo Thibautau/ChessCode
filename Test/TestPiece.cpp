@@ -899,7 +899,7 @@ TEST_F(BoardTest, BaiserDeLaMort)
 
     board.placePiece("b1", new Piece(TypePieces::KING, Color::BLACK));
     board.placePiece("c3", new Piece(TypePieces::QUEEN, Color::WHITE));
-    board.placePiece("d3", new Piece(TypePieces::BISHOP, Color::WHITE));
+    board.placePiece("d2", new Piece(TypePieces::ROOK, Color::WHITE));
 
     Color colWinner = Color::NONE;
 
@@ -1117,4 +1117,18 @@ TEST_F(BoardTest, KingMoveBehindEnemyPAwn)
     EXPECT_EQ(board.getPieceAt("e6"), nullptr);
     EXPECT_EQ(board.getPieceAt("f6")->getTypePiece(), TypePieces::KING);
     EXPECT_EQ(board.getPieceAt("f6")->getColor(), Color::WHITE);
+}
+
+
+// Test pour voir si le pion attaque de loin en diagonale (plus d'une ligne)
+TEST_F(BoardTest, PawnPromotion2Pawn2King)
+{
+    board.clearBoard();
+    board.setupFromFEN("8/3P1k2/8/8/8/8/3p1K2/8 w - - 0 1");
+
+    bool result2 = board.movePiece("f2f3");
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt("f2"), nullptr);
+    EXPECT_EQ(board.getPieceAt("f3")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("f3")->getColor(), Color::WHITE);
 }
