@@ -12,11 +12,24 @@
 
 class UCI {
 private:
-    //Attributs de classes
+    //Attributs de classes:
+    //La partie du jeu en cours.
     MainChessGame *m_mainChessGame;
+    //Boolean indiquant si le mode debug est activé ou non dans la partie.
     bool m_debugMode;
+    //Boolean indiquant si l'IA a arrêté ou non le calcul de son prochain coup.
+    //Est initialisé à false puis devient true une fois la commande stop est rentrée
     std::atomic<bool> m_stop;
+    //Thread chargé de rechercher le meilleur coup pour l'IA.
     std::thread m_searchThread;
+
+    /**
+     * Méthode utilisant m_searchThread afin d'obtenir le meilleur coup
+     * possible pour l'IA à l'aide de findBestMove(), puis affiche ce coup
+     * dans la console.
+     *
+     * @param depth: la profondeur à laquelle le coup a été effectué.
+     */
     void searchThread(int depth);
 
 public:
