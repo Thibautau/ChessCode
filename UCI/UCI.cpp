@@ -130,20 +130,13 @@ void UCI::inputPosition(std::string &in_sInput) const {
         while(ss >> token)
         {
             std::string move = token.substr(0, 4); // Par exemple, "e2"
-            char promotion = 0;
+            char promotion = '\0';
 
             // Si la longueur est de 5, cela signifie qu'il y a une promotion
             if (token.length() == 5) {
                 promotion = token.at(4);
             }
-
-            std::string movePlayed;
-            if (!promotion) {
-                m_mainChessGame->playTurn(move, promotion);
-            }
-            else {
-                m_mainChessGame->playTurn(move);
-            }
+            m_mainChessGame->playTurn(move, promotion);
         }
     }
     else {

@@ -192,9 +192,16 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
         } else {
             int score = evaluateMoveWithMinimax(board, profondeur, estMaximisant, alpha, beta, coup, currentColor, promotion);
             if (estMaximisant) {
+                if (score > meilleurScore) {
+                    bestPromotion = '\0';
+                }
                 meilleurScore = std::max(meilleurScore, score);
                 alpha = std::max(alpha, meilleurScore);
-            } else {
+            }
+            else {
+                if (score < meilleurScore) {
+                    bestPromotion = '\0';
+                }
                 meilleurScore = std::min(meilleurScore, score);
                 beta = std::min(beta, meilleurScore);
             }
