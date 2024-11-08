@@ -152,7 +152,7 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
 
 int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool estMaximisant, char &bestPromotion) {
     nodeCount++;
-    uint64_t zobristHash = Zobrist::computeZobristHash(board.getBoardStateAsVector(), m_color == Color::BLACK);
+    uint64_t zobristHash = Zobrist::computeZobristHash(board.getBoardStateAsVector(), m_color == Color::BLACK, board.getCastlingStateAsVector(), board.getEnPassantState());
 
     // Transposition Table Lookup
     if (transpositionTable.find(zobristHash) != transpositionTable.end()) {
