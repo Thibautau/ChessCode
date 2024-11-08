@@ -143,6 +143,83 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
     std::cout << "Nodes/s: "<<nodeCount/(duration.count()/1000)<<"\n";*/
 }
 
+int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool estMaximisant, char &bestPromotion) {
+    nodeCount++;
+    uint64_t zobristHash = Zobrist::computeZobristHash(board.getBoardStateAsVector(), m_color == Color::BLACK);
+
+    // Transposition Table Lookup
+    if (transpositionTable.find(zobristHash) != transpositionTable.end()) {
+        const TranspositionTableEntry& entry = transpositionTable[zobristHash];
+
+        if (entry.depth >= depth) {
+            if (entry.score >= beta) return entry.score;
+            if (entry.score <= alpha) return entry.score;
+            alpha = std::max(alpha, entry.score);
+            beta = std::min(beta, entry.score);
+        }
+    }
+
+    //@TODO Verifier le gameOver aussi
+    if (depth == 0 ) {
+        int evaluation = board.evaluate(m_color);
+        transpositionTable[zobristHash] = {depth, evaluation, EXACT};
+        return evaluation;
+    }
+
+    Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
+    std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(currentColor);
+    if (possibleMoves.empty()) return estMaximisant ? -100000 : 100000;
+
+    int originalAlpha = alpha;
+    int bestScore = estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
+    char promotion = '\0';
+    bestPromotion = '\0';
+
+    for (const auto& move : possibleMoves) {
+        if (board.isPromotionMove(move.first, move.second, currentColor)) {
+            for (char promoType : {'q', 'n', 'b', 'r'}) {
+                promotion = promoType;
+                int score = evaluateMoveWithMinimax(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
+                if (estMaximisant) {
+                    if (score > bestScore) bestScore = score, bestPromotion = promoType;
+                    alpha = std::max(alpha, bestScore);
+                    if (bestScore >= beta) break;
+                }
+                else {
+                    if (score < bestScore) bestScore = score, bestPromotion = promoType;
+                    beta = std::min(beta, bestScore);
+                    if (bestScore <= alpha) break;
+                }
+            }
+        }
+        else {
+            int score = evaluateMoveWithMinimax(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
+            if (estMaximisant) {
+                if (score > bestScore) bestScore = score, bestPromotion = '\0';
+                alpha = std::max(alpha, bestScore);
+                if (bestScore >= beta) break;
+            }
+            else {
+                if (score < bestScore) bestScore = score, bestPromotion = '\0';
+                beta = std::min(beta, bestScore);
+                if (bestScore <= alpha) break;
+            }
+        }
+    }
+
+    // Cache the bounds or exact score based on alpha-beta
+    if (bestScore <= originalAlpha) {
+        transpositionTable[zobristHash] = {depth, bestScore, ALPHA_CUT};
+    } else if (bestScore >= beta) {
+        transpositionTable[zobristHash] = {depth, bestScore, BETA_CUT};
+    } else {
+        transpositionTable[zobristHash] = {depth, bestScore, EXACT};
+    }
+
+    return bestScore;
+}
+
+
 int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, char &bestPromotion) {
     nodeCount++;
     if (profondeur == 0) {
@@ -226,7 +303,7 @@ int Bot::evaluateMoveWithMinimax(Board& board, int profondeur, bool estMaximisan
     bool isPromotion = board.isPromotionMove(move.first, move.second, currentColor);
     int enPassantPos = -1;
     board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promotion), &enPassantPos);
-    int score = minimax(board, profondeur - 1, !estMaximisant, alpha, beta, promotion);
+    int score = alphaBetaWithMemory(board, profondeur - 1, !estMaximisant, alpha, beta, promotion);
     board.undoMove(move.first, move.second, capturedPiece, isPromotion);
     return score;
 }
