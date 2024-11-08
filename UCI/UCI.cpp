@@ -161,7 +161,7 @@ void UCI::inputGo(std::string &in_sInput) {
     m_searchThread = std::thread(&UCI::searchThread, this, depth);
 }
 
-//@TODO Faut coder ça
+
 void UCI::inputStop() {
     m_stop = true;
     if(m_searchThread.joinable()) {
