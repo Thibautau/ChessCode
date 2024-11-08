@@ -154,10 +154,9 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     nodeCount++;
     uint64_t zobristHash = Zobrist::computeZobristHash(board.getBoardStateAsVector(), m_color == Color::BLACK, board.getCastlingStateAsVector(), board.getEnPassantState());
 
-    // Transposition Table Lookup
+    // Recherche dans la table de transposition
     if (transpositionTable.find(zobristHash) != transpositionTable.end()) {
         const TranspositionTableEntry& entry = transpositionTable[zobristHash];
-
         if (entry.depth >= depth) {
             if (entry.score >= beta) return entry.score;
             if (entry.score <= alpha) return entry.score;
@@ -166,15 +165,22 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
         }
     }
 
-    //@TODO Verifier le gameOver aussi
-    if (depth == 0 ) {
-        int evaluation = board.evaluate(m_color);
+    // Cas de base : profondeur 0
+    if (depth == 0) {
+        int evaluation = board.evaluate(m_color);  // Évaluation de la position pour le joueur courant
         transpositionTable[zobristHash] = {depth, evaluation, EXACT};
         return evaluation;
     }
 
+    // Détermination de la couleur à maximiser ou minimiser
     Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(currentColor);
+
+    // Tri des coups en fonction de leur évaluation
+    std::ranges::stable_sort(possibleMoves.begin(), possibleMoves.end(), std::greater<>{}, [&](const std::pair<int, int>& move) {
+        return board.evaluateMove(move, m_color);
+    });
+
     if (possibleMoves.empty()) return estMaximisant ? -100000 : 100000;
 
     int originalAlpha = alpha;
@@ -184,9 +190,12 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
 
     for (const auto& move : possibleMoves) {
         if (board.isPromotionMove(move.first, move.second, currentColor)) {
+            // Essayer chaque promotion
             for (char promoType : {'q', 'n', 'b', 'r'}) {
                 promotion = promoType;
                 int score = evaluateMoveWithMinimax(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
+                score -= 8;  // Ajustement après évaluation (peut être amélioré)
+
                 if (estMaximisant) {
                     if (score > bestScore) bestScore = score, bestPromotion = promoType;
                     alpha = std::max(alpha, bestScore);
@@ -198,15 +207,13 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
                     if (bestScore <= alpha) break;
                 }
             }
-        }
-        else {
+        } else {
             int score = evaluateMoveWithMinimax(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
             if (estMaximisant) {
                 if (score > bestScore) bestScore = score, bestPromotion = '\0';
                 alpha = std::max(alpha, bestScore);
                 if (bestScore >= beta) break;
-            }
-            else {
+            } else {
                 if (score < bestScore) bestScore = score, bestPromotion = '\0';
                 beta = std::min(beta, bestScore);
                 if (bestScore <= alpha) break;
@@ -214,17 +221,12 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
         }
     }
 
-    // Cache the bounds or exact score based on alpha-beta
-    if (bestScore <= originalAlpha) {
-        transpositionTable[zobristHash] = {depth, bestScore, ALPHA_CUT};
-    } else if (bestScore >= beta) {
-        transpositionTable[zobristHash] = {depth, bestScore, BETA_CUT};
-    } else {
-        transpositionTable[zobristHash] = {depth, bestScore, EXACT};
-    }
+    // Sauvegarde du résultat dans la table de transposition
+    transpositionTable[zobristHash] = {depth, bestScore, EXACT};
 
     return bestScore;
 }
+
 
 
 int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, char &bestPromotion) {

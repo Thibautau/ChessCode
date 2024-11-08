@@ -1131,43 +1131,197 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
 
 //************************* Evaluation and Heuristic Functions ***********************//
 
-int Board::evaluate(Color in_colPlayer) const {
+int Board::evaluate(Color in_colPlayer) {
     int score = 0;
 
-    for(Piece* piece : m_tabpiBoard) {
-        if(piece != nullptr) {
-            int pieceScore = 0;
-            switch(piece->getTypePiece()) {
-                case TypePieces::PAWN:
-                    pieceScore = 1;
-                break;
-                case TypePieces::KNIGHT:
-                    pieceScore = 3;
-                break;
-                case TypePieces::BISHOP:
-                    pieceScore = 3;
-                break;
-                case TypePieces::ROOK:
-                    pieceScore = 5;
-                break;
-                case TypePieces::QUEEN:
-                    pieceScore = 9;
-                break;
-                case TypePieces::KING:
-                    pieceScore = 10000;
-                break;
-                default: pieceScore = 0;
+    for (int i = 0; i < 64; ++i) {
+        Piece* piece = m_tabpiBoard[i];
+        if (piece != nullptr) {
+            int pieceScore = getPieceValue(piece->getTypePiece());
+
+
+            // Ajouter des éléments stratégiques comme la structure des pions
+            if (piece->getTypePiece() == TypePieces::PAWN) {
+                pieceScore += evaluatePawnStructure(i, piece->getColor());
             }
 
-            if(piece->getColor() == in_colPlayer) {
+            // Ajouter la sécurité du roi
+            if (piece->getTypePiece() == TypePieces::KING) {
+                pieceScore += evaluateKingSafety(piece->getColor());
+            }
+
+            // Ajustement final du score en fonction de la couleur
+            if (piece->getColor() == in_colPlayer) {
                 score += pieceScore;
-            } else {
+            }
+            else {
                 score -= pieceScore;
             }
         }
     }
 
+    // Ajouter la mobilité
+    score += evaluateMobility(in_colPlayer);
+
     return score;
+}
+
+
+int Board::evaluateMobility(Color in_colPlayer) const {
+    int mobilityScore = 0;
+
+    // Parcourir toutes les cases de l'échiquier
+    for (int i = 0; i < 64; ++i) {
+        Piece* piece = getPieceAt(i);  // Récupère la pièce à la position i
+        if (piece != nullptr && piece->getColor() == in_colPlayer) {
+            // Compter la mobilité de la pièce en fonction de son type
+            int mobility = getPieceMobility(piece, i);
+            mobilityScore += mobility;
+        }
+    }
+
+    return mobilityScore;
+}
+
+int Board::getPieceMobility(Piece* piece, int position) const {
+    int mobility = 0;
+
+    switch (piece->getTypePiece()) {
+        case TypePieces::PAWN:
+            mobility = evaluatePawnMobility(piece, position);
+            break;
+        case TypePieces::KNIGHT:
+            mobility = evaluateKnightMobility(piece, position);
+            break;
+        case TypePieces::BISHOP:
+            mobility = evaluateBishopMobility(piece, position);
+            break;
+        case TypePieces::ROOK:
+            mobility = evaluateRookMobility(piece, position);
+            break;
+        case TypePieces::QUEEN:
+            mobility = evaluateQueenMobility(piece, position);
+            break;
+        case TypePieces::KING:
+            mobility = evaluateKingMobility(piece, position);
+            break;
+        default:
+            mobility = 0;
+    }
+
+    return mobility;
+}
+
+int Board::evaluatePawnMobility(Piece* piece, int position) const {
+    int mobility = 0;
+    int direction = (piece->getColor() == Color::WHITE) ? 1 : -1;
+
+    // Vérifier les cases de déplacement possibles pour un pion (en avant, captures en diagonale)
+    int forward = position + direction * 8;
+    if (isValidPosition(forward) && getPieceAt(forward) == nullptr) {
+        mobility++;  // Le pion peut avancer d'une case
+    }
+
+    // Vérifier les captures en diagonale
+    int leftCapture = position + direction * 7;
+    if (isValidPosition(leftCapture) && getPieceAt(leftCapture) != nullptr && getPieceAt(leftCapture)->getColor() != piece->getColor()) {
+        mobility++;  // Capture en diagonale à gauche
+    }
+
+    int rightCapture = position + direction * 9;
+    if (isValidPosition(rightCapture) && getPieceAt(rightCapture) != nullptr && getPieceAt(rightCapture)->getColor() != piece->getColor()) {
+        mobility++;  // Capture en diagonale à droite
+    }
+
+    return mobility;
+}
+
+int Board::evaluateKnightMobility(Piece* piece, int position) const {
+    int mobility = 0;
+    static const int knightMoves[8] = {-17, -15, -10, -6, 6, 10, 15, 17};
+
+    // Vérifier toutes les positions possibles d'un cavalier
+    for (int i = 0; i < 8; ++i) {
+        int newPos = position + knightMoves[i];
+        if (isValidPosition(newPos) && (getPieceAt(newPos) == nullptr || getPieceAt(newPos)->getColor() != piece->getColor())) {
+            mobility++;
+        }
+    }
+
+    return mobility;
+}
+
+int Board::evaluateBishopMobility(Piece* piece, int position) const {
+    int mobility = 0;
+    static const int bishopDirections[4] = {-9, -7, 7, 9};
+
+    // Vérifier les déplacements possibles en diagonale (les quatre directions)
+    for (int dir : bishopDirections) {
+        int newPos = position;
+        while (isValidPosition(newPos + dir)) {
+            newPos += dir;
+            Piece* target = getPieceAt(newPos);
+            if (target == nullptr) {
+                mobility++;  // Case vide
+            } else {
+                if (target->getColor() != piece->getColor()) {
+                    mobility++;  // Capture possible
+                }
+                break;  // Arrêter la direction si une pièce est rencontrée
+            }
+        }
+    }
+
+    return mobility;
+}
+
+int Board::evaluateRookMobility(Piece* piece, int position) const {
+    int mobility = 0;
+    static const int rookDirections[4] = {-8, -1, 1, 8};
+
+    // Vérifier les déplacements possibles en ligne droite (les quatre directions)
+    for (int dir : rookDirections) {
+        int newPos = position;
+        while (isValidPosition(newPos + dir)) {
+            newPos += dir;
+            Piece* target = getPieceAt(newPos);
+            if (target == nullptr) {
+                mobility++;  // Case vide
+            } else {
+                if (target->getColor() != piece->getColor()) {
+                    mobility++;  // Capture possible
+                }
+                break;  // Arrêter la direction si une pièce est rencontrée
+            }
+        }
+    }
+
+    return mobility;
+}
+
+int Board::evaluateQueenMobility(Piece* piece, int position) const {
+    int mobility = 0;
+
+    // Une reine peut se déplacer comme une tour ou un fou, donc on additionne les mobilités de la tour et du fou
+    mobility += evaluateRookMobility(piece, position);
+    mobility += evaluateBishopMobility(piece, position);
+
+    return mobility;
+}
+
+int Board::evaluateKingMobility(Piece* piece, int position) const {
+    int mobility = 0;
+    static const int kingMoves[8] = {-9, -8, -7, -1, 1, 7, 8, 9};
+
+    // Vérifier toutes les cases possibles d'un roi
+    for (int i = 0; i < 8; ++i) {
+        int newPos = position + kingMoves[i];
+        if (isValidPosition(newPos) && (getPieceAt(newPos) == nullptr || getPieceAt(newPos)->getColor() != piece->getColor())) {
+            mobility++;
+        }
+    }
+
+    return mobility;
 }
 
 int Board::evaluateMove(const std::pair<int, int>& move, Color color) {

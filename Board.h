@@ -349,7 +349,15 @@ public:
     * @param in_colPlayer La couleur du joueur dont l'évaluation est demandée (blanc ou noir).
     * @return Un score entier représentant l'évaluation de la position pour le joueur donné.
     */
-    int evaluate(Color in_colPlayer) const;
+    int evaluate(Color in_colPlayer);
+    int evaluateMobility(Color in_colPlayer) const;
+    int getPieceMobility(Piece* piece, int position) const;
+    int evaluatePawnMobility(Piece* piece, int position) const;
+    int evaluateKnightMobility(Piece* piece, int position) const;
+    int evaluateBishopMobility(Piece* piece, int position) const;
+    int evaluateRookMobility(Piece* piece, int position) const;
+    int evaluateQueenMobility(Piece* piece, int position) const;
+    int evaluateKingMobility(Piece* piece, int position) const;
     /**
     * Évalue un mouvement spécifique (capture, structure des pions, sécurité du roi).
     *
