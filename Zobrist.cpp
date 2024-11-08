@@ -18,6 +18,13 @@ std::vector<std::vector<uint64_t>> Zobrist::zobristTable(64, std::vector<uint64_
  */
 uint64_t Zobrist::zobristBlackTurn;
 
+//NEW
+// Table pour les droits de roque (4 valeurs possibles)
+uint64_t Zobrist::zobristCastlingRights[4];
+
+// Table pour la prise en passant (16 cases)
+uint64_t Zobrist::zobristEnPassant[16];
+
 /**
  * Initialise la table Zobrist avec des valeurs aléatoires.
  * La fonction génère des nombres aléatoires et les assigne à la table de hachage.
@@ -29,12 +36,25 @@ void Zobrist::initZobrist() {
     std::mt19937_64 gen(rd());
     std::uniform_int_distribution<uint64_t> dis;
 
+    // Génération des clés pour chaque combinaison de case et type de pièce
     for (int i = 0; i < 64; ++i) {
         for (int j = 0; j < 12; ++j) {
             zobristTable[i][j] = dis(gen);
         }
     }
     zobristBlackTurn = dis(gen);
+
+    //NEW
+    // Génération des clés pour les droits de roque
+    for (int i = 0; i < 4; ++i) {
+        zobristCastlingRights[i] = dis(gen);
+    }
+
+    // Génération des clés pour la prise en passant
+    for (int i = 0; i < 16; ++i) {
+        zobristEnPassant[i] = dis(gen);
+    }
+    //ENDNEW
 }
 
 /**
@@ -42,21 +62,38 @@ void Zobrist::initZobrist() {
  * La fonction prend en compte les pièces sur l'échiquier et le tour en cours (noir ou blanc).
  * Le résultat est une valeur de 64 bits représentant l'état du jeu.
  *
- * @param board Le tableau représentant l'échiquier (64 cases).
- * @param isBlackTurn Booléen indiquant si c'est le tour des noirs.
+ * @param in_boardVectorIndexInZobristTable Tableau de 64 contenant les indices de chaque case dans la table de Zobrits ex : case 0 (tour blanche) => indice ( 2 (tour) + 0 (6 si noir))
+ * @param in_bIsBlackTurn Booléen indiquant si c'est le tour des noirs.
+ * @param in_vectIndexCastlingRights Les droits de roque sous forme d'indice (0-3). Même principe que in_boardVectorIndexInZobristTable
+ * @param in_iIndexZobristEnPassant La case de prise en passant (de 0 à 15) ou -1 si pas de prise en passant.
  * @return La valeur de hachage Zobrist de l'état actuel de l'échiquier.
  */
-uint64_t Zobrist::computeZobristHash(const std::vector<int>& board, bool isBlackTurn) {
-    uint64_t h = 0;
-    if (isBlackTurn) {
-        h ^= zobristBlackTurn;
+uint64_t Zobrist::computeZobristHash(const std::vector<int>& in_boardVectorIndexInZobristTable, bool in_bIsBlackTurn, const std::vector<int>& in_vectIndexCastlingRights, int in_iIndexZobristEnPassant) {
+    uint64_t hashedBoard = 0;
+    if (in_bIsBlackTurn) {
+        hashedBoard ^= zobristBlackTurn;
     }
 
     for (int i = 0; i < 64; ++i) {
-        int piece = board[i];
-        if (piece != 0) {
-            h ^= zobristTable[i][piece - 1];
+        int iIndexZobristPiece = in_boardVectorIndexInZobristTable[i];
+        if (iIndexZobristPiece != 0) {
+            hashedBoard ^= zobristTable[i][iIndexZobristPiece - 1];
         }
     }
-    return h;
+
+    // Ajouter la clé pour les droits de roque
+    for (int i = 0; i < 4; ++i) {
+        int iIndiceCastling = in_vectIndexCastlingRights[i];
+        if (iIndiceCastling != -1) // Si on a le droit de roque
+        {
+            hashedBoard ^= zobristCastlingRights[iIndiceCastling];
+        }
+    }
+
+    // Ajouter la clé pour la prise en passant si applicable
+    if (in_iIndexZobristEnPassant != -1) {
+        hashedBoard ^= zobristEnPassant[in_iIndexZobristEnPassant];
+    }
+
+    return hashedBoard;
 }

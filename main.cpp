@@ -9,6 +9,9 @@ int main() {
     MainChessGame* game = new MainChessGame(mode);
     game->initChessGame();
 
+    game->getBoard()->clearBoard();
+    game->getBoard()->setupFromFEN("8/8/k7/2Q5/2K5/8/8/8 w - - 21 13");
+
     /*bool bUseUCI = true;
     if(bUseUCI)
     {*/

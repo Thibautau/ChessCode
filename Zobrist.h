@@ -13,9 +13,11 @@ class Zobrist {
 private:
     static std::vector<std::vector<uint64_t>> zobristTable;
     static uint64_t zobristBlackTurn;
+    static uint64_t zobristCastlingRights[4];
+    static uint64_t zobristEnPassant[16];
 public:
     static void initZobrist();
-    static uint64_t computeZobristHash(const std::vector<int>& board, bool isBlackTurn);
+    static uint64_t computeZobristHash(const std::vector<int>& in_boardVector, bool in_bIsBlackTurn, const std::vector<int>& in_vectCastlingRights, int in_iIndexZobristEnPassant);
 
 };
 

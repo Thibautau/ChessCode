@@ -438,6 +438,24 @@ public:
     * @return Un vecteur d'entiers de taille 64 représentant l'état du plateau.
     */
     std::vector<int> getBoardStateAsVector() const;
+
+    /**
+     * Récupère l'état actuel du plateau sous forme de vecteur d'entiers.
+     * indice dans le tableau retourné :
+     *      - 0 : white little rock (king side) (valeur 0)
+     *      - 1 : white big rock (queen side) (valeur 1)
+     *      - 2 : black little rock (king side) (valeur 2)
+     *      - 3 : black big rock (queen side) (valeur 3)
+     * @return Un vecteur d'entiers de taille 4 représentant l'état des droits de roque.
+     */
+    std::vector<int> getCastlingStateAsVector() const;
+
+    /**
+     * Les indices retournés vont de 0 à 15.    0-7 : EnPassant noir en lisant de gauche à droite ||    8-15 : EnPassant blanc en lisant de gauche à droite
+     * @return L'indice de la valeur en passant dans le tableau Zobrits
+     */
+    int getEnPassantState() const;
+    
     /**
     * Convertit une position sur le plateau de notation alphanumérique (par exemple 'a1', 'h8') en une position interne.
     * La colonne est exprimée par une lettre entre 'a' et 'h', et la ligne par un chiffre entre '1' et '8'.

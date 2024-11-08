@@ -23,6 +23,7 @@
 - Table de transpositions (Pas optimiser mais fais déjà gagner des perf)
 */
 int Bot::nodeCount = 0;
+int Bot::uniqueNodeIterated = 0;
 
 Bot::Bot(Color color) : m_color(color) {}
 
@@ -101,6 +102,7 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
     Zobrist::initZobrist();
 
     nodeCount = 0;
+    uniqueNodeIterated = 0;
     char promotion = '\0';
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -108,15 +110,17 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
     std::ranges::stable_sort(possibleMoves.begin(), possibleMoves.end(), std::greater<>{}, [&](const std::pair<int, int>& move) {
         return board.evaluateMove(move, m_color);
     });
-
+    //board.displayBoard();
     for (const std::pair<int, int>& coup : possibleMoves) {
-        uint64_t zobristHash = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false);
+        uint64_t zobristHash = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState());
 
         if (board.isPromotionMove(coup.first, coup.second, m_color)) {
             for (char promoType : {'q', 'r', 'b', 'n'}) {
                 promotion = promoType;
                 int score = evaluateMoveWithMinimax(board, profondeur_max, true, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), coup, m_color, promotion);
-                transpositionTable[zobristHash] = {profondeur_max, score, 0};
+                if (transpositionTable.find(zobristHash) != transpositionTable.end()) {
+                    transpositionTable[zobristHash] = {profondeur_max, score, 0};
+                }
                 if (score > meilleurScore) {
                     meilleurScore = score;
                     meilleurCoup = coup;
@@ -126,7 +130,10 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
         }
         else {
             int score = evaluateMoveWithMinimax(board, profondeur_max, true, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), coup, m_color, promotion);
-            transpositionTable[zobristHash] = {profondeur_max, score, 0};
+            //debugPrintMove(coup.first, coup.second);
+            if (transpositionTable.find(zobristHash) != transpositionTable.end()) {
+                transpositionTable[zobristHash] = {profondeur_max, score, 0};
+            }
             if (score > meilleurScore) {
                 meilleurScore = score;
                 meilleurCoup = coup;
@@ -136,7 +143,7 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> duration = end - start;
-
+    std::cout << "TranspositionTable Size : " << transpositionTable.size() << std::endl;
     transpositionTable.clear();
 
     /*std::cout << "Nodes evaluated: " << nodeCount << ", Time taken: " << duration.count() << " ms\n";
@@ -149,10 +156,11 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
         return board.evaluate(m_color);
     }
 
-    uint64_t zobristHash = Zobrist::computeZobristHash(board.getBoardStateAsVector(), m_color == Color::BLACK);
+    uint64_t zobristHash = Zobrist::computeZobristHash(board.getBoardStateAsVector(), m_color == Color::BLACK, board.getCastlingStateAsVector(), board.getEnPassantState());
     if (transpositionTable.find(zobristHash) != transpositionTable.end()) {
         return transpositionTable[zobristHash].score;
     }
+    uniqueNodeIterated++; // On est sur un noeud qu'on n'a jamais parcouru
 
     Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(currentColor);
@@ -170,6 +178,7 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
     bestPromotion = '\0';
 
     for (const std::pair<int, int>& coup : possibleMoves) {
+        //debugPrintMove(coup.first, coup.second);
         if(board.isPromotionMove(coup.first, coup.second, currentColor)) {
             for (char promoType : {'q', 'n', 'b', 'r'}) {
                 promotion = promoType;
@@ -218,6 +227,7 @@ int Bot::minimax(Board& board, int profondeur, bool estMaximisant, int alpha, in
     }
 
     transpositionTable[zobristHash] = {profondeur, meilleurScore, EXACT};
+    //board.displayBoard();
     return meilleurScore;
 }
 
