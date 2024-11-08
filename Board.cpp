@@ -1459,6 +1459,46 @@ std::vector<int> Board::getBoardStateAsVector() const {
     return boardState;
 }
 
+std::vector<int> Board::getCastlingStateAsVector() const
+{
+    std::vector<int> castling(4, -1);
+    if(m_bWhiteKingCanLittleRock)
+    {
+        castling[0] = 0;
+    }
+    if(m_bWhiteKingCanBigRock)
+    {
+        castling[1] = 1;
+    }
+    if(m_bBlackKingCanLittleRock)
+    {
+        castling[2] = 2;
+    }
+    if(m_bBlackKingCanBigRock)
+    {
+        castling[3] = 3;
+    }
+    return castling;
+}
+
+int Board::getEnPassantState() const
+{
+    if(m_ipositionEnPassant == -1)
+    {
+        return -1;
+    }
+    else if (m_ipositionEnPassant >= 40 && m_ipositionEnPassant <= 47) // 3 ème ligne en partant du haut pour les noirs (6)
+    {
+        return std::abs(40 - m_ipositionEnPassant); // Indices allant de 0 à 7
+    }
+    else if (m_ipositionEnPassant >= 16 && m_ipositionEnPassant <= 23) // 3 ème ligne en partant du bas pour les blancs (3)
+    {
+        return 8 + std::abs(16 - m_ipositionEnPassant); // Indices allant de 8 à 15
+    }
+
+    return -1;
+}
+
 int Board::convertToPosition(char col, char row) {
     int column = col - 'a';
     int line = row - '1';

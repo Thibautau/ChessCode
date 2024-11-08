@@ -29,6 +29,8 @@ private:
 
 public:
     static int nodeCount;
+    //Si on a déjà parcouru un node alors on n'incrémente pas le compteur
+    static int uniqueNodeIterated;
     Bot(Color color);
     /**
     * Fonction qui fait jouer le bot en choisissant un mouvement sur l'échiquier.

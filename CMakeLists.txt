@@ -53,6 +53,7 @@ add_executable(runTests Test/Test.cpp
         Test/TestPiece.cpp
         Test/TestPlayer.cpp
         Test/TestUCI.cpp
+        Test/TestBot.cpp
 )
 
 # Créer l'exécutable pour les perf
