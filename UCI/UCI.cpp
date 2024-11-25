@@ -145,7 +145,7 @@ void UCI::inputPosition(std::string &in_sInput) const {
 }
 
 void UCI::inputGo(std::string &in_sInput) {
-    int depth = 6;
+    int depth = 8;
     std::istringstream iss(in_sInput);
     std::string token;
 

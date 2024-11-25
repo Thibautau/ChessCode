@@ -14,10 +14,15 @@
 const int EXACT = 0;
 const int ALPHA_CUT = -1;
 const int BETA_CUT = 1;
+const int UPPER = 1;
+const int LOWER = 1;
 
 struct TranspositionTableEntry {
     int depth;
     int score;
+    int bestMoveIndex;
+    int lowerBound;
+    int upperBound;
     int flag; // 0: Exact, -1: Alpha cut, 1: Beta cut
 };
 
@@ -110,6 +115,8 @@ public:
     */
     int evaluateMoveWithMinimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor,char& promotion);
     int alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool estMaximisant, char &bestPromotion);
+    int alphaBetaWithMemoryv2(Board& board, int depth, int alpha, int beta, bool estMaximisant, char &bestPromotion);
+    int minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta);
 };
 
 #endif //BOT_H

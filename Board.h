@@ -349,7 +349,16 @@ public:
     * @param in_colPlayer La couleur du joueur dont l'évaluation est demandée (blanc ou noir).
     * @return Un score entier représentant l'évaluation de la position pour le joueur donné.
     */
+    int evaluateSimple(Color in_colPlayer) ;
     int evaluate(Color in_colPlayer);
+    bool isCenterSquare(int index);
+    bool isInitialPosition(Piece* piece, int index);
+    int countProtections(Piece* piece, int pos);
+    int countThreats(Piece* piece, int pos);
+    bool isMultipleAttack(Piece* piece, int pos);
+    bool isSingleAttack(Piece* piece, int pos);
+    int getOpponentKingPosition(Color playerColor) ;
+    bool isTowardsOpponentKing(Piece* piece, int pos, int opponentKingPosition);
     int evaluateMobility(Color in_colPlayer) const;
     int getPieceMobility(Piece* piece, int position) const;
     int evaluatePawnMobility(Piece* piece, int position) const;

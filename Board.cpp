@@ -8,6 +8,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <set>
 
 //************************ Initialisation and Setup Functions ************************//
 Board::Board()
@@ -1131,40 +1132,253 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
 
 //************************* Evaluation and Heuristic Functions ***********************//
 
+int Board::evaluateSimple(Color in_colPlayer) {
+    int score = 0;
+
+    for (int i = 0; i < 64; ++i) {
+        Piece* piece = m_tabpiBoard[i];
+        if (piece != nullptr) {
+            score += getPieceValue(piece->getTypePiece());
+        }
+    }
+    return score;
+}
+
+
 int Board::evaluate(Color in_colPlayer) {
     int score = 0;
+
+    // Récupérer une fois la position du roi adverse
+    int opponentKingPosition = getOpponentKingPosition(in_colPlayer);
 
     for (int i = 0; i < 64; ++i) {
         Piece* piece = m_tabpiBoard[i];
         if (piece != nullptr) {
             int pieceScore = getPieceValue(piece->getTypePiece());
 
-
-            // Ajouter des éléments stratégiques comme la structure des pions
-            if (piece->getTypePiece() == TypePieces::PAWN) {
-                pieceScore += evaluatePawnStructure(i, piece->getColor());
+            // 1. Contrôle du centre
+            if (isCenterSquare(i)) {
+                pieceScore += (piece->getColor() == in_colPlayer) ? 10 : -10;
             }
 
-            // Ajouter la sécurité du roi
+            // 2. Malus pour les pièces restées en position initiale
+            if (isInitialPosition(piece, i)) {
+                pieceScore -= 5;
+            }
+
+            // 3. Isolation et menace
+            int protections = countProtections(piece, i);
+            int threats = countThreats(piece, i);
+            if (threats > protections) {
+                pieceScore -= getPieceValue(piece->getTypePiece());
+            } else {
+                pieceScore += protections * 2; // Bonus pour chaque protection
+            }
+
+            // 4. Mobilité
+            pieceScore += getPieceMobility(piece, i);
+
+            // 5. Bonus pour les attaques, fourchettes et tropisme vers le roi
+            if (isMultipleAttack(piece, i)) {
+                pieceScore += 20; // Bonus pour fourchette
+            }
+            else if (isSingleAttack(piece, i)) {
+                pieceScore += 10; // Bonus pour attaque simple
+            }
+
+            if (isTowardsOpponentKing(piece, i, opponentKingPosition)) {
+                pieceScore += 5; // Tropisme vers le roi
+            }
+
+            // 6. Sécurité du roi
             if (piece->getTypePiece() == TypePieces::KING) {
                 pieceScore += evaluateKingSafety(piece->getColor());
             }
 
-            // Ajustement final du score en fonction de la couleur
+            // Ajustement final en fonction de la couleur
             if (piece->getColor() == in_colPlayer) {
                 score += pieceScore;
-            }
-            else {
+            } else {
                 score -= pieceScore;
             }
         }
     }
 
-    // Ajouter la mobilité
+    // 7. Encourager le roque pour la sécurité du roi
+    /*if (canCastle(in_colPlayer)) {
+        score += 15; // Bonus pour la possibilité de roque
+    }*/
+
+    // 8. Ajouter la mobilité totale pour le joueur
     score += evaluateMobility(in_colPlayer);
 
     return score;
 }
+
+bool Board::isCenterSquare(int index) {
+    // Indices des cases centrales dans un tableau 8x8
+    const std::set<int> centerSquares = {27, 28, 35, 36};
+    return centerSquares.find(index) != centerSquares.end();
+}
+
+bool Board::isInitialPosition(Piece* piece, int index) {
+    if (!piece) return false;
+
+    TypePieces type = piece->getTypePiece();
+    Color color = piece->getColor();
+
+    // Indices des positions initiales pour les pièces blanches et noires
+    if (color == Color::WHITE) {
+        switch (type) {
+            case TypePieces::PAWN: return index >= 8 && index <= 15;
+            case TypePieces::ROOK: return index == 0 || index == 7;
+            case TypePieces::KNIGHT: return index == 1 || index == 6;
+            case TypePieces::BISHOP: return index == 2 || index == 5;
+            case TypePieces::QUEEN: return index == 3;
+            case TypePieces::KING: return index == 4;
+            default: return false;
+        }
+    } else if (color == Color::BLACK) {
+        switch (type) {
+            case TypePieces::PAWN: return index >= 48 && index <= 55;
+            case TypePieces::ROOK: return index == 56 || index == 63;
+            case TypePieces::KNIGHT: return index == 57 || index == 62;
+            case TypePieces::BISHOP: return index == 58 || index == 61;
+            case TypePieces::QUEEN: return index == 59;
+            case TypePieces::KING: return index == 60;
+            default: return false;
+        }
+    }
+
+    return false;
+}
+
+int Board::countProtections(Piece* piece, int pos) {
+    if (!piece) return 0;
+
+    int protectionCount = 0;
+    Color color = piece->getColor();
+
+    // Obtenir la liste de toutes les cases depuis lesquelles une pièce alliée pourrait protéger cette pièce
+    std::vector<std::pair<int, int>> possibleMoves = listOfPossibleMoves(color);
+
+    for (const auto& move : possibleMoves) {
+        int from = move.first;
+        int to = move.second;
+
+        // Vérifie si la pièce se déplaçant à `to` se trouve sur la même case que la pièce à protéger
+        if (to == pos) {
+            Piece* protector = getPieceAt(from);
+            if (protector && protector->getColor() == color) {
+                protectionCount++;
+            }
+        }
+    }
+
+    return protectionCount;
+}
+
+int Board::countThreats(Piece* piece, int pos) {
+    if (!piece) return 0;
+
+    int threatCount = 0;
+    Color enemyColor = (piece->getColor() == Color::WHITE) ? Color::BLACK : Color::WHITE;
+
+    // Obtenir la liste des mouvements possibles des pièces ennemies
+    std::vector<std::pair<int, int>> possibleMoves = listOfPossibleMoves(enemyColor);
+
+    // Parcourir les mouvements possibles pour détecter les menaces
+    for (const auto& move : possibleMoves) {
+        int to = move.second;
+
+        // Vérifie si la destination correspond à la position de la pièce ciblée
+        if (to == pos) {
+            threatCount++;
+        }
+    }
+
+    return threatCount;
+}
+
+bool Board::isMultipleAttack(Piece* piece, int pos) {
+    if (!piece) return false;
+
+    // Initialiser un vecteur pour stocker les mouvements possibles
+    std::vector<int> possibleMoves;
+    possibleMovesForPiece(pos, possibleMoves);
+
+    int enemyTargets = 0;
+    Color pieceColor = piece->getColor();
+
+    // Parcourir chaque position cible potentielle
+    for (int targetPosition : possibleMoves) {
+        Piece* targetPiece = getPieceAt(targetPosition);
+
+        // Vérifier si la case est occupée par une pièce ennemie
+        if (targetPiece && targetPiece->getColor() != pieceColor) {
+            enemyTargets++;
+        }
+
+        // Si plus d'une cible ennemie est trouvée, c'est une attaque multiple
+        if (enemyTargets > 1) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Board::isSingleAttack(Piece* piece, int pos) {
+    if (!piece) return false;
+
+    std::vector<int> possibleMoves;
+    possibleMovesForPiece(pos, possibleMoves);
+
+    int enemyTargets = 0;
+    Color pieceColor = piece->getColor();
+
+    for (int targetPosition : possibleMoves) {
+        Piece* targetPiece = getPieceAt(targetPosition);
+
+        if (targetPiece && targetPiece->getColor() != pieceColor) {
+            enemyTargets++;
+            // Si plus d'une cible est trouvée, c'est une attaque multiple
+            if (enemyTargets > 1) {
+                return false; // multiple attack
+            }
+        }
+    }
+
+    return enemyTargets == 1; // single attack si une seule cible est trouvée
+}
+
+// Fonction pour obtenir la position du roi adverse
+int Board::getOpponentKingPosition(Color playerColor) {
+    Color opponentColor = (playerColor == Color::WHITE) ? Color::BLACK : Color::WHITE;
+    for (int i = 0; i < 64; ++i) {
+        Piece* currentPiece = getPieceAt(i);
+        if (currentPiece && currentPiece->getColor() == opponentColor && currentPiece->getTypePiece() == TypePieces::KING) {
+            return i;
+        }
+    }
+    return -1; // Si le roi adverse n'est pas trouvé (ce cas ne devrait normalement pas se produire)
+}
+
+bool Board::isTowardsOpponentKing(Piece* piece, int pos, int opponentKingPosition) {
+    if (!piece || opponentKingPosition == -1) return false;
+
+    int piecePosition = pos;
+    int direction = opponentKingPosition - piecePosition;
+
+    // Exemple pour une pièce qui se déplace dans une direction simple (ligne droite ou diagonale vers le roi)
+    if (abs(direction) <= 7) {  // Vérifie si la différence est "sensible" sur une ligne ou diagonale
+        return true;
+    }
+
+    return false;
+}
+
+
 
 
 int Board::evaluateMobility(Color in_colPlayer) const {
@@ -1330,7 +1544,7 @@ int Board::evaluateMove(const std::pair<int, int>& move, Color color) {
     int moveValue = 0;
 
     if (attackingPiece->getTypePiece() != TypePieces::KING) {
-        moveValue += getPieceValue(attackingPiece->getTypePiece());
+        moveValue += (getPieceValue(attackingPiece->getTypePiece())*10);
     }
 
     if (capturedPiece != nullptr) {
