@@ -11,6 +11,8 @@
 #include <chrono>
 #include <fstream>
 
+#include "MainChessGame.h"
+
 //@TODO Vérification de l'implémentation des table de transposition (docs sur le discord)
 //@TODO Ajout des opération XOR pour le changement des hash avec Zobrist plutôt que tout recalculer (docs sur le discord)
 //@TODO L'ordering+nouveau système d'évaluation = suppression de pions et ralentissement (2x moins de noeud à évaluer mais 2,5x fois moins de nodes/s)
@@ -344,16 +346,20 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
 
     // Cas de base : profondeur 0
     if (depth == 0) {
-        //int evaluation = board.evaluateSimple(m_color);
+        // Evaluation de la position à profondeur 0
         int evaluation = board.evaluateTest(m_color);
         return evaluation;
     }
 
-    // Ouverture du fichier de log une seule fois avant la boucle
-    std::ofstream logFile("C:/Users/Peter/CLionProjects/ChessCode4/debug_log.txt", std::ios::app); // Ouvrir en mode append
+    // Ouvrir le fichier de log une seule fois avant la boucle principale
+    static std::ofstream logFile("C:/Users/Peter/CLionProjects/ChessCode4/debug_log.txt", std::ios::app); // Ouvrir en mode append
     if (!logFile.is_open()) {
         std::cerr << "Erreur d'ouverture du fichier de log" << std::endl;
         return 0;
+    }
+
+    if (depth == 3) {
+        logFile << "Plateau à la profondeur " << depth << " :\n" << board.getBoardAsString() << "\n";
     }
 
     // Détermination de la couleur à maximiser ou minimiser
@@ -365,25 +371,27 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
         return board.evaluateMove(move, m_color);
     });
 
-    if (possibleMoves.empty()) return estMaximisant ? std::numeric_limits<int>::min(): std::numeric_limits<int>::max();
+    if (possibleMoves.empty()) return estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
 
     int bestScore = estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
     char promotion = '\0';
     bestPromotion = '\0';
 
-    logFile << "Plateau: \n" << board.getBoardAsString() << "\n";
-
+    // Boucle sur tous les coups possibles
     for (const auto& move : possibleMoves) {
         if (board.isPromotionMove(move.first, move.second, currentColor)) {
             // Essayer chaque promotion
             for (char promoType : {'q', 'n', 'b', 'r'}) {
                 promotion = promoType;
                 int score = evaluateMoveWithMinimax(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
-                logFile << "Move: " << move.first << " -> " << move.second
-                    << " Score: " << score
-                    << " Alpha: " << alpha
-                    << " Beta: " << beta
-                    << " Depth: " << depth << "\n";
+
+                // Log des informations de mouvement pour chaque promotion
+                logFile << "Move: " <<indexToPosition( move.first) << " -> " << indexToPosition(move.second)
+                        << " Promotion: " << promoType
+                        << " Score: " << score
+                        << " Alpha: " << alpha
+                        << " Beta: " << beta
+                        << " Depth: " << depth << "\n";
 
                 if (estMaximisant) {
                     if (score > bestScore) bestScore = score, bestPromotion = promoType;
@@ -396,15 +404,18 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
                     if (bestScore <= alpha) break;
                 }
             }
-        }
-        else {
+        } else {
+            // Evaluation du coup sans promotion
             int score = evaluateMoveWithMinimax(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
+
             // Log des informations de mouvement
-            logFile << "Move: " << move.first << " -> " << move.second
+
+            logFile << "Move: " <<indexToPosition( move.first) << " -> " << indexToPosition(move.second)
                     << " Score: " << score
                     << " Alpha: " << alpha
                     << " Beta: " << beta
                     << " Depth: " << depth << "\n";
+
             if (estMaximisant) {
                 if (score > bestScore) bestScore = score, bestPromotion = '\0';
                 alpha = std::max(alpha, bestScore);
@@ -414,13 +425,11 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
                 beta = std::min(beta, bestScore);
                 if (bestScore <= alpha) break;
             }
-
-
         }
     }
-    logFile.close();
     return bestScore;
 }
+
 
 int Bot::evaluateMoveWithMinimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor, char& promotion) {
     Piece* capturedPiece = nullptr;
