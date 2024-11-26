@@ -1195,6 +1195,17 @@ TEST_F(BoardTest, KingCanMoveButGameCrashed)
     EXPECT_FALSE(isGameOver);
     EXPECT_EQ(Color::NONE, colWinner);
 
+    std::vector<std::pair<int, int>> listOfMoves = board.listOfPossibleMoves(Color::BLACK);
+    EXPECT_EQ(listOfMoves.size(), 1);
+    EXPECT_EQ(listOfMoves[0].first, 59);
+    EXPECT_EQ(listOfMoves[0].second, 51);
+
+    bool isWhiteKingChecked = board.isWhiteKingCheck();
+    colWinner = Color::NONE;
+    bool isGameOverForWhite = board.isGameOver(Color::WHITE, colWinner);
+    EXPECT_FALSE(isWhiteKingChecked);
+    EXPECT_FALSE(isGameOverForWhite);
+
 
     //Try to move the black king at d7 (below)
     bool result2 = board.movePiece("d8d7", Color::BLACK);
@@ -1202,7 +1213,7 @@ TEST_F(BoardTest, KingCanMoveButGameCrashed)
 
     isCheck = board.isBlackKingCheck();
     colWinner = Color::NONE;
-    isGameOver = board.isGameOver(Color::BLACK, colWinner);
+    isGameOver = board.isGameOver(Color::WHITE, colWinner);
     EXPECT_FALSE(isCheck);
     EXPECT_FALSE(isGameOver);
     EXPECT_EQ(Color::NONE, colWinner);
