@@ -1144,6 +1144,23 @@ int Board::evaluateSimple(Color in_colPlayer) {
     return score;
 }
 
+int Board::evaluateTest(Color in_colPlayer) {
+    int score = 0;
+    for (int i = 0; i < 64; ++i) {
+        Piece* piece = m_tabpiBoard[i];
+        if (piece != nullptr) {
+            int pieceValue = getPieceValue(piece->getTypePiece());
+            if (piece->getColor() == in_colPlayer) {
+                score += pieceValue;
+            }
+            else {
+                score -= pieceValue;
+            }
+        }
+    }
+    return score;
+}
+
 
 int Board::evaluate(Color in_colPlayer) {
     int score = 0;
@@ -1154,66 +1171,74 @@ int Board::evaluate(Color in_colPlayer) {
     for (int i = 0; i < 64; ++i) {
         Piece* piece = m_tabpiBoard[i];
         if (piece != nullptr) {
-            int pieceScore = getPieceValue(piece->getTypePiece());
+            int pieceScore = getPieceValue(piece->getTypePiece()) * 10;
 
             // 1. Contrôle du centre
             if (isCenterSquare(i)) {
-                pieceScore += (piece->getColor() == in_colPlayer) ? 10 : -10;
+                pieceScore += (piece->getColor() == in_colPlayer) ? 500 : -500; // Réduire la valeur du contrôle du centre
             }
 
             // 2. Malus pour les pièces restées en position initiale
             if (isInitialPosition(piece, i)) {
-                pieceScore -= 5;
+                pieceScore -= 100; // Augmenter la pénalité pour les pièces en position initiale
             }
 
             // 3. Isolation et menace
             int protections = countProtections(piece, i);
             int threats = countThreats(piece, i);
             if (threats > protections) {
-                pieceScore -= getPieceValue(piece->getTypePiece());
+                pieceScore -= getPieceValue(piece->getTypePiece()) * 4; // Augmenter la pénalité pour les pièces menacées
             } else {
-                pieceScore += protections * 2; // Bonus pour chaque protection
+                pieceScore += protections * 30; // Bonus accru pour les protections
             }
 
             // 4. Mobilité
-            pieceScore += getPieceMobility(piece, i);
+            pieceScore += getPieceMobility(piece, i) * 2; // Augmenter l'importance de la mobilité
 
             // 5. Bonus pour les attaques, fourchettes et tropisme vers le roi
             if (isMultipleAttack(piece, i)) {
-                pieceScore += 20; // Bonus pour fourchette
+                pieceScore += 100; // Réduire les bonus pour les fourchettes
             }
             else if (isSingleAttack(piece, i)) {
-                pieceScore += 10; // Bonus pour attaque simple
+                pieceScore += 50; // Réduire les bonus pour les attaques simples
             }
 
+            // 6. Tropisme vers le roi
             if (isTowardsOpponentKing(piece, i, opponentKingPosition)) {
-                pieceScore += 5; // Tropisme vers le roi
+                pieceScore += 200; // Réduire l'importance du tropisme vers le roi
             }
 
-            // 6. Sécurité du roi
+            // 7. Sécurité du roi
             if (piece->getTypePiece() == TypePieces::KING) {
-                pieceScore += evaluateKingSafety(piece->getColor());
+                pieceScore += evaluateKingSafety(piece->getColor()) * 2; // Réduire le bonus pour la sécurité du roi
+            }
+
+            // 8. Sacrifices imprudents : si une pièce est sacrifiée sans avantage stratégique
+            if (threats > protections && getPieceValue(piece->getTypePiece()) >= 3) {
+                pieceScore -= 5000; // Pénalité pour sacrifier des pièces importantes sans gain stratégique
             }
 
             // Ajustement final en fonction de la couleur
             if (piece->getColor() == in_colPlayer) {
                 score += pieceScore;
-            } else {
+            }
+            else {
                 score -= pieceScore;
             }
         }
     }
 
-    // 7. Encourager le roque pour la sécurité du roi
+    // 8. Encourager le roque pour la sécurité du roi
     /*if (canCastle(in_colPlayer)) {
-        score += 15; // Bonus pour la possibilité de roque
+        score += 30; // Augmenter le bonus pour la possibilité de roque
     }*/
 
-    // 8. Ajouter la mobilité totale pour le joueur
-    score += evaluateMobility(in_colPlayer);
+    // 9. Ajouter la mobilité totale pour le joueur
+    score += evaluateMobility(in_colPlayer) * 2; // Augmenter l'importance de la mobilité globale
 
     return score;
 }
+
 
 bool Board::isCenterSquare(int index) {
     // Indices des cases centrales dans un tableau 8x8
@@ -1702,7 +1727,7 @@ int Board::getPieceValue(TypePieces type) {
         case TypePieces::BISHOP: return 3;
         case TypePieces::ROOK:   return 5;
         case TypePieces::QUEEN:  return 9;
-        case TypePieces::KING:   return 10000;
+        case TypePieces::KING:   return 0;
         default: return 0;
     }
 }

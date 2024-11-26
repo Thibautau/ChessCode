@@ -349,7 +349,8 @@ public:
     * @param in_colPlayer La couleur du joueur dont l'évaluation est demandée (blanc ou noir).
     * @return Un score entier représentant l'évaluation de la position pour le joueur donné.
     */
-    int evaluateSimple(Color in_colPlayer) ;
+    int evaluateSimple(Color in_colPlayer);
+    int evaluateTest(Color in_colPlayer);
     int evaluate(Color in_colPlayer);
     bool isCenterSquare(int index);
     bool isInitialPosition(Piece* piece, int index);
