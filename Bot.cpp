@@ -111,7 +111,7 @@ void Bot::clearFile(const std::string& filename) {
 
 void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int, int>& meilleurCoup, char* bestPromotion) {
     int meilleurScore = std::numeric_limits<int>::min();
-    clearFile("C:/Users/Peter/CLionProjects/ChessCode4/debug_log.txt");
+    clearFile("../debug_log.txt");
     meilleurCoup = { -1, -1 };
     std::pair<int, int> previousBestMove = { -1, -1 };
     Zobrist::initZobrist();
@@ -352,7 +352,7 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
     }
 
     // Ouvrir le fichier de log une seule fois avant la boucle principale
-    static std::ofstream logFile("C:/Users/Peter/CLionProjects/ChessCode4/debug_log.txt", std::ios::app); // Ouvrir en mode append
+    static std::ofstream logFile("../debug_log.txt", std::ios::app); // Ouvrir en mode append
     if (!logFile.is_open()) {
         std::cerr << "Erreur d'ouverture du fichier de log" << std::endl;
         return 0;
