@@ -9,6 +9,7 @@
 #include <iostream>
 #include <limits>
 #include <set>
+#include <sstream>
 
 //************************ Initialisation and Setup Functions ************************//
 Board::Board()

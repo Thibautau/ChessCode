@@ -28,7 +28,10 @@
 int Bot::nodeCount = 0;
 int Bot::uniqueNodeIterated = 0;
 
-Bot::Bot(Color color) : m_color(color) {}
+Bot::Bot(Color color) : m_color(color)
+{
+    m_logFile = new LogInFile("Bot_Evaluation_Log.txt", true);
+}
 
 Color Bot::getPlayerColor() const {
     return m_color;
@@ -44,6 +47,8 @@ void Bot::play(Board& board, int& start, int& end) {
 
     choisir_meilleur_coup(board, profondeur_max, meilleurCoup);
 
+    //m_logFile->clear();
+    m_logFile->close();
     start = meilleurCoup.first;
     end = meilleurCoup.second;
 }
@@ -51,6 +56,9 @@ void Bot::play(Board& board, int& start, int& end) {
 void Bot::playWithDepth(Board& board, int& start, int& end, int depth, char& promotion) {
     std::pair<int, int> meilleurCoup;
     choisir_meilleur_coup(board, depth, meilleurCoup,&promotion);
+
+    //m_logFile->clear();
+    m_logFile->close();
     start = meilleurCoup.first;
     end = meilleurCoup.second;
     std::cout << "coup: " << meilleurCoup.first << "  " <<meilleurCoup.second << "\n";
@@ -111,7 +119,8 @@ void Bot::clearFile(const std::string& filename) {
 
 void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int, int>& meilleurCoup, char* bestPromotion) {
     int meilleurScore = std::numeric_limits<int>::min();
-    clearFile("../debug_log.txt");
+    m_logFile->clear();
+    //clearFile("../debug_log.txt");
     meilleurCoup = { -1, -1 };
     std::pair<int, int> previousBestMove = { -1, -1 };
     Zobrist::initZobrist();
@@ -352,14 +361,16 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
     }
 
     // Ouvrir le fichier de log une seule fois avant la boucle principale
-    static std::ofstream logFile("../debug_log.txt", std::ios::app); // Ouvrir en mode append
+    /*static std::ofstream logFile("../debug_log.txt", std::ios::app); // Ouvrir en mode append
     if (!logFile.is_open()) {
         std::cerr << "Erreur d'ouverture du fichier de log" << std::endl;
         return 0;
-    }
+    }*/
 
     if (depth == 3) {
-        logFile << "Plateau à la profondeur " << depth << " :\n" << board.getBoardAsString() << "\n";
+        //logFile << "Plateau à la profondeur " << depth << " :\n" << board.getBoardAsString() << "\n";
+        std::string logMessage = "Plateau à la profondeur " + std::to_string(depth) + " :\n" + board.getBoardAsString() + "\n";
+        m_logFile->writeLogOnSameLine(logMessage);
     }
 
     // Détermination de la couleur à maximiser ou minimiser
@@ -386,12 +397,20 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
                 int score = evaluateMoveWithMinimax(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
 
                 // Log des informations de mouvement pour chaque promotion
-                logFile << "Move: " <<indexToPosition( move.first) << " -> " << indexToPosition(move.second)
+                /*logFile << "Move: " <<indexToPosition( move.first) << " -> " << indexToPosition(move.second)
                         << " Promotion: " << promoType
                         << " Score: " << score
                         << " Alpha: " << alpha
                         << " Beta: " << beta
-                        << " Depth: " << depth << "\n";
+                        << " Depth: " << depth << "\n";*/
+                std::string logMessage = "Move: " + indexToPosition( move.first) + " -> " + indexToPosition(move.second)
+                        + " Promotion: " + promoType
+                        + " Score: " + std::to_string(score)
+                        + " Alpha: " + std::to_string(alpha)
+                        + " Beta: " + std::to_string(beta)
+                        + " Depth: " + std::to_string(depth) + "\n";
+                m_logFile->writeLogOnSameLine(logMessage);
+
 
                 if (estMaximisant) {
                     if (score > bestScore) bestScore = score, bestPromotion = promoType;
@@ -409,12 +428,12 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
             int score = evaluateMoveWithMinimax(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
 
             // Log des informations de mouvement
-
-            logFile << "Move: " <<indexToPosition( move.first) << " -> " << indexToPosition(move.second)
-                    << " Score: " << score
-                    << " Alpha: " << alpha
-                    << " Beta: " << beta
-                    << " Depth: " << depth << "\n";
+            std::string logMessage = "Move: " + indexToPosition( move.first) + " -> " + indexToPosition(move.second)
+                        + " Score: " + std::to_string(score)
+                        + " Alpha: " + std::to_string(alpha)
+                        + " Beta: " + std::to_string(beta)
+                        + " Depth: " + std::to_string(depth) + "\n";
+            m_logFile->writeLogOnSameLine(logMessage);
 
             if (estMaximisant) {
                 if (score > bestScore) bestScore = score, bestPromotion = '\0';

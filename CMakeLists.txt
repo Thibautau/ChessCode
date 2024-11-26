@@ -38,6 +38,8 @@ add_executable(ChessCode
         Zobrist.h
         UCI/UCI.cpp
         UCI/UCI.h
+        LogInFile.cpp
+        LogInFile.h
 )
 
 # Créer l'exécutable pour les tests
@@ -60,6 +62,8 @@ add_executable(runTests Test/Test.cpp
 add_executable(runPerf
         Test/TestPerf.cpp
         Test/TestPerf.h
+        LogInFile.cpp
+        LogInFile.h
 )
 
 # Lier GoogleTest à l'exécutable de tests

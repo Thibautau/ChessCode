@@ -10,6 +10,7 @@
 #include "Player.h"
 #include <unordered_map>
 #include <cstdint>
+#include "LogInFile.h"
 
 const int EXACT = 0;
 const int ALPHA_CUT = -1;
@@ -30,6 +31,7 @@ class Bot : public Player {
 private:
     Color m_color;
     std::unordered_map<uint64_t, TranspositionTableEntry> transpositionTable;
+    LogInFile* m_logFile;
 
 
 public:
