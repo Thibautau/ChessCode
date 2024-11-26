@@ -1174,3 +1174,36 @@ TEST_F(BoardTest, KingChangesToQueenIllegal)
     EXPECT_EQ(board.getPieceAt("g5")->getTypePiece(), TypePieces::KING);
     EXPECT_EQ(board.getPieceAt("g5")->getColor(), Color::BLACK);
 }
+
+// Test d'un crash qu'on a eu où le roi a le droit de bouger
+TEST_F(BoardTest, KingCanMoveButGameCrashed)
+{
+    board.clearBoard();
+    board.setupFromFEN("3k4/8/7B/2Q1R2P/3P4/4K3/P1P4P/8 w - - 21 13");
+
+    bool result = board.movePiece("h6g5");
+    EXPECT_TRUE(result);
+    EXPECT_EQ(board.getPieceAt("h6"), nullptr);
+    EXPECT_EQ(board.getPieceAt("g5")->getTypePiece(), TypePieces::BISHOP);
+    EXPECT_EQ(board.getPieceAt("g5")->getColor(), Color::WHITE);
+
+    bool isCheck = board.isBlackKingCheck();
+    Color colWinner = Color::NONE;
+    bool isGameOver = board.isGameOver(Color::BLACK, colWinner);
+
+    EXPECT_TRUE(isCheck);
+    EXPECT_FALSE(isGameOver);
+    EXPECT_EQ(Color::NONE, colWinner);
+
+
+    //Try to move the black king at d7 (below)
+    bool result2 = board.movePiece("d8d7", Color::BLACK);
+    EXPECT_TRUE(result2);
+
+    isCheck = board.isBlackKingCheck();
+    colWinner = Color::NONE;
+    isGameOver = board.isGameOver(Color::BLACK, colWinner);
+    EXPECT_FALSE(isCheck);
+    EXPECT_FALSE(isGameOver);
+    EXPECT_EQ(Color::NONE, colWinner);
+}

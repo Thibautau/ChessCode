@@ -66,6 +66,8 @@ add_executable(runTests Test/Test.cpp
         Test/TestPlayer.cpp
         Test/TestUCI.cpp
         Test/TestBot.cpp
+        LogFile.cpp
+        LogFile.h
 )
 
 # Créer l'exécutable pour les perf
