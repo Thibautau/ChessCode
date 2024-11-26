@@ -1148,3 +1148,29 @@ TEST_F(BoardTest, QueenMoveCrashesGame)
     std::vector<std::pair<int,int>> listOfMove = board.listOfPossibleMoves(Color::BLACK);
     EXPECT_EQ(listOfMove.size(), 2);
 }
+
+// Test pour voir si le pion noir se change en dame (pas le droit)
+TEST_F(BoardTest, PawnChangesToQueenIllegal)
+{
+    board.clearBoard();
+    board.setupFromFEN("8/5R1p/p1p1B1kN/4p3/4P3/1p4P1/PPP1K1P1/7R b - - 21 13");
+
+    bool result2 = board.movePiece("b3a2", Color::BLACK);
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt("b3"), nullptr);
+    EXPECT_EQ(board.getPieceAt("a2")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("a2")->getColor(), Color::BLACK);
+}
+
+// Test pour voir si le roi noir se change en dame (pas le droit)
+TEST_F(BoardTest, KingChangesToQueenIllegal)
+{
+    board.clearBoard();
+    board.setupFromFEN("8/5R1p/p1p1B1k1/4N3/4P3/6P1/pPP1K1P1/7R b - - 21 13");
+
+    bool result2 = board.movePiece("g6g5", Color::BLACK);
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt("g6"), nullptr);
+    EXPECT_EQ(board.getPieceAt("g5")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("g5")->getColor(), Color::BLACK);
+}
