@@ -554,6 +554,7 @@ public:
     * et les pièces blanches en minuscule. Les cases vides sont représentées par un point (".").
     */
     void displayBoard() const;
+    std::string getBoardAsString() const;
 };
 
 #endif //BOARD_H

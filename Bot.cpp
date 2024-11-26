@@ -9,6 +9,7 @@
 #include <limits>
 #include <algorithm>
 #include <chrono>
+#include <fstream>
 
 //@TODO Vérification de l'implémentation des table de transposition (docs sur le discord)
 //@TODO Ajout des opération XOR pour le changement des hash avec Zobrist plutôt que tout recalculer (docs sur le discord)
@@ -96,8 +97,19 @@ void comparerVecteurs(const std::vector<std::pair<int, int>>& vec1, const std::v
     }
 }
 
+
+void Bot::clearFile(const std::string& filename) {
+    std::ofstream file(filename, std::ios::trunc); // Ouvre le fichier en mode 'trunc' (truncate)
+    if (!file.is_open()) {
+        std::cerr << "Erreur d'ouverture du fichier pour suppression du contenu." << std::endl;
+    }
+    // Si le fichier est ouvert en mode 'trunc', il est automatiquement vidé.
+    file.close();
+}
+
 void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int, int>& meilleurCoup, char* bestPromotion) {
     int meilleurScore = std::numeric_limits<int>::min();
+    clearFile("C:/Users/Peter/CLionProjects/ChessCode4/debug_log.txt");
     meilleurCoup = { -1, -1 };
     std::pair<int, int> previousBestMove = { -1, -1 };
     Zobrist::initZobrist();
@@ -337,6 +349,13 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
         return evaluation;
     }
 
+    // Ouverture du fichier de log une seule fois avant la boucle
+    std::ofstream logFile("C:/Users/Peter/CLionProjects/ChessCode4/debug_log.txt", std::ios::app); // Ouvrir en mode append
+    if (!logFile.is_open()) {
+        std::cerr << "Erreur d'ouverture du fichier de log" << std::endl;
+        return 0;
+    }
+
     // Détermination de la couleur à maximiser ou minimiser
     Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(currentColor);
@@ -352,12 +371,19 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
     char promotion = '\0';
     bestPromotion = '\0';
 
+    logFile << "Plateau: \n" << board.getBoardAsString() << "\n";
+
     for (const auto& move : possibleMoves) {
         if (board.isPromotionMove(move.first, move.second, currentColor)) {
             // Essayer chaque promotion
             for (char promoType : {'q', 'n', 'b', 'r'}) {
                 promotion = promoType;
                 int score = evaluateMoveWithMinimax(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
+                logFile << "Move: " << move.first << " -> " << move.second
+                    << " Score: " << score
+                    << " Alpha: " << alpha
+                    << " Beta: " << beta
+                    << " Depth: " << depth << "\n";
 
                 if (estMaximisant) {
                     if (score > bestScore) bestScore = score, bestPromotion = promoType;
@@ -373,6 +399,12 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
         }
         else {
             int score = evaluateMoveWithMinimax(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
+            // Log des informations de mouvement
+            logFile << "Move: " << move.first << " -> " << move.second
+                    << " Score: " << score
+                    << " Alpha: " << alpha
+                    << " Beta: " << beta
+                    << " Depth: " << depth << "\n";
             if (estMaximisant) {
                 if (score > bestScore) bestScore = score, bestPromotion = '\0';
                 alpha = std::max(alpha, bestScore);
@@ -382,8 +414,11 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
                 beta = std::min(beta, bestScore);
                 if (bestScore <= alpha) break;
             }
+
+
         }
     }
+    logFile.close();
     return bestScore;
 }
 

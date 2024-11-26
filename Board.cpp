@@ -1150,6 +1150,12 @@ int Board::evaluateTest(Color in_colPlayer) {
         Piece* piece = m_tabpiBoard[i];
         if (piece != nullptr) {
             int pieceValue = getPieceValue(piece->getTypePiece());
+
+            // 1. Contrôle du centre
+            if (isCenterSquare(i)) {
+                pieceValue += (piece->getColor() == in_colPlayer) ? 2 : -2; // Réduire la valeur du contrôle du centre
+            }
+
             if (piece->getColor() == in_colPlayer) {
                 score += pieceValue;
             }
@@ -1981,25 +1987,34 @@ bool Board::isGameOver(Color colCurrent_player, Color& out_colWinner) {
 
 
 void Board::displayBoard() const {
+    std::cout <<  getBoardAsString();
+}
+
+std::string Board::getBoardAsString() const {
+    std::ostringstream boardStream;
+
     for (int row = 7; row >= 0; --row) {
-        std::cout << row + 1 << " | ";
+        boardStream << row + 1 << " | ";  // Affiche le numéro de la ligne
         for (int col = 0; col < 8; ++col) {
             Piece* piece = m_tabpiBoard[(row * 8) + col];
             if (piece) {
                 char displayChar = piece->getDisplayChar();
                 if (piece->getColor() == Color::BLACK) {
-                    std::cout << static_cast<char>(toupper(displayChar)) << " ";
+                    boardStream << static_cast<char>(toupper(displayChar)) << " ";  // Majuscule pour les pièces noires
                 } else {
-                    std::cout << static_cast<char>(tolower(displayChar)) << " ";
+                    boardStream << static_cast<char>(tolower(displayChar)) << " ";  // Minuscule pour les pièces blanches
                 }
             } else {
-                std::cout << ". ";
+                boardStream << ". ";  // Case vide
             }
         }
-        std::cout << std::endl;
+        boardStream << std::endl;
     }
-    std::cout << "    ---------------" << std::endl;
-    std::cout << "    a b c d e f g h" << std::endl;
+
+    boardStream << "    ---------------" << std::endl;
+    boardStream << "    a b c d e f g h" << std::endl;
+
+    return boardStream.str();  // Retourne la chaîne générée
 }
 
 //************************************************************************************//

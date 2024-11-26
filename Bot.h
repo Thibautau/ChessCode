@@ -118,6 +118,7 @@ public:
     int alphaBetaWithMemoryv2(Board& board, int depth, int alpha, int beta, bool estMaximisant, char &bestPromotion);
     int alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMaximisant, char &bestPromotion);
     int minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta);
+    void clearFile(const std::string& filename);
 };
 
 #endif //BOT_H
