@@ -30,7 +30,7 @@ int Bot::uniqueNodeIterated = 0;
 
 Bot::Bot(Color color) : m_color(color)
 {
-    m_logFile = new LogInFile("Bot_Evaluation_Log.txt", true);
+    m_logFile = new LogFile("Bot_Evaluation_Log.txt", true);
 }
 
 Color Bot::getPlayerColor() const {
@@ -370,7 +370,7 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
     if (depth == 3) {
         //logFile << "Plateau à la profondeur " << depth << " :\n" << board.getBoardAsString() << "\n";
         std::string logMessage = "Plateau à la profondeur " + std::to_string(depth) + " :\n" + board.getBoardAsString() + "\n";
-        m_logFile->writeLogOnSameLine(logMessage);
+        m_logFile->logInfo(logMessage);
     }
 
     // Détermination de la couleur à maximiser ou minimiser
@@ -409,7 +409,7 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
                         + " Alpha: " + std::to_string(alpha)
                         + " Beta: " + std::to_string(beta)
                         + " Depth: " + std::to_string(depth) + "\n";
-                m_logFile->writeLogOnSameLine(logMessage);
+                m_logFile->logInfo(logMessage);
 
 
                 if (estMaximisant) {
@@ -433,7 +433,7 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
                         + " Alpha: " + std::to_string(alpha)
                         + " Beta: " + std::to_string(beta)
                         + " Depth: " + std::to_string(depth) + "\n";
-            m_logFile->writeLogOnSameLine(logMessage);
+            m_logFile->logInfo(logMessage);
 
             if (estMaximisant) {
                 if (score > bestScore) bestScore = score, bestPromotion = '\0';

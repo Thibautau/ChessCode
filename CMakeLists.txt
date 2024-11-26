@@ -15,6 +15,16 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
+FetchContent_Declare(
+        spdlog
+        GIT_REPOSITORY https://github.com/gabime/spdlog.git
+        GIT_TAG        v1.12.0  # Vous pouvez choisir une autre version ici
+)
+FetchContent_MakeAvailable(spdlog)
+
+# Assurez-vous que les répertoires d'inclusion de spdlog sont bien ajoutés
+include_directories(${spdlog_SOURCE_DIR}/include)
+
 enable_testing()
 
 # Créer l'exécutable principal
@@ -38,8 +48,8 @@ add_executable(ChessCode
         Zobrist.h
         UCI/UCI.cpp
         UCI/UCI.h
-        LogInFile.cpp
-        LogInFile.h
+        LogFile.cpp
+        LogFile.h
 )
 
 # Créer l'exécutable pour les tests
@@ -62,9 +72,10 @@ add_executable(runTests Test/Test.cpp
 add_executable(runPerf
         Test/TestPerf.cpp
         Test/TestPerf.h
-        LogInFile.cpp
-        LogInFile.h
+        LogFile.cpp
+        LogFile.h
 )
 
 # Lier GoogleTest à l'exécutable de tests
 target_link_libraries(runTests gtest gtest_main)
+target_link_libraries(ChessCode PRIVATE spdlog::spdlog)
