@@ -153,6 +153,13 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
                 if (transpositionTable.find(zobristHash) == transpositionTable.end()) {
                     transpositionTable[zobristHash] = {profondeur_max, score, 0};
                 }
+                // Si aucun bon coup n'a été trouvé, c'est qu'on est échec et mat mais le coup qu'on évalue est peut etre notre seule possibilité
+                if (score == std::numeric_limits<int>::min() && meilleurScore == std::numeric_limits<int>::min())
+                {
+                    previousBestMove = coup;
+                    if (bestPromotion) *bestPromotion = promotion;
+                }
+
                 if (score > meilleurScore) {
                     meilleurScore = score;
                     previousBestMove = coup;
@@ -165,6 +172,12 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
             // Mettre à jour la table de transposition uniquement si le coup est trouvé
             if (transpositionTable.find(zobristHash) == transpositionTable.end()) {
                 transpositionTable[zobristHash] = {profondeur_max, score, 0};
+            }
+            // Si aucun bon coup n'a été trouvé, c'est qu'on est échec et mat mais le coup qu'on évalue est peut etre notre seule possibilité
+            if (score == std::numeric_limits<int>::min() && meilleurScore == std::numeric_limits<int>::min())
+            {
+                previousBestMove = coup;
+                if (bestPromotion) *bestPromotion = promotion;
             }
             if (score > meilleurScore) {
                 meilleurScore = score;
