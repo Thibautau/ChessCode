@@ -117,7 +117,22 @@ TEST_F(TestBotAI, GameCrashDueToPawnPromotion)
 TEST_F(TestBotAI, GameCrashDueToPawnPromotion2)
 {
     board.clearBoard();
-    board.setupFromFEN("4k3/8/8/3K4/8/8/7p/8 w - - 21 13");
+    board.setupFromFEN("8/8/8/3K4/8/8/7p/8 w - - 21 13");
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
+    EXPECT_EQ(iStart, 15);
+    EXPECT_EQ(iEnd, 7);
+    EXPECT_EQ(cPromotion, 'q'); // The queen seems to be the best choice
+}
+
+TEST_F(TestBotAI, TestPromotionWhenEnemyCanAlsoPromoteKnight)
+{
+    board.clearBoard();
+    board.setupFromFEN("8/P1k5/8/3K4/8/8/7p/8 w - - 21 13");
 
     //Try to move the black pawn at h2 (promotion)
     Bot* botBlack = new Bot(Color::BLACK);
