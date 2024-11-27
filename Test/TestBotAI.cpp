@@ -129,17 +129,19 @@ TEST_F(TestBotAI, GameCrashDueToPawnPromotion2)
     EXPECT_EQ(cPromotion, 'q'); // The queen seems to be the best choice
 }
 
-TEST_F(TestBotAI, TestPromotionWhenEnemyCanAlsoPromoteKnight)
+TEST_F(TestBotAI, TestBugAfterRock)
 {
     board.clearBoard();
-    board.setupFromFEN("8/P1k5/8/3K4/8/8/7p/8 w - - 21 13");
+    board.setupFromFEN("r7/1p1k1N2/3b1np1/p2p1P1p/P7/3P1P2/P2B2PP/4K2R w - - 21 13");
+
+    bool result = board.movePiece("e1g1");
+
+    EXPECT_TRUE(result);
 
     //Try to move the black pawn at h2 (promotion)
     Bot* botBlack = new Bot(Color::BLACK);
     int iStart, iEnd = -1;
     char cPromotion = '\0';
-    botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
-    EXPECT_EQ(iStart, 15);
-    EXPECT_EQ(iEnd, 7);
-    EXPECT_EQ(cPromotion, 'q'); // The queen seems to be the best choice
+    botBlack->playWithDepth(board, iStart, iEnd, 6,cPromotion);
+    EXPECT_EQ(cPromotion, '\0');
 }
