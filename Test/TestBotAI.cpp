@@ -66,3 +66,65 @@ TEST_F(TestBotAI, KingCanMoveButGameCrashed)
     EXPECT_EQ(Color::NONE, colWinner);
 }
 
+// Test d'un crash qu'on a eu où le roi a le droit de bouger
+TEST_F(TestBotAI, GameCrashDueToPawnPromotion)
+{
+    board.clearBoard();
+    board.setupFromFEN("4k3/1p1r3p/pB6/3pK3/4p1P1/3b4/7p/8 w - - 21 13");
+
+    bool result = board.movePiece("e5f5");
+    EXPECT_TRUE(result);
+    EXPECT_EQ(board.getPieceAt("e5"), nullptr);
+    EXPECT_EQ(board.getPieceAt("f5")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt("f5")->getColor(), Color::WHITE);
+
+    bool isBlackKingCheck = board.isBlackKingCheck();
+    bool isWhiteKingCheck = board.isWhiteKingCheck();
+    Color colWinner = Color::NONE;
+    bool isGameOverForBlack = board.isGameOver(Color::BLACK, colWinner);
+    bool isGameOverForWhite = board.isGameOver(Color::WHITE, colWinner);
+
+    EXPECT_FALSE(isBlackKingCheck);
+    EXPECT_FALSE(isWhiteKingCheck);
+    EXPECT_FALSE(isGameOverForBlack);
+    EXPECT_FALSE(isGameOverForWhite);
+    EXPECT_EQ(Color::NONE, colWinner);
+
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
+    EXPECT_EQ(iStart, 15);
+    EXPECT_EQ(iEnd, 7);
+    EXPECT_EQ(cPromotion, 'q'); // The queen seems to be the best choice
+
+
+    isBlackKingCheck = board.isBlackKingCheck();
+    isWhiteKingCheck = board.isWhiteKingCheck();
+    colWinner = Color::NONE;
+    isGameOverForWhite = board.isGameOver(Color::WHITE, colWinner);
+    isGameOverForBlack = board.isGameOver(Color::BLACK, colWinner);
+    EXPECT_FALSE(isBlackKingCheck);
+    EXPECT_FALSE(isWhiteKingCheck);
+    EXPECT_FALSE(isGameOverForWhite);
+    EXPECT_FALSE(isGameOverForBlack);
+    EXPECT_EQ(Color::NONE, colWinner);
+}
+
+// Test d'un crash qu'on a eu où le roi a le droit de bouger
+TEST_F(TestBotAI, GameCrashDueToPawnPromotion2)
+{
+    board.clearBoard();
+    board.setupFromFEN("4k3/8/8/3K4/8/8/7p/8 w - - 21 13");
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
+    EXPECT_EQ(iStart, 15);
+    EXPECT_EQ(iEnd, 7);
+    EXPECT_EQ(cPromotion, 'q'); // The queen seems to be the best choice
+}
