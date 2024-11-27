@@ -1133,6 +1133,115 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
 
 //************************* Evaluation and Heuristic Functions ***********************//
 
+bool Board::isInDanger(Piece* piece, int position) {
+    // Vérifier les menaces de chaque type de pièce adverse
+    Color opponentColor = (piece->getColor() == Color::BLACK) ? Color::WHITE : Color::BLACK;
+
+    // Vérifier si la pièce est menacée par un cavalier
+    if (isAttackedByKnight(position, opponentColor)) return true;
+
+    // Vérifier si la pièce est menacée par un roi
+    if (isAttackedByKing(position, opponentColor)) return true;
+
+    // Vérifier si la pièce est menacée par une tour ou une dame en ligne droite
+    if (isAttackedByRookOrQueen(position, opponentColor)) return true;
+
+    // Vérifier si la pièce est menacée par un fou ou une dame en diagonale
+    if (isAttackedByBishopOrQueen(position, opponentColor)) return true;
+
+    // Vérifier si la pièce est menacée par un pion (seulement pour les pions)
+    if (piece->getTypePiece() == TypePieces::PAWN && isAttackedByPawn(position, opponentColor)) return true;
+
+    return false;
+}
+
+bool Board::isAttackedByKnight(int position, Color opponentColor) {
+    // Définir les mouvements possibles d'un cavalier
+    static const int knightMoves[8] = {-17, -15, -10, -6, 6, 10, 15, 17};
+    for (int move : knightMoves) {
+        int targetPosition = position + move;
+        if (targetPosition >= 0 && targetPosition < 64) {
+            Piece* targetPiece = m_tabpiBoard[targetPosition];
+            if (targetPiece != nullptr && targetPiece->getColor() == opponentColor && targetPiece->getTypePiece() == TypePieces::KNIGHT) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool Board::isAttackedByKing(int position, Color opponentColor) {
+    static const int kingMoves[8] = {-1, 1, -8, 8, -9, -7, 7, 9};
+    for (int move : kingMoves) {
+        int targetPosition = position + move;
+        if (targetPosition >= 0 && targetPosition < 64) {
+            Piece* targetPiece = m_tabpiBoard[targetPosition];
+            if (targetPiece != nullptr && targetPiece->getColor() == opponentColor && targetPiece->getTypePiece() == TypePieces::KING) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool Board::isAttackedByRookOrQueen(int position, Color opponentColor) {
+    static const int rookMoves[4] = {-8, 8, -1, 1};  // Mouvement en ligne droite (haut, bas, gauche, droite)
+    for (int move : rookMoves) {
+        int targetPosition = position;
+        while (true) {
+            targetPosition += move;
+            if (targetPosition < 0 || targetPosition >= 64 || (move == 1 && targetPosition % 8 == 0) || (move == -1 && (targetPosition + 1) % 8 == 0)) {
+                break;  // Sortir si on sort de l'échiquier ou si on dépasse une ligne
+            }
+            Piece* targetPiece = m_tabpiBoard[targetPosition];
+            if (targetPiece != nullptr) {
+                if (targetPiece->getColor() == opponentColor && (targetPiece->getTypePiece() == TypePieces::ROOK || targetPiece->getTypePiece() == TypePieces::QUEEN)) {
+                    return true;
+                }
+                break;  // Une autre pièce bloque la ligne
+            }
+        }
+    }
+    return false;
+}
+
+bool Board::isAttackedByBishopOrQueen(int position, Color opponentColor) {
+    static const int bishopMoves[4] = {-9, -7, 7, 9};  // Mouvement en diagonale
+    for (int move : bishopMoves) {
+        int targetPosition = position;
+        while (true) {
+            targetPosition += move;
+            if (targetPosition < 0 || targetPosition >= 64 || (targetPosition % 8 == 0 && move == 7) || (targetPosition % 8 == 7 && move == -7)) {
+                break;  // Sortir si on sort de l'échiquier ou si on dépasse une diagonale
+            }
+            Piece* targetPiece = m_tabpiBoard[targetPosition];
+            if (targetPiece != nullptr) {
+                if (targetPiece->getColor() == opponentColor && (targetPiece->getTypePiece() == TypePieces::BISHOP || targetPiece->getTypePiece() == TypePieces::QUEEN)) {
+                    return true;
+                }
+                break;  // Une autre pièce bloque la diagonale
+            }
+        }
+    }
+    return false;
+}
+
+bool Board::isAttackedByPawn(int position, Color opponentColor) {
+    int direction = (opponentColor == Color::WHITE) ? -1 : 1;
+    int leftAttack = position + direction * 7;
+    int rightAttack = position + direction * 9;
+
+    if (leftAttack >= 0 && leftAttack < 64 && m_tabpiBoard[leftAttack] != nullptr && m_tabpiBoard[leftAttack]->getColor() == opponentColor && m_tabpiBoard[leftAttack]->getTypePiece() == TypePieces::PAWN) {
+        return true;
+    }
+    if (rightAttack >= 0 && rightAttack < 64 && m_tabpiBoard[rightAttack] != nullptr && m_tabpiBoard[rightAttack]->getColor() == opponentColor && m_tabpiBoard[rightAttack]->getTypePiece() == TypePieces::PAWN) {
+        return true;
+    }
+    return false;
+}
+
+
+
 int Board::evaluateSimple(Color in_colPlayer) {
     int score = 0;
 
@@ -1147,26 +1256,36 @@ int Board::evaluateSimple(Color in_colPlayer) {
 
 int Board::evaluateTest(Color in_colPlayer) {
     int score = 0;
+
     for (int i = 0; i < 64; ++i) {
         Piece* piece = m_tabpiBoard[i];
         if (piece != nullptr) {
             int pieceValue = getPieceValue(piece->getTypePiece());
-
-            // 1. Contrôle du centre
-            if (isCenterSquare(i)) {
-                pieceValue += (piece->getColor() == in_colPlayer) ? 2 : -2; // Réduire la valeur du contrôle du centre
-            }
-
-            if (piece->getColor() == in_colPlayer) {
-                score += pieceValue;
-            }
-            else {
-                score -= pieceValue;
-            }
+            int squareValue = GetSquareValue(piece, i);
+            score += (piece->getColor() == Color::WHITE) ? pieceValue + squareValue : -pieceValue + squareValue;
         }
     }
+
     return score;
 }
+
+int Board::GetSquareValue(Piece* piece, int pos) {
+    switch (piece->getTypePiece()) {
+        case TypePieces::PAWN:
+            return piece->getColor() == Color::WHITE ? WhitePawnSquareTable[pos] : BlackPawnSquareTable[pos];
+        case TypePieces::KNIGHT:
+            return piece->getColor() == Color::WHITE ? WhiteKnightSquareTable[pos] : BlackKnightSquareTable[pos];
+        case TypePieces::BISHOP:
+            return piece->getColor() == Color::WHITE ? WhiteBishopSquareTable[pos] : BlackBishopSquareTable[pos];
+        case TypePieces::ROOK:
+            return piece->getColor() == Color::WHITE ? WhiteRookSquareTable[pos] : BlackRookSquareTable[pos];
+        case TypePieces::QUEEN:
+            return piece->getColor() == Color::WHITE ? WhiteQueenSquareTable[pos] : BlackQueenSquareTable[pos];
+        default:
+            return 0;
+    }
+}
+
 
 
 int Board::evaluate(Color in_colPlayer) {
@@ -1988,25 +2107,25 @@ bool Board::isGameOver(Color colCurrent_player, Color& out_colWinner) {
 
 
 void Board::displayBoard() const {
-    std::cout <<  getBoardAsString();
+    std::cout << getBoardAsString();
 }
 
 std::string Board::getBoardAsString() const {
     std::ostringstream boardStream;
 
     for (int row = 7; row >= 0; --row) {
-        boardStream << row + 1 << " | ";  // Affiche le numéro de la ligne
+        boardStream << row + 1 << " | ";
         for (int col = 0; col < 8; ++col) {
             Piece* piece = m_tabpiBoard[(row * 8) + col];
             if (piece) {
                 char displayChar = piece->getDisplayChar();
                 if (piece->getColor() == Color::BLACK) {
-                    boardStream << static_cast<char>(toupper(displayChar)) << " ";  // Majuscule pour les pièces noires
+                    boardStream << static_cast<char>(toupper(displayChar)) << " ";
                 } else {
-                    boardStream << static_cast<char>(tolower(displayChar)) << " ";  // Minuscule pour les pièces blanches
+                    boardStream << static_cast<char>(tolower(displayChar)) << " ";
                 }
             } else {
-                boardStream << ". ";  // Case vide
+                boardStream << ". ";
             }
         }
         boardStream << std::endl;
@@ -2015,7 +2134,7 @@ std::string Board::getBoardAsString() const {
     boardStream << "    ---------------" << std::endl;
     boardStream << "    a b c d e f g h" << std::endl;
 
-    return boardStream.str();  // Retourne la chaîne générée
+    return boardStream.str();
 }
 
 //************************************************************************************//

@@ -409,15 +409,9 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
                 promotion = promoType;
                 int score = evaluateMoveWithMinimax(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
 
-                // Log des informations de mouvement pour chaque promotion
-                /*logFile << "Move: " <<indexToPosition( move.first) << " -> " << indexToPosition(move.second)
-                        << " Promotion: " << promoType
-                        << " Score: " << score
-                        << " Alpha: " << alpha
-                        << " Beta: " << beta
-                        << " Depth: " << depth << "\n";*/
                 std::string logMessage = "Move: " + indexToPosition( move.first) + " -> " + indexToPosition(move.second)
                         + " Promotion: " + promoType
+                        + " Maximisant: " + (estMaximisant ? "true" : "false")
                         + " Score: " + std::to_string(score)
                         + " Alpha: " + std::to_string(alpha)
                         + " Beta: " + std::to_string(beta)
@@ -435,6 +429,8 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
                     beta = std::min(beta, bestScore);
                     if (bestScore <= alpha) break;
                 }
+
+
             }
         } else {
             // Evaluation du coup sans promotion
@@ -442,11 +438,13 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
 
             // Log des informations de mouvement
             std::string logMessage = "Move: " + indexToPosition( move.first) + " -> " + indexToPosition(move.second)
+                        + " Maximisant: " + (estMaximisant ? "true" : "false")
                         + " Score: " + std::to_string(score)
                         + " Alpha: " + std::to_string(alpha)
                         + " Beta: " + std::to_string(beta)
                         + " Depth: " + std::to_string(depth) + "\n";
             m_logFile->logInfo(logMessage);
+
 
             if (estMaximisant) {
                 if (score > bestScore) bestScore = score, bestPromotion = '\0';
