@@ -1262,7 +1262,7 @@ int Board::evaluateTest(Color in_colPlayer) {
         if (piece != nullptr) {
             int pieceValue = getPieceValue(piece->getTypePiece());
             int squareValue = GetSquareValue(piece, i);
-            score += (piece->getColor() == Color::WHITE) ? pieceValue + squareValue : -pieceValue + squareValue;
+            score += (piece->getColor() == in_colPlayer) ? pieceValue + squareValue : -pieceValue + squareValue;
         }
     }
 
@@ -1848,12 +1848,12 @@ int Board::evaluateKingSafety(Color color) const {
 
 int Board::getPieceValue(TypePieces type) {
     switch (type) {
-        case TypePieces::PAWN:   return 1;
-        case TypePieces::KNIGHT: return 3;
-        case TypePieces::BISHOP: return 3;
-        case TypePieces::ROOK:   return 5;
-        case TypePieces::QUEEN:  return 9;
-        case TypePieces::KING:   return 0;
+        case TypePieces::PAWN:   return 100;
+        case TypePieces::KNIGHT: return 320;
+        case TypePieces::BISHOP: return 330;
+        case TypePieces::ROOK:   return 500;
+        case TypePieces::QUEEN:  return 900;
+        case TypePieces::KING:   return 20000;
         default: return 0;
     }
 }

@@ -429,16 +429,6 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
                     beta = std::min(beta, bestScore);
                     if (bestScore <= alpha) break;
                 }
-                /*if (estMaximisant) {
-                    if (score > bestScore) bestScore = score, bestPromotion = promoType;
-                    alpha = std::max(alpha, score);
-                    if (beta <= alpha) break;
-                }
-                else {
-                    if (score < bestScore) bestScore = score, bestPromotion = promoType;
-                    beta = std::min(beta, score);
-                    if (beta <= alpha) break;
-                }*/
 
 
             }
@@ -465,15 +455,6 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
                 beta = std::min(beta, bestScore);
                 if (bestScore <= alpha) break;
             }
-            /*if (estMaximisant) {
-                if (score > bestScore) bestScore = score, bestPromotion = '\0';
-                alpha = std::max(alpha, score);
-                if (beta <= alpha) break;
-            } else {
-                if (score < bestScore) bestScore = score, bestPromotion = '\0';
-                beta = std::min(beta, score);
-                if (beta <= alpha) break;
-            }*/
         }
     }
     return bestScore;
