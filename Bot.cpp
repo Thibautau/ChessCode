@@ -148,7 +148,7 @@ void Bot::choisir_meilleur_coup(Board& board, int profondeur_max, std::pair<int,
         if (board.isPromotionMove(coup.first, coup.second, m_color)) {
             for (char promoType : {'q', 'r', 'b', 'n'}) {
                 promotion = promoType;
-                int score = evaluateMoveWithMinimax(board, profondeur_max, true, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), coup, m_color, promotion);
+                int score = evaluateMoveWithMinimax(board, profondeur_max, true, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), coup, m_color, promoType);
                 // Mettre à jour la table de transposition uniquement si le coup est trouvé
                 if (transpositionTable.find(zobristHash) == transpositionTable.end()) {
                     transpositionTable[zobristHash] = {profondeur_max, score, 0};
@@ -321,8 +321,9 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     if (possibleMoves.empty()) return estMaximisant ? std::numeric_limits<int>::min(): std::numeric_limits<int>::max();
 
     int bestScore = estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
-    char promotion = '\0';
-    bestPromotion = '\0';
+    //char promotion = '\0';
+    char promotion = bestPromotion;
+    //bestPromotion = '\0';
 
     for (const auto& move : possibleMoves) {
         if (board.isPromotionMove(move.first, move.second, currentColor)) {
@@ -346,11 +347,11 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
         else {
             int score = evaluateMoveWithMinimax(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
             if (estMaximisant) {
-                if (score > bestScore) bestScore = score, bestPromotion = '\0';
+                if (score > bestScore) bestScore = score, bestPromotion = promotion;
                 alpha = std::max(alpha, bestScore);
                 if (bestScore >= beta) break;
             } else {
-                if (score < bestScore) bestScore = score, bestPromotion = '\0';
+                if (score < bestScore) bestScore = score, bestPromotion = promotion;
                 beta = std::min(beta, bestScore);
                 if (bestScore <= alpha) break;
             }
@@ -368,20 +369,12 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
 
     // Cas de base : profondeur 0
     if (depth == 0) {
-        // Evaluation de la position à profondeur 0
         int evaluation = board.evaluateTest(m_color);
         return evaluation;
     }
 
-    // Ouvrir le fichier de log une seule fois avant la boucle principale
-    /*static std::ofstream logFile("../debug_log.txt", std::ios::app); // Ouvrir en mode append
-    if (!logFile.is_open()) {
-        std::cerr << "Erreur d'ouverture du fichier de log" << std::endl;
-        return 0;
-    }*/
-
+    // Pour les logs
     if (depth == 3) {
-        //logFile << "Plateau à la profondeur " << depth << " :\n" << board.getBoardAsString() << "\n";
         std::string logMessage = "Plateau à la profondeur " + std::to_string(depth) + " :\n" + board.getBoardAsString() + "\n";
         m_logFile->logInfo(logMessage);
     }
@@ -395,12 +388,12 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
         return board.evaluateMove(move, m_color);
     });
 
+    //Ehec et mat
     if (possibleMoves.empty()) return estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
 
     int bestScore = estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
-    //char promotion = '\0';
-    char promotion = bestPromotion;
-    //bestPromotion = '\0';
+    char promotion = '\0';
+    bestPromotion = '\0';
 
     // Boucle sur tous les coups possibles
     for (const auto& move : possibleMoves) {
@@ -465,9 +458,10 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
 int Bot::evaluateMoveWithMinimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor, char& promotion) {
     Piece* capturedPiece = nullptr;
     bool isPromotion = board.isPromotionMove(move.first, move.second, currentColor);
+    char promotionForMove = promotion;
     int enPassantPos = -1;
-    board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promotion), &enPassantPos);
-    int score = alphaBetaBasic(board, profondeur - 1, alpha, beta, !estMaximisant, promotion);
+    board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promotionForMove), &enPassantPos);
+    int score = alphaBetaBasic(board, profondeur - 1, alpha, beta, !estMaximisant, promotionForMove);
     board.undoMove(move.first, move.second, capturedPiece, isPromotion);
     return score;
 }
