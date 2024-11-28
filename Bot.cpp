@@ -123,6 +123,7 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
     meilleurCoup = { -1, -1 };
     std::pair<int, int> previousBestMove = { -1, -1 };
     Zobrist::initZobrist();
+    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
 
     nodeCount = 0;
     uniqueNodeIterated = 0;
@@ -291,7 +292,9 @@ int Bot::evaluateMoveWithMinimaxv2(Board& board, int profondeur, bool estMaximis
     int enPassantPos = -1;
     uint64_t originalHash = board.getZobristHash();
 
-    Piece* piece_depart = board.getPieceAt(move.first);
+
+
+    /*Piece* piece_depart = board.getPieceAt(move.first);
     Piece* piece_arrivee = board.getPieceAt(move.second);
 
     // Mise à jour du hash Zobrist
@@ -307,11 +310,12 @@ int Bot::evaluateMoveWithMinimaxv2(Board& board, int profondeur, bool estMaximis
         TypePieces promotedType = Piece::charToPieceType(promotionForMove);
         zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_arrivee->getTypePiece(), piece_arrivee->getColor()), move.second); // Retirer le pion
         zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(promotedType, piece_arrivee->getColor()), move.second); // Ajouter la pièce promue
-    }
+    }*/
 
     //Exécution du mouvement + récurssif
     board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promotionForMove), &enPassantPos);
-    board.setZobristHash(zobristHash);
+    //board.setZobristHash(zobristHash);
+    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
     int score = alphaBetaWithMemory(board, profondeur - 1, alpha, beta, !estMaximisant, promotionForMove);
     board.undoMove(move.first, move.second, capturedPiece, isPromotion);
 
