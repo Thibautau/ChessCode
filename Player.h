@@ -10,8 +10,9 @@
 
 class Player {
 public:
-    virtual void play(Board& board, Coordinate& start, Coordinate& end) = 0;
+    virtual void play(Board& board, int& start, int& end) = 0;
     virtual Color getPlayerColor() const = 0;
+    virtual void setPlayerColor(Color col) = 0;
     //virtual ~Player();
 };
 

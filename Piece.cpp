@@ -4,30 +4,38 @@
 
 #include "Piece.h"
 
-Piece::Piece(const TypePieces type, const Color color)
-    : m_tpTypePiece(type), m_colColorPiece(color){m_alreadyMoved = false;}
+Piece::Piece(TypePieces type, Color color)
+    : m_tpTypePiece(type), m_colColorPiece(color) {
+}
 
 TypePieces Piece::getTypePiece() const {
     return m_tpTypePiece;
+}
+
+void Piece::setTypePiece(TypePieces type) {
+    m_tpTypePiece = type;
 }
 
 Color Piece::getColor() const {
     return m_colColorPiece;
 }
 
-bool Piece::hasAlreadyMoved() const
-{
-    return m_alreadyMoved;
-}
-
-void Piece::setAlreadyMoved(bool in_bMoved)
-{
-    m_alreadyMoved = in_bMoved;
-}
-
 Color Piece::getEnemyColor() const
 {
     switch (m_colColorPiece)
+    {
+        case Color::WHITE:
+            return Color::BLACK;
+        case Color::BLACK:
+            return Color::WHITE;
+        default:
+            return Color::NONE;
+    }
+}
+
+Color Piece::getEnemyColor(Color in_colPiece)
+{
+    switch (in_colPiece)
     {
         case Color::WHITE:
             return Color::BLACK;
@@ -61,6 +69,28 @@ char Piece::getDisplayChar() const{
     }
 }
 
+TypePieces Piece::charToPieceType(char piece) {
+    switch (piece) {
+        case 'p': return TypePieces::PAWN;
+        case 'n': return TypePieces::KNIGHT;
+        case 'b': return TypePieces::BISHOP;
+        case 'r': return TypePieces::ROOK;
+        case 'q': return TypePieces::QUEEN;
+        case 'k': return TypePieces::KING;
+        default: return TypePieces::NONE;
+    }
+}
+
+std::vector<TypePieces> Piece::pieceForPromotion() {
+    std::vector<TypePieces> promotionOptions = {
+        TypePieces::ROOK,
+        TypePieces::KNIGHT,
+        TypePieces::BISHOP,
+        TypePieces::QUEEN
+    };
+    return promotionOptions;
+}
+
 int Piece::getColumnOfRookAfterRock(int in_iColumn)
 {
     if(in_iColumn < 0 || in_iColumn >= 8)
@@ -79,52 +109,6 @@ int Piece::getColumnOfRookAfterRock(int in_iColumn)
     }
 
     return -1;
-}
-
-int Piece::getRookVectorWithAdjustableLength(Vector* out_tabvectRookDisplacement, int in_iIndicesStart, int in_iLengthToAdjust)
-{
-    if(in_iIndicesStart < 0 || in_iIndicesStart >= 5 || in_iLengthToAdjust > 8 || in_iLengthToAdjust < 0){
-        return WRONG_PARAMETER;
-    }
-
-    out_tabvectRookDisplacement[in_iIndicesStart] = Vector(1, 0, in_iLengthToAdjust); // To go up
-    out_tabvectRookDisplacement[in_iIndicesStart + 1] = Vector(-1, 0, in_iLengthToAdjust); // To go down
-    out_tabvectRookDisplacement[in_iIndicesStart + 2] = Vector(0, -1, in_iLengthToAdjust); // To go left
-    out_tabvectRookDisplacement[in_iIndicesStart + 3] = Vector(0, 1, in_iLengthToAdjust); // To go right
-
-    return NO_ERROR;
-}
-
-int Piece::getBishopVectorWithAdjustableLength(Vector* out_tabvectBishopDisplacement, int in_iIndicesStart, int in_iLengthToAdjust)
-{
-    if(in_iIndicesStart < 0 || in_iIndicesStart >= 5 || in_iLengthToAdjust > 8 || in_iLengthToAdjust < 0){
-        return WRONG_PARAMETER;
-    }
-
-    out_tabvectBishopDisplacement[in_iIndicesStart] = Vector(-1, 1, in_iLengthToAdjust); // To go up to the right
-    out_tabvectBishopDisplacement[in_iIndicesStart + 1] = Vector(-1, -1, in_iLengthToAdjust); // To go up to the right
-    out_tabvectBishopDisplacement[in_iIndicesStart + 2] = Vector(1, 1, in_iLengthToAdjust); // To go down to the right
-    out_tabvectBishopDisplacement[in_iIndicesStart + 3] = Vector(1, -1, in_iLengthToAdjust); // To go down to the left
-
-    return NO_ERROR;
-}
-
-int Piece::getKnightVectorWithAdjustableLength(Vector* out_tabvectKnightDisplacement, int in_iIndicesStart, int in_iLengthToAdjust)
-{
-    if(in_iIndicesStart < 0 || in_iLengthToAdjust > 8 || in_iLengthToAdjust < 0){
-        return WRONG_PARAMETER;
-    }
-
-    out_tabvectKnightDisplacement[in_iIndicesStart] = Vector(-2, -1, in_iLengthToAdjust); // bas bas gauche
-    out_tabvectKnightDisplacement[in_iIndicesStart + 1] = Vector(-2, 1, in_iLengthToAdjust); //
-    out_tabvectKnightDisplacement[in_iIndicesStart + 2] = Vector(-1, 2, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 3] = Vector(1, 2, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 4] = Vector(2, 1, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 5] = Vector(2, -1, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 6] = Vector(1, -2, in_iLengthToAdjust);
-    out_tabvectKnightDisplacement[in_iIndicesStart + 7] = Vector(-1, -2, in_iLengthToAdjust);
-
-    return NO_ERROR;
 }
 
 TypeOfPieceAttack Piece::typeOfAttack() const
@@ -165,100 +149,361 @@ bool Piece::attackKnight() const
     return typeAttack == TypeOfPieceAttack::L;
 }
 
-
-int Piece::getVectorOfDisplacement(Vector** out_tabvectOfDisplacement, int& out_tabSize)
+int* Piece::getKingMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement)
 {
-    Vector* vectorOfDisplacement = nullptr;
-    int iErrorCode = NO_ERROR;
-    int iRow;
-    int iLengthToAdjust;
-    int iLengthToMoveLeftRight;
-
-    switch (m_tpTypePiece) {
-        // The pawn can only move forward
-        case TypePieces::PAWN:
-            vectorOfDisplacement = new Vector[3];
-
-            // -1 for the black because you want to go down
-            iRow = -1;
-            if(m_colColorPiece == Color::WHITE)
-            {
-                // 1 for the white to go up
-                iRow = 1;
-            }
-
-            iLengthToAdjust = 1;
-            if(m_alreadyMoved == false)
-            {
-                iLengthToAdjust = 2;
-            }
-
-            // Moving forward
-            vectorOfDisplacement[0] = Vector(iRow, 0, iLengthToAdjust);
-            vectorOfDisplacement[1] = Vector(iRow, -1, 1);
-            vectorOfDisplacement[2] = Vector(iRow, 1, 1);
-            out_tabSize = 3;
-            *out_tabvectOfDisplacement = vectorOfDisplacement;
-            break;
-        case TypePieces::ROOK:
-            vectorOfDisplacement = new Vector[4];
-
-            iErrorCode = getRookVectorWithAdjustableLength(vectorOfDisplacement, 0, 7);
-
-            out_tabSize = 4;
-            *out_tabvectOfDisplacement = vectorOfDisplacement;
-            break;
-        case TypePieces::KNIGHT:
-            vectorOfDisplacement = new Vector[8];
-
-            iErrorCode = getKnightVectorWithAdjustableLength(vectorOfDisplacement, 0, 1);
-
-            out_tabSize = 8;
-            *out_tabvectOfDisplacement = vectorOfDisplacement;
-            break;
-        case TypePieces::BISHOP:
-            vectorOfDisplacement = new Vector[4];
-
-            iErrorCode = getBishopVectorWithAdjustableLength(vectorOfDisplacement, 0, 7);
-
-            out_tabSize = 4;
-            *out_tabvectOfDisplacement = vectorOfDisplacement;
-            break;
-        case TypePieces::QUEEN:
-            // BISHOP + ROOK at length 7
-            vectorOfDisplacement = new Vector[8];
-
-            iErrorCode = getRookVectorWithAdjustableLength(vectorOfDisplacement, 0, 7);
-            iErrorCode = getBishopVectorWithAdjustableLength(vectorOfDisplacement, 4, 7);
-
-            out_tabSize = 8;
-            *out_tabvectOfDisplacement = vectorOfDisplacement;
-            break;
-        case TypePieces::KING:
-            // BISHOP + ROOK at length 1
-            vectorOfDisplacement = new Vector[8];
-
-            iLengthToMoveLeftRight = 1;
-            if(m_alreadyMoved == false)
-            {
-                iLengthToMoveLeftRight = 2;
-            }
-
-            vectorOfDisplacement[0] = Vector(1, 0, 1); // To go up
-            vectorOfDisplacement[1] = Vector(-1, 0, 1); // To go down
-            vectorOfDisplacement[2] = Vector(0, -1, iLengthToMoveLeftRight); // To go left. Length at 2 for the rock
-            vectorOfDisplacement[3] = Vector(0, 1, iLengthToMoveLeftRight); // To go right. Length at 2 for the rock
-            iErrorCode = getBishopVectorWithAdjustableLength(vectorOfDisplacement, 4, 1);
-
-            out_tabSize = 8;
-            *out_tabvectOfDisplacement = vectorOfDisplacement;
-            break;
-        default:
-            break;
-    }
-
-    *out_tabvectOfDisplacement = vectorOfDisplacement;
-
-    return iErrorCode;
+    out_iNbOfRepetitionToDo = 1;
+    out_iNbOfMovement = 8;
+    static int kingMoves[8] = {
+        -1, 1,-8, 8,
+        -7, -9, 7, 9
+    };
+    return kingMoves;
 }
 
+int* Piece::getLittleRockMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement)
+{
+    out_iNbOfRepetitionToDo = 1;
+    out_iNbOfMovement = 1;
+
+    static int kingMoves[1] = {
+        2
+    };
+    return kingMoves;
+}
+int* Piece::getBigRockMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement)
+{
+    out_iNbOfRepetitionToDo = 1;
+    out_iNbOfMovement = 1;
+
+    static int kingMoves[1] = {
+        -2
+    };
+    return kingMoves;
+}
+
+int* Piece::getKnightMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) {
+    out_iNbOfRepetitionToDo = 1;
+    out_iNbOfMovement = 8;
+    static int knightMoves[8] = {
+        6, 10, 15, 17,
+        -6, -10, -15, -17
+    };
+    return knightMoves;
+}
+
+int* Piece::getRookMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) {
+    out_iNbOfRepetitionToDo = 7;
+    out_iNbOfMovement = 4;
+    static int rookMoves[4] = {
+        8, // Haut
+        -8, // Bas
+        -1, // Gauche
+        1 // Droit
+    };
+    return rookMoves;
+}
+
+int* Piece::getBishopMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) {
+    out_iNbOfRepetitionToDo = 7;
+    out_iNbOfMovement = 4;
+    static int bishopMoves[4] = {
+        7, // Haut gauche
+        9, // Haut droite
+        -7, //Bas droite (c'est bien ça!)
+        -9 // Bas gauche
+    };
+    return bishopMoves;
+}
+
+int* Piece::getQueenMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement) {
+    out_iNbOfRepetitionToDo = 7;
+    out_iNbOfMovement = 8;
+    static int queenMoves[8] = {
+        8, // Haut
+        -8, // Bas
+        -1, // Gauche
+        1, // Droit
+        7, // Haut gauche
+        9, // Haut droite
+        -7, //Bas droite (c'est bien ça!)
+        -9 // Bas gauche
+    };
+    return queenMoves;
+}
+
+int* Piece::getPawnMoves(int& out_iNbOfRepetitionToDo, int& out_iNbOfMovement, Color in_colPiece) {
+    out_iNbOfRepetitionToDo = 2;
+    out_iNbOfMovement = 4;
+    if(in_colPiece == Color::WHITE)
+    {
+        static int queenMoves[4] = {
+            8, 7, 9, 16
+        };
+        return queenMoves;
+    }
+    else if(in_colPiece == Color::BLACK)
+    {
+        static int queenMoves[4] = {
+            -8, -7, -9, -16
+        };
+        return queenMoves;
+    }
+    return {};
+}
+
+
+bool Piece::isValidPosition(int position) {
+    return position >= 0 && position < 64;
+}
+
+
+bool Piece::isBishopNextPositionValid(int in_iDirection, int in_iNextPosition)
+{
+    if(in_iNextPosition < 0 || in_iNextPosition >= 64)
+    {
+        return false;
+    }
+
+    switch (in_iDirection) {
+        case 9:
+        case -7:
+            return in_iNextPosition % 8 != 0;  // Si on dépasse la bordure droite
+
+        case 7:
+        case -9:
+            return in_iNextPosition % 8 != 7;  // Si on dépasse la bordure gauche
+
+        default:
+            return false;  // Pour toute autre direction non gérée
+    }
+}
+
+
+bool Piece::isRookNextPositionValid(int in_iDirection, int in_iNextPosition)
+{
+    if(in_iNextPosition < 0 || in_iNextPosition >= 64) // Verify is the rook can go up or down
+    {
+        return false;
+    }
+
+    switch (in_iDirection) {
+        case -8:
+        case 8:
+            return isValidPosition(in_iNextPosition);
+        case 1:
+            return in_iNextPosition % 8 != 0;  // Si on dépasse la bordure droite
+        case -1:
+            return in_iNextPosition % 8 != 7;  // Si on dépasse la bordure gauche
+
+        default:
+            return false;  // Pour toute autre direction non gérée
+    }
+}
+
+bool Piece::isKnightNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition)
+{
+    if(in_iNextPosition < 0 || in_iNextPosition >= 64) // Verify is the rook can go up or down
+    {
+        return false;
+    }
+
+    int iInitialRow = in_iInitialPosition / 8;
+    int iInitialColumn = in_iInitialPosition % 8;
+
+    int iNextRow = in_iNextPosition / 8;
+    int iNextColumn = in_iNextPosition % 8;
+
+    int iRowDifference = std::abs(iInitialRow - iNextRow);
+    int iColumnDifference = std::abs(iInitialColumn - iNextColumn);
+
+    if(iRowDifference == 1 && iColumnDifference == 2)
+    {
+        return true;
+    }
+    if(iRowDifference == 2 && iColumnDifference == 1)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Piece::isPawnNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition)
+{
+    if(in_iNextPosition < 0 || in_iNextPosition >= 64) // Verify is the rook can go up or down
+    {
+        return false;
+    }
+
+    int direction = (m_colColorPiece == Color::WHITE) ? 1 : -1;
+    int startRow = (m_colColorPiece == Color::WHITE) ? 1 : 6;
+
+    int iInitialRow = in_iInitialPosition / 8;
+
+    bool bCanMoveOf2 = false;
+    if(iInitialRow == startRow)
+    {
+        bCanMoveOf2 = true;
+    }
+    switch (in_iDirection) {
+        case 16:
+            return isValidPosition(in_iNextPosition) && bCanMoveOf2 && m_colColorPiece == Color::WHITE;
+        case -16:
+            return isValidPosition(in_iNextPosition) && bCanMoveOf2 && m_colColorPiece == Color::BLACK;
+        case -8:
+            return isValidPosition(in_iNextPosition) && m_colColorPiece == Color::BLACK;
+        case 8:
+            return isValidPosition(in_iNextPosition) && m_colColorPiece == Color::WHITE;
+        case 9:
+        case -7:
+            return in_iNextPosition % 8 != 0;  // Si on dépasse la bordure droite
+
+        case 7:
+        case -9:
+            return in_iNextPosition % 8 != 7;  // Si on dépasse la bordure gauche
+
+        default:
+            return false;  // Pour toute autre direction non gérée
+    }
+}
+
+bool Piece::isRockNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition) const {
+    if(in_iNextPosition < 0 || in_iNextPosition >= 64) // Verify is the rook can go up or down
+    {
+        return false;
+    }
+
+    int iPositionDifference = std::abs(in_iInitialPosition - in_iNextPosition);
+    if(iPositionDifference != 2)
+    {
+        return false;
+    }
+
+    switch (in_iDirection) {
+        case -2:
+            switch(m_colColorPiece)
+            {
+                case Color::WHITE:
+                    return in_iNextPosition == 2;
+                case Color::BLACK:
+                    return in_iNextPosition == 58;
+                default:
+                    return false;
+            }
+        case 2:
+            switch(m_colColorPiece)
+            {
+                case Color::WHITE:
+                    return in_iNextPosition == 6;
+                case Color::BLACK:
+                    return in_iNextPosition == 62;
+                default:
+                    return false;
+            }
+
+        default:
+            return false;
+    }
+}
+
+bool Piece::isNextPositionValid(int in_iDirection, int in_iInitialPosition, int in_iNextPosition)
+{
+    if(in_iNextPosition < 0 || in_iNextPosition >= 64)
+    {
+        return false;
+    }
+
+    switch (m_tpTypePiece) {
+        case TypePieces::BISHOP:
+            return isBishopNextPositionValid(in_iDirection, in_iNextPosition);
+        case TypePieces::ROOK:
+            return isRookNextPositionValid(in_iDirection, in_iNextPosition);
+        case TypePieces::QUEEN:
+            return isRookNextPositionValid(in_iDirection, in_iNextPosition) || isBishopNextPositionValid(in_iDirection, in_iNextPosition);
+        case TypePieces::KING:
+            return isRookNextPositionValid(in_iDirection, in_iNextPosition) || isBishopNextPositionValid(in_iDirection, in_iNextPosition);
+        case TypePieces::KNIGHT:
+            return isKnightNextPositionValid(in_iDirection, in_iInitialPosition, in_iNextPosition);
+        case TypePieces::PAWN:
+            return isPawnNextPositionValid(in_iDirection, in_iInitialPosition, in_iNextPosition);
+        default:
+            return false;
+    }
+
+    return false;
+}
+
+bool Piece::isNextPositionNotOutOfBoard(int in_iDirection, int in_iInitialPosition)
+{
+    if(in_iInitialPosition < 0 || in_iInitialPosition >= 64)
+    {
+        return false;
+    }
+
+    int iNextPosition = in_iInitialPosition + in_iDirection;
+
+    switch (in_iDirection) {
+        case 16:
+        case -16:
+        case -8:
+        case 8:
+            return isValidPosition(iNextPosition); // POur en haut et en bas
+        case 9:
+        case -7:
+        case 1:
+            return iNextPosition % 8 != 0;  // Si on dépasse la bordure droite
+
+        case 7:
+        case -9:
+        case -1:
+            return iNextPosition % 8 != 7;  // Si on dépasse la bordure gauche
+        case 6:
+        case -6:
+        case 10:
+        case -10:
+        case 15:
+        case -15:
+        case 17:
+        case -17:
+            return isKnightNextPositionValid(in_iDirection, in_iInitialPosition, iNextPosition); // See if it can be replaced by return isValidPosition(iNextPosition); // POur en haut et en bas
+
+        default:
+            return false;  // Pour toute autre direction non gérée
+    }
+}
+
+bool Piece::doesPieceMoveInDirection(int in_iDirection)
+{
+    int iRepetition = 0;
+    int iNbMovements = 0;
+    int* itabDirections = nullptr;
+    switch (m_tpTypePiece) {
+        case TypePieces::BISHOP:
+             itabDirections = getBishopMoves(iRepetition, iNbMovements);
+            return elementEstDansTableau(in_iDirection, itabDirections, iNbMovements);
+        case TypePieces::ROOK:
+            itabDirections = getRookMoves(iRepetition, iNbMovements);
+            return elementEstDansTableau(in_iDirection, itabDirections, iNbMovements);
+        case TypePieces::QUEEN:
+        case TypePieces::KING:
+        {
+            int iRepetition2 = 0;
+            int iNbMovements2 = 0;
+            int* itabDirections2 = nullptr;
+            itabDirections = getRookMoves(iRepetition, iNbMovements);
+            itabDirections2 = getBishopMoves(iRepetition2, iNbMovements2);
+            return elementEstDansTableau(in_iDirection, itabDirections, iNbMovements) || elementEstDansTableau(in_iDirection, itabDirections2, iNbMovements2);
+        }
+        case TypePieces::KNIGHT:
+            itabDirections = getKnightMoves(iRepetition, iNbMovements);
+            return elementEstDansTableau(in_iDirection, itabDirections, iNbMovements);
+        case TypePieces::PAWN:
+            itabDirections = getPawnMoves(iRepetition, iNbMovements, m_colColorPiece);
+            return elementEstDansTableau(in_iDirection, itabDirections, iNbMovements);
+        default:
+            return false;
+    }
+}
+
+bool Piece::elementEstDansTableau(int element, const int tableau[], int nbElement) {
+    return std::find(tableau, tableau + nbElement, element) != tableau + nbElement;
+}
