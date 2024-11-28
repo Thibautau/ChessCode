@@ -8,6 +8,7 @@
 #include "Piece.h"
 #include "Type.h"
 #include <vector>
+#include <cstdint>
 
 class Board {
 private:
@@ -24,6 +25,8 @@ private:
     int m_iBlackKingPosition = 60;
     int m_iWhiteKingPosition = 4;
     int m_ipositionEnPassant = -1;
+
+    uint64_t zobristHash;
 
     const int MVV_LVA[7][7] = {
         { 0,  0,  0,  0,  0,  0, 0 },      // Victim K, Attacker K, Q, R, B, N, P, None
@@ -682,6 +685,8 @@ public:
     */
     void displayBoard() const;
     std::string getBoardAsString() const;
+    uint64_t getZobristHash() const { return zobristHash; }
+    void setZobristHash(uint64_t hash) { zobristHash = hash; }
 };
 
 #endif //BOARD_H

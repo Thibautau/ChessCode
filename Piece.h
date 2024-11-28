@@ -264,7 +264,6 @@ public:
     bool doesPieceMoveInDirection(int in_iDirection);
 
 
-
 private:
     /**
     * Vérifie l'élément donnée est dans le tableau

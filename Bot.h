@@ -17,8 +17,8 @@
 const int EXACT = 0;
 const int ALPHA_CUT = -1;
 const int BETA_CUT = 1;
-const int UPPER = 1;
-const int LOWER = 1;
+const int UPPERBOUND = 1;
+const int LOWERBOUND = 1;
 
 struct TranspositionTableEntry {
     int depth;
@@ -124,6 +124,7 @@ public:
     int alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMaximisant, char &bestPromotion);
     int minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta);
     void clearFile(const std::string& filename);
+    int evaluateMoveWithMinimaxv2(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor, char& promotion);
 };
 
 #endif //BOT_H

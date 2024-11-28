@@ -17,6 +17,7 @@ private:
     static uint64_t zobristEnPassant[16];
 public:
     static void initZobrist();
+    static uint64_t getPieceHash(int squareIndex, int pieceIndex);
     static uint64_t computeZobristHash(const std::vector<int>& in_boardVector, bool in_bIsBlackTurn, const std::vector<int>& in_vectCastlingRights, int in_iIndexZobristEnPassant);
 
 };
