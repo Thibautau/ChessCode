@@ -687,6 +687,7 @@ public:
     std::string getBoardAsString() const;
     uint64_t getZobristHash() const { return zobristHash; }
     void setZobristHash(uint64_t hash) { zobristHash = hash; }
+    void listOfPossibleMoves(Color in_colPlayer, std::vector<std::pair<int, int>>& out_moves) ;
 };
 
 #endif //BOARD_H

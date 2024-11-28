@@ -1106,6 +1106,22 @@ std::vector<std::pair<int, int>> Board::listOfPossibleMoves(Color in_colPlayer) 
     return possibleMoves;
 }
 
+void Board::listOfPossibleMoves(Color in_colPlayer, std::vector<std::pair<int, int>>& out_moves) {
+    // Efface les anciennes valeurs du vecteur fourni
+    out_moves.clear();
+
+    for (int iPosition = 0; iPosition < 64; ++iPosition) {
+        Piece* pPiece = getPieceAt(iPosition);
+        if (pPiece != nullptr && pPiece->getColor() == in_colPlayer) {
+            std::vector<int> validMoves;
+            possibleMovesForPiece(iPosition, validMoves);
+            for (int targetPos : validMoves) {
+                out_moves.emplace_back(iPosition, targetPos);
+            }
+        }
+    }
+}
+
 bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion,int enPassantPos) {
     Piece* movingPiece = getPieceAt(in_iEndPosition);
     if(movingPiece == nullptr) {
