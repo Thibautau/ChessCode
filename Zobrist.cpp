@@ -4,6 +4,7 @@
 
 #include "Zobrist.h"
 #include <random>
+#include <stdexcept>
 
 
 /**

@@ -45,7 +45,7 @@ void Bot::play(Board& board, int& start, int& end) {
     std::pair<int, int> meilleurCoup;
     int profondeur_max = 6;
 
-    choisir_meilleur_coup(board, profondeur_max, meilleurCoup);
+    choisir_meilleur_coupv2(board, profondeur_max, meilleurCoup);
 
     //m_logFile->clear();
     m_logFile->close();
@@ -55,7 +55,7 @@ void Bot::play(Board& board, int& start, int& end) {
 
 void Bot::playWithDepth(Board& board, int& start, int& end, int depth, char& promotion) {
     std::pair<int, int> meilleurCoup;
-    choisir_meilleur_coup(board, depth, meilleurCoup,&promotion);
+    choisir_meilleur_coupv2(board, depth, meilleurCoup,&promotion);
 
     //m_logFile->clear();
     m_logFile->close();
