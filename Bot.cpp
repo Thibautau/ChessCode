@@ -393,7 +393,6 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
 
     int bestScore = estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
     char promotion = '\0';
-    bestPromotion = '\0';
 
     // Boucle sur tous les coups possibles
     for (const auto& move : possibleMoves) {
