@@ -125,6 +125,7 @@ public:
     int minimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta);
     void clearFile(const std::string& filename);
     int evaluateMoveWithMinimaxv2(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor, char& promotion);
+    void choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<int, int>& meilleurCoup, char* bestPromotion=nullptr);
 };
 
 #endif //BOT_H

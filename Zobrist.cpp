@@ -98,8 +98,8 @@ uint64_t Zobrist::computeZobristHash(const std::vector<int>& in_boardVectorIndex
     return hashedBoard;
 }
 
-uint64_t Zobrist::getPieceHash(int squareIndex, int pieceIndex) {
-    if (squareIndex < 0 || squareIndex >= 64 || pieceIndex < 0 || pieceIndex >= 12) {
+uint64_t Zobrist::getPieceHash(int pieceIndex, int squareIndex) {
+    if (squareIndex < 0 || squareIndex >= 64 || pieceIndex <= 0 || pieceIndex > 12) {
         throw std::out_of_range("Invalid square or piece index for Zobrist hash.");
     }
     return zobristTable[squareIndex][pieceIndex];
