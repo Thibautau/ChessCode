@@ -313,6 +313,9 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     Piece* piece_depart = board.getPieceAt(move.first);
     Piece* piece_arrivee = board.getPieceAt(move.second);
 
+    if(!piece_depart) {
+        std::cerr << "Warning: No piece found at start square (" << move.first << "). Check board state." << std::endl;
+    }
 
     std::vector<int> boardState = board.getBoardStateAsVector();
     std::vector<int> castlingRights = board.getCastlingStateAsVector();
