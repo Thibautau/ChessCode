@@ -328,7 +328,7 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
 
     // In case of capture
     if (piece_arrivee) {
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_arrivee->getTypePiece(), piece_depart->getColor()), move.second);//Remove the piece captured
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_arrivee->getTypePiece(), piece_arrivee->getColor()), move.second);//Remove the piece captured
     }
 
     // XOR the start and end of the moved piece
@@ -343,9 +343,9 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     }
 
     // XOR the castling rights
-    for (int castlingRight : castlingRights) {
+    /*for (int castlingRight : castlingRights) {
         zobristHash ^= Zobrist::zobristCastlingRights[castlingRight];
-    }
+    }*/
 
     // XOR en passant square
     if (enPassantState != -1) {
