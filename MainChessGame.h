@@ -56,6 +56,12 @@ public:
     */
     void setBoardFromFEN(const std::string& fen);
     /**
+    * Configure l'échiquier à partir d'une notation FEN.
+    *
+    * @param fen La chaîne de caractères FEN représentant l'état de l'échiquier.
+    */
+    static void setBoardFromFENStatic(const std::string& fen, Board* in_pBoard);
+    /**
     * Trouve le meilleur coup pour le joueur actuel en fonction de la profondeur donnée.
     *
     * @param depth La profondeur de recherche pour l'algorithme Minimax.

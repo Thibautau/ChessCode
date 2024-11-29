@@ -109,6 +109,10 @@ add_executable(runTestZobrist
         Type.h
         Zobrist.cpp
         Zobrist.h
+        MainChessgame.cpp
+        MainChessgame.h
+        PlayerHuman.cpp
+        Player.h
 )
 
 # Lier GoogleTest à l'exécutable de tests

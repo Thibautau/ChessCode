@@ -322,6 +322,7 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     int enPassantState = board.getEnPassantState();
 
     // If it's at the black to play
+    //if (currentColor != Color::BLACK) {
     //if (currentColor == Color::BLACK) {
         zobristHash ^= Zobrist::zobristBlackTurn;
     //}
@@ -332,8 +333,8 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     }
 
     // XOR the start and end of the moved piece
-    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor())-1, move.first);//Remove the piece moving
-    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor())-1, move.second);//Place the piece moving
+    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()) - 1, move.first);//Remove the piece moving
+    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()) - 1, move.second);//Place the piece moving
 
     // If the move is a promotion
     if (isPromotion) {

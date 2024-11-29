@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include "Board.h"
 #include "Bot.h"
+#include "MainChessGame.h"
 #include "Zobrist.h"
 
 class TestZobrist : public ::testing::Test {
@@ -64,8 +65,62 @@ TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay)
     EXPECT_EQ(endBoard2HashForMove, initBoard2Hash);
 }
 
-
 TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay2)
+{
+    Zobrist::initZobrist();
+
+    board.clearBoard();
+    board.setupFromFEN("7k/8/8/8/8/8/8/K7 w - - 21 13");
+    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
+    uint64_t initBoardHash = board.getZobristHash();
+
+    bool boardMoveResult = board.movePiece("a1b2");
+
+    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
+    uint64_t intermediaireBoardHash = board.getZobristHash();
+
+    EXPECT_TRUE(boardMoveResult);
+
+    uint64_t endBoardHashForMove = intermediaireBoardHash;
+    Bot::calculateZobristHashForMove(board, {9,0}, Color::WHITE, '\0', false, endBoardHashForMove);
+
+    EXPECT_EQ(endBoardHashForMove, initBoardHash);
+}
+
+TEST_F(TestZobrist, test)
+{
+    Zobrist::initZobrist();
+
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("7k/8/8/8/8/8/8/K7 w - - 21 13", &board);
+    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
+    uint64_t initBoardHash = board.getZobristHash();
+
+    uint64_t BoardHashComputedByBot = initBoardHash;
+    Bot::calculateZobristHashForMove(board, {0, 9}, Color::WHITE, '\0', false, BoardHashComputedByBot);
+
+    bool boardMoveResult = board.movePiece("a1b2");
+
+    board2.clearBoard();
+    MainChessGame::setBoardFromFENStatic("7k/8/8/8/8/8/1K6/8 b - - 21 13", &board2);
+    board2.setZobristHash(Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.getEnPassantState()));
+    uint64_t BoardHash = board2.getZobristHash();
+
+    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.getEnPassantState()));
+    uint64_t intermediaireBoardHash = board.getZobristHash();
+
+    EXPECT_EQ(BoardHashComputedByBot, intermediaireBoardHash);
+    EXPECT_EQ(BoardHash, intermediaireBoardHash);
+    EXPECT_TRUE(boardMoveResult);
+
+    uint64_t endBoardHashForMove = intermediaireBoardHash;
+    Bot::calculateZobristHashForMove(board, {9,0}, Color::WHITE, '\0', false, endBoardHashForMove);
+
+    EXPECT_EQ(endBoardHashForMove, initBoardHash);
+}
+
+
+TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay3)
 {
     Zobrist::initZobrist();
 
@@ -158,7 +213,7 @@ TEST_F(TestZobrist, TwoBoardTestCalculating2)
     EXPECT_EQ(hash2, hash1);
 }
 
-TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay3) {
+TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay4) {
     Zobrist::initZobrist();
 
     board.clearBoard();
@@ -174,7 +229,7 @@ TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay3) {
     EXPECT_EQ(hash1, hash1_base);
 }
 
-TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay4) {
+TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay5) {
     Zobrist::initZobrist();
 
     board.clearBoard();
@@ -191,7 +246,7 @@ TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay4) {
 }
 
 
-TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay5) {
+TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay6) {
     Zobrist::initZobrist();
 
     board.clearBoard();
@@ -207,7 +262,7 @@ TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay5) {
     EXPECT_EQ(hash1, hash1_base);
 }
 
-TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay6) {
+TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay7) {
     Zobrist::initZobrist();
 
     board.clearBoard();
