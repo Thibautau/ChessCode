@@ -322,24 +322,24 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     int enPassantState = board.getEnPassantState();
 
     // If it's at the black to play
-    if (currentColor == Color::BLACK) {
+    //if (currentColor == Color::BLACK) {
         zobristHash ^= Zobrist::zobristBlackTurn;
-    }
+    //}
 
     // In case of capture
     if (piece_arrivee) {
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_arrivee->getTypePiece(), piece_arrivee->getColor()), move.second);//Remove the piece captured
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_arrivee->getTypePiece(), piece_arrivee->getColor())-1, move.second);//Remove the piece captured
     }
 
     // XOR the start and end of the moved piece
-    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()), move.first);//Remove the piece moving
-    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()), move.second);//Place the piece moving
+    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor())-1, move.first);//Remove the piece moving
+    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor())-1, move.second);//Place the piece moving
 
     // If the move is a promotion
     if (isPromotion) {
         TypePieces promotedType = Piece::charToPieceType(promotionForMove);
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()), move.second); // Remove the pawn
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(promotedType, piece_depart->getColor()), move.second); // Add the promoted piece
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor())-1, move.second); // Remove the pawn
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(promotedType, piece_depart->getColor())-1, move.second); // Add the promoted piece
     }
 
     // XOR the castling rights

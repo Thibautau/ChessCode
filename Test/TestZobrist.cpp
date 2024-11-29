@@ -230,13 +230,27 @@ TEST_F(TestZobrist, Capture) {
 
     board.clearBoard();
     board.setupFromFEN("6kq/8/8/8/8/7Q/8/K7 w - - 21 13");
-    uint64_t hash1_base = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    board2.setupFromFEN("6k1/8/8/8/8/7q/8/K7 b - - 21 13");
 
     uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
 
     Bot::calculateZobristHashForMove(board, {63,23}, Color::WHITE, '\0', false, hash1);
-    board.movePiece("h8h3");
-    Bot::calculateZobristHashForMove(board, {23,63}, Color::WHITE, '\0', false, hash1);
+    uint64_t hash1_end = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
 
-    EXPECT_EQ(hash1, hash1_base);
+    EXPECT_EQ(hash1, hash1_end);
+}
+
+TEST_F(TestZobrist, Promotion) {
+    Zobrist::initZobrist();
+
+    board.clearBoard();
+    board.setupFromFEN("6k1/8/8/8/8/8/1p6/K7 w - - 21 13");
+    board2.setupFromFEN("6k1/8/8/8/8/8/8/Kq6 b - - 21 13");
+
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+
+    Bot::calculateZobristHashForMove(board, {9,1}, Color::WHITE, 'q', true, hash1);
+    uint64_t hash1_end = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
+
+    EXPECT_EQ(hash1, hash1_end);
 }
