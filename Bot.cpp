@@ -308,22 +308,44 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     Piece* piece_depart = board.getPieceAt(move.first);
     Piece* piece_arrivee = board.getPieceAt(move.second);
 
-    // XOR the departure and arrival of the moved piece
-    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()), move.first);
-    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()), move.second);
 
-    // If there's a captured piece, remove its hash
-    if (board.getPieceAt(move.second)) {
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_arrivee->getTypePiece(), piece_arrivee->getColor()), move.second);
+    std::vector<int> boardState = board.getBoardStateAsVector();
+    std::vector<int> castlingRights = board.getCastlingStateAsVector();
+    int enPassantState = board.getEnPassantState();
+
+    // XOR the start and end of the moved piece
+    zobristHash ^= Zobrist::getPieceHash(boardState[move.first], move.first);
+    zobristHash ^= Zobrist::getPieceHash(boardState[move.second], move.second);
+
+    // In case of capture
+    if (piece_arrivee) {
+        zobristHash ^= Zobrist::getPieceHash(boardState[move.second], move.second);
     }
 
-    // If the move is a promotion, handle the promotion piece
+    // If the move is a promotion
     if (isPromotion) {
         TypePieces promotedType = Piece::charToPieceType(promotionForMove);
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_arrivee->getTypePiece(), piece_arrivee->getColor()), move.second); // Remove the pawn
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(promotedType, piece_arrivee->getColor()), move.second); // Add the promoted piece
+        zobristHash ^= Zobrist::getPieceHash(boardState[move.second], move.second); // Remove the pawn
+        zobristHash ^= Zobrist::getPieceHash(boardState[move.second], move.second); // Add the promoted piece
+    }
+
+    // If it's at the black to play
+    if (currentColor == Color::BLACK) {
+        zobristHash ^= Zobrist::zobristBlackTurn;
+    }
+
+    // XOR the castling rights
+    for (int castlingRight : castlingRights) {
+        zobristHash ^= Zobrist::zobristCastlingRights[castlingRight];
+    }
+
+    // XOR en passant square
+    if (enPassantState != -1) {
+        zobristHash ^= Zobrist::zobristEnPassant[enPassantState];
     }
 }
+
+
 
 
 //V1 du Bot
