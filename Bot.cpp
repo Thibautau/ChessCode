@@ -291,11 +291,16 @@ int Bot::evaluateMoveWithMinimaxv2(Board& board, int profondeur, bool estMaximis
     char promotionForMove = promotion;
     int enPassantPos = -1;
     uint64_t originalHash = board.getZobristHash();
+    uint64_t zobristHash = board.getZobristHash();  // Sauvegarder le hash original
+
+    // Calculer le nouveau hash avant de jouer le coup
+    calculateZobristHashForMove(board, move, currentColor, promotionForMove, isPromotion, zobristHash);
+    board.setZobristHash(zobristHash);
 
     //Exécution du mouvement + récurssif
     board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promotionForMove), &enPassantPos);
     //board.setZobristHash(zobristHash);
-    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
+    board.setZobristHash(zobristHash);
     int score = alphaBetaWithMemory(board, profondeur - 1, alpha, beta, !estMaximisant, promotionForMove);
     board.undoMove(move.first, move.second, capturedPiece, isPromotion);
 
@@ -313,25 +318,25 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     std::vector<int> castlingRights = board.getCastlingStateAsVector();
     int enPassantState = board.getEnPassantState();
 
-    // XOR the start and end of the moved piece
-    zobristHash ^= Zobrist::getPieceHash(boardState[move.first], move.first);
-    zobristHash ^= Zobrist::getPieceHash(boardState[move.second], move.second);
+    // If it's at the black to play
+    if (currentColor == Color::BLACK) {
+        zobristHash ^= Zobrist::zobristBlackTurn;
+    }
 
     // In case of capture
     if (piece_arrivee) {
-        zobristHash ^= Zobrist::getPieceHash(boardState[move.second], move.second);
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_arrivee->getTypePiece(), piece_depart->getColor()), move.second);//Remove the piece captured
     }
+
+    // XOR the start and end of the moved piece
+    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()), move.first);//Remove the piece moving
+    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()), move.second);//Place the piece moving
 
     // If the move is a promotion
     if (isPromotion) {
         TypePieces promotedType = Piece::charToPieceType(promotionForMove);
-        zobristHash ^= Zobrist::getPieceHash(boardState[move.second], move.second); // Remove the pawn
-        zobristHash ^= Zobrist::getPieceHash(boardState[move.second], move.second); // Add the promoted piece
-    }
-
-    // If it's at the black to play
-    if (currentColor == Color::BLACK) {
-        zobristHash ^= Zobrist::zobristBlackTurn;
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()), move.second); // Remove the pawn
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(promotedType, piece_depart->getColor()), move.second); // Add the promoted piece
     }
 
     // XOR the castling rights
