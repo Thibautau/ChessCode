@@ -224,3 +224,19 @@ TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay6) {
     EXPECT_EQ(hash1, hash2);
     EXPECT_EQ(hash1, hash1_base);
 }
+
+TEST_F(TestZobrist, Capture) {
+    Zobrist::initZobrist();
+
+    board.clearBoard();
+    board.setupFromFEN("6kq/8/8/8/8/7Q/8/K7 w - - 21 13");
+    uint64_t hash1_base = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+
+    Bot::calculateZobristHashForMove(board, {63,23}, Color::WHITE, '\0', false, hash1);
+    board.movePiece("h8h3");
+    Bot::calculateZobristHashForMove(board, {23,63}, Color::WHITE, '\0', false, hash1);
+
+    EXPECT_EQ(hash1, hash1_base);
+}
