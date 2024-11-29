@@ -95,8 +95,24 @@ add_executable(runTestBotAI
         Zobrist.h
 )
 
+add_executable(runTestZobrist
+        Test/TestZobrist.cpp
+        Test/TestZobrist.h
+        Board.cpp
+        Board.h
+        Bot.cpp
+        Bot.h
+        Piece.cpp
+        Piece.h
+        LogFile.cpp
+        LogFile.h
+        Type.h
+        Zobrist.cpp
+        Zobrist.h
+)
 
 # Lier GoogleTest à l'exécutable de tests
 target_link_libraries(runTests gtest gtest_main)
 target_link_libraries(runTestBotAI gtest gtest_main)
+target_link_libraries(runTestZobrist gtest gtest_main)
 target_link_libraries(ChessCode PRIVATE spdlog::spdlog)
