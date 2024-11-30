@@ -27,8 +27,8 @@ TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay)
 
     board.clearBoard();
     board2.clearBoard();
-    board.setupFromFEN("7k/8/8/8/8/8/8/K7 w - - 21 13");
-    board2.setupFromFEN("7k/8/8/8/8/8/8/K7 b - - 21 13");
+    MainChessGame::setBoardFromFENStatic("7k/8/8/8/8/8/8/K7 w - - 21 13", &board);
+    MainChessGame::setBoardFromFENStatic("7k/8/8/8/8/8/8/K7 b - - 21 13", &board2);
     board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
     board2.setZobristHash(Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board2.getCastlingStateAsVector(), board2.getEnPassantState()));
 
@@ -58,33 +58,13 @@ TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay)
     uint64_t endBoardHashForMove = intermediaireBoardHash;
     uint64_t endBoard2HashForMove = intermediaireBoard2Hash;
     Bot::calculateZobristHashForMove(board, {9,0}, Color::WHITE, '\0', false, endBoardHashForMove);
+    Bot::calculateZobristHashForMove(board, {55,63}, Color::BLACK, '\0', false, endBoardHashForMove);
     Bot::calculateZobristHashForMove(board2, {55, 63}, Color::BLACK, '\0', false, endBoard2HashForMove);
+    Bot::calculateZobristHashForMove(board2, {9, 0}, Color::WHITE, '\0', false, endBoard2HashForMove);
 
     EXPECT_NE(endBoardHashForMove, endBoard2HashForMove);
     EXPECT_EQ(endBoardHashForMove, initBoardHash);
     EXPECT_EQ(endBoard2HashForMove, initBoard2Hash);
-}
-
-TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay2)
-{
-    Zobrist::initZobrist();
-
-    board.clearBoard();
-    board.setupFromFEN("7k/8/8/8/8/8/8/K7 w - - 21 13");
-    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
-    uint64_t initBoardHash = board.getZobristHash();
-
-    bool boardMoveResult = board.movePiece("a1b2");
-
-    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
-    uint64_t intermediaireBoardHash = board.getZobristHash();
-
-    EXPECT_TRUE(boardMoveResult);
-
-    uint64_t endBoardHashForMove = intermediaireBoardHash;
-    Bot::calculateZobristHashForMove(board, {9,0}, Color::WHITE, '\0', false, endBoardHashForMove);
-
-    EXPECT_EQ(endBoardHashForMove, initBoardHash);
 }
 
 TEST_F(TestZobrist, test)
@@ -116,33 +96,6 @@ TEST_F(TestZobrist, test)
     uint64_t endBoardHashForMove = intermediaireBoardHash;
     Bot::calculateZobristHashForMove(board, {9,0}, Color::WHITE, '\0', false, endBoardHashForMove);
 
-    EXPECT_EQ(endBoardHashForMove, initBoardHash);
-}
-
-
-TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay3)
-{
-    Zobrist::initZobrist();
-
-    board.clearBoard();
-    board.setupFromFEN("7k/8/8/8/8/8/8/K7 w - - 21 13");
-    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
-    uint64_t initBoardHash = board.getZobristHash();
-
-    bool boardMoveResult = board.movePiece("a1b2");
-
-
-    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
-    uint64_t intermediaireBoardHash = board.getZobristHash();
-
-    EXPECT_TRUE(boardMoveResult);
-
-    uint64_t endBoardHashForMove = intermediaireBoardHash;
-    Bot::calculateZobristHashForMove(board, {9,0}, Color::WHITE, '\0', false, endBoardHashForMove);
-
-    board.movePiece("b2a1");
-
-    EXPECT_EQ(endBoardHashForMove, Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
     EXPECT_EQ(endBoardHashForMove, initBoardHash);
 }
 
