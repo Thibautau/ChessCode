@@ -118,21 +118,24 @@ void Bot::clearFile(const std::string& filename) {
 }
 
 void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<int, int>& meilleurCoup, char* bestPromotion) {
+    // Initialisation des variables
     int meilleurScore = std::numeric_limits<int>::min();
     m_logFile->clear();
     meilleurCoup = { -1, -1 };
     std::pair<int, int> previousBestMove = { -1, -1 };
+
+    // Initialisation de Zobrist et du hash de la position
     Zobrist::initZobrist();
     board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
 
+    // Variables pour récupérer les stats et informations diverses
     nodeCount = 0;
     uniqueNodeIterated = 0;
     char promotion = '\0';
     auto start = std::chrono::high_resolution_clock::now();
 
+    // Obtenir les mouvements possibles
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);
-
-    // Vérifiez si des coups sont possibles
     if (possibleMoves.empty()) {
         return;
     }
@@ -142,43 +145,39 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
         return board.evaluateMove(move1, m_color) > board.evaluateMove(move2, m_color);
     });
 
+    // Variables de promotion
+    const char* promotionTypes = nullptr;
+    size_t promotionCount = 0;
+
+    // Évaluer chaque coup possible
     for (const std::pair<int, int>& coup : possibleMoves) {
         uint64_t zobristHash = board.getZobristHash();
+        bool isPromotion = board.isPromotionMove(coup.first, coup.second, m_color);
 
-        if (board.isPromotionMove(coup.first, coup.second, m_color)) {
-            for (char promoType : {'q', 'r', 'b', 'n'}) {
-                promotion = promoType;
-                int score = evaluateMoveWithMinimaxv2(board, profondeur_max, true, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), coup, m_color, promoType);
-                // Mettre à jour la table de transposition uniquement si le coup est trouvé
-                if (transpositionTable.find(zobristHash) == transpositionTable.end()) {
-                    transpositionTable[zobristHash] = {profondeur_max, score, 0};
-                }
-                // Si aucun bon coup n'a été trouvé, c'est qu'on est échec et mat mais le coup qu'on évalue est peut etre notre seule possibilité
-                if (score == std::numeric_limits<int>::min() && meilleurScore == std::numeric_limits<int>::min())
-                {
-                    previousBestMove = coup;
-                    if (bestPromotion) *bestPromotion = promotion;
-                }
-
-                if (score > meilleurScore) {
-                    meilleurScore = score;
-                    previousBestMove = coup;
-                    if (bestPromotion) *bestPromotion = promotion;
-                }
-            }
+        if (isPromotion) {
+            promotionTypes = PROMOTION_TYPES;
+            promotionCount = std::size(PROMOTION_TYPES);
+        } else {
+            promotionTypes = NO_PROMOTION;
+            promotionCount = std::size(NO_PROMOTION);
         }
-        else {
+
+        for (size_t i = 0; i < promotionCount; ++i) {
+            promotion = promotionTypes[i];
             int score = evaluateMoveWithMinimaxv2(board, profondeur_max, true, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), coup, m_color, promotion);
-            // Mettre à jour la table de transposition uniquement si le coup est trouvé
+
+            // Vérification de la table de transposition avant d'ajouter
             if (transpositionTable.find(zobristHash) == transpositionTable.end()) {
                 transpositionTable[zobristHash] = {profondeur_max, score, 0};
             }
-            // Si aucun bon coup n'a été trouvé, c'est qu'on est échec et mat mais le coup qu'on évalue est peut etre notre seule possibilité
-            if (score == std::numeric_limits<int>::min() && meilleurScore == std::numeric_limits<int>::min())
-            {
+
+            // Gérer les cas où aucun bon coup n'est trouvé
+            if (score == std::numeric_limits<int>::min() && meilleurScore == std::numeric_limits<int>::min()) {
                 previousBestMove = coup;
                 if (bestPromotion) *bestPromotion = promotion;
             }
+
+            // Mettre à jour le meilleur coup
             if (score > meilleurScore) {
                 meilleurScore = score;
                 previousBestMove = coup;
@@ -187,6 +186,7 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
         }
     }
 
+    // Temps d'exécution
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> duration = end - start;
 
@@ -196,10 +196,8 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
     }
 
     transpositionTable.clear();
-
-    /*std::cout << "Nodes evaluated: " << nodeCount << ", Time taken: " << duration.count() << " ms\n";
-    std::cout << "Nodes/s: "<<nodeCount/(duration.count()/1000)<<"\n";*/
 }
+
 
 
 int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool estMaximisant, char &bestPromotion) {
