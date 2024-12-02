@@ -239,16 +239,17 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
 
     // Détermination de la couleur à maximiser ou minimiser
     Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
-    std::vector<std::pair<int, int>> possibleMoves;
-    board.listOfPossibleMoves(currentColor, possibleMoves);
+    std::pair<int, int> possibleMoves[128];
+    int moveCount = 0;
+    board.listOfPossibleMoves(currentColor, possibleMoves, moveCount);
 
     // Tri des coups en fonction de leur évaluation
-    std::ranges::stable_sort(possibleMoves.begin(), possibleMoves.end(), std::greater<>{}, [&](const std::pair<int, int>& move) {
+    std::ranges::stable_sort(possibleMoves, possibleMoves + moveCount, std::greater<>{}, [&](const std::pair<int, int>& move) {
         return board.evaluateMove(move, m_color);
     });
 
     //Mise en echec et mat ou PAT
-    if (possibleMoves.empty()) {
+    if (moveCount == 0) {
         return estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
     }
 
@@ -256,7 +257,8 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     int bestScore = estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
 
 
-    for (const std::pair<int, int>& move : possibleMoves) {
+    for (int i = 0; i < moveCount; ++i) {
+        const std::pair<int, int>& move = possibleMoves[i];
         //Pour gérer les promotions (car pas gérer de base, les mouvements sont des pairs de int)
         const char* promotionTypes;
         size_t promotionCount;

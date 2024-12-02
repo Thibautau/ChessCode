@@ -1122,6 +1122,24 @@ void Board::listOfPossibleMoves(Color in_colPlayer, std::vector<std::pair<int, i
     }
 }
 
+void Board::listOfPossibleMoves(Color in_colPlayer, std::pair<int, int> out_moves[128], int& out_moveCount) {
+    out_moveCount = 0;
+
+    for (int iPosition = 0; iPosition < 128; ++iPosition) {
+        Piece* pPiece = getPieceAt(iPosition);
+        if (pPiece != nullptr && pPiece->getColor() == in_colPlayer) {
+            std::vector<int> validMoves;
+            possibleMovesForPiece(iPosition, validMoves);
+            for (int targetPos : validMoves) {
+                if (out_moveCount < 128) {
+                    out_moves[out_moveCount++] = std::make_pair(iPosition, targetPos);
+                }
+            }
+        }
+    }
+}
+
+
 bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion,int enPassantPos) {
     Piece* movingPiece = getPieceAt(in_iEndPosition);
     if(movingPiece == nullptr) {
