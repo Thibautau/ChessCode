@@ -150,9 +150,9 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
     size_t promotionCount = 0;
 
     // Évaluer chaque coup possible
-    for (const std::pair<int, int>& coup : possibleMoves) {
+    for (const std::pair<int, int>& move : possibleMoves) {
         uint64_t zobristHash = board.getZobristHash();
-        bool isPromotion = board.isPromotionMove(coup.first, coup.second, m_color);
+        bool isPromotion = board.isPromotionMove(move.first, move.second, m_color);
 
         if (isPromotion) {
             promotionTypes = PROMOTION_TYPES;
@@ -163,8 +163,23 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
         }
 
         for (size_t i = 0; i < promotionCount; ++i) {
-            promotion = promotionTypes[i];
-            int score = evaluateMoveWithMinimaxv2(board, profondeur_max, true, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), coup, m_color, promotion);
+            char promoType = promotionTypes[i];
+            uint64_t originalHash = board.getZobristHash();
+            Piece* capturedPiece = nullptr;
+            int enPassantPos = -1;
+
+            // Mise à jour du hash pour le coup
+            calculateZobristHashForMove(board, move, m_color, promoType, promoType != '\0', zobristHash);
+            board.setZobristHash(zobristHash);
+
+            // Jouer le coup
+            board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+
+            int score = alphaBetaWithMemory(board, profondeur_max-1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false, promotion);
+
+            // Annuler le coup
+            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0');
+            board.setZobristHash(originalHash);
 
             // Vérification de la table de transposition avant d'ajouter
             if (transpositionTable.find(zobristHash) == transpositionTable.end()) {
@@ -173,14 +188,14 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
 
             // Gérer les cas où aucun bon coup n'est trouvé
             if (score == std::numeric_limits<int>::min() && meilleurScore == std::numeric_limits<int>::min()) {
-                previousBestMove = coup;
+                previousBestMove = move;
                 if (bestPromotion) *bestPromotion = promotion;
             }
 
             // Mettre à jour le meilleur coup
             if (score > meilleurScore) {
                 meilleurScore = score;
-                previousBestMove = coup;
+                previousBestMove = move;
                 if (bestPromotion) *bestPromotion = promotion;
             }
         }
@@ -308,30 +323,6 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     return bestScore;
 }
 
-int Bot::evaluateMoveWithMinimaxv2(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor, char& promotion) {
-    Piece* capturedPiece = nullptr;
-    bool isPromotion = board.isPromotionMove(move.first, move.second, currentColor);
-    char promotionForMove = promotion;
-    int enPassantPos = -1;
-    uint64_t originalHash = board.getZobristHash();
-    uint64_t zobristHash = board.getZobristHash();  // Sauvegarder le hash original
-
-    // Calculer le nouveau hash avant de jouer le coup
-    calculateZobristHashForMove(board, move, currentColor, promotionForMove, isPromotion, zobristHash);
-    board.setZobristHash(zobristHash);
-
-    //Exécution du mouvement + récurssif
-    board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promotionForMove), &enPassantPos);
-    //board.setZobristHash(zobristHash);
-    board.setZobristHash(zobristHash);
-    int score = alphaBetaWithMemory(board, profondeur - 1, alpha, beta, !estMaximisant, promotionForMove);
-    board.undoMove(move.first, move.second, capturedPiece, isPromotion);
-
-    board.setZobristHash(originalHash);
-
-    return score;
-}
-
 void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& move, Color currentColor, char promotionForMove, bool isPromotion, uint64_t& zobristHash) {
     Piece* piece_depart = board.getPieceAt(move.first);
     Piece* piece_arrivee = board.getPieceAt(move.second);
@@ -375,6 +366,31 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     if (enPassantState != -1) {
         zobristHash ^= Zobrist::zobristEnPassant[enPassantState];
     }
+}
+
+//Ne sert plus à rien (à garder pour test dans un premier temps)
+int Bot::evaluateMoveWithMinimaxv2(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor, char& promotion) {
+    Piece* capturedPiece = nullptr;
+    bool isPromotion = board.isPromotionMove(move.first, move.second, currentColor);
+    char promotionForMove = promotion;
+    int enPassantPos = -1;
+    uint64_t originalHash = board.getZobristHash();
+    uint64_t zobristHash = board.getZobristHash();  // Sauvegarder le hash original
+
+    // Calculer le nouveau hash avant de jouer le coup
+    calculateZobristHashForMove(board, move, currentColor, promotionForMove, isPromotion, zobristHash);
+    board.setZobristHash(zobristHash);
+
+    //Exécution du mouvement + récurssif
+    board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promotionForMove), &enPassantPos);
+    //board.setZobristHash(zobristHash);
+    board.setZobristHash(zobristHash);
+    int score = alphaBetaWithMemory(board, profondeur - 1, alpha, beta, !estMaximisant, promotionForMove);
+    board.undoMove(move.first, move.second, capturedPiece, isPromotion);
+
+    board.setZobristHash(originalHash);
+
+    return score;
 }
 
 
