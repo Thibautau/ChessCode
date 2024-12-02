@@ -168,12 +168,12 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             Piece* capturedPiece = nullptr;
             int enPassantPos = -1;
 
-            // Mise à jour du hash pour le coup
-            calculateZobristHashForMove(board, move, m_color, promoType, promoType != '\0', zobristHash);
-            board.setZobristHash(zobristHash);
-
             // Jouer le coup
             board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+
+            // Mise à jour du hash pour le coup
+            calculateZobristHashForMove(board, move, m_color, promoType, promoType != '\0', zobristHash, capturedPiece);
+            board.setZobristHash(zobristHash);
 
             int score = alphaBetaWithMemory(board, profondeur_max-1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false, promotion);
 
@@ -278,12 +278,12 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             Piece* capturedPiece = nullptr;
             int enPassantPos = -1;
 
-            // Mise à jour du hash pour le coup
-            calculateZobristHashForMove(board, move, currentColor, promoType, promoType != '\0', zobristHash);
-            board.setZobristHash(zobristHash);
-
             // Jouer le coup
             board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+
+            // Mise à jour du hash pour le coup
+            calculateZobristHashForMove(board, move, currentColor, promoType, promoType != '\0', zobristHash, capturedPiece);
+            board.setZobristHash(zobristHash);
 
             // Appel récursif
             int score = alphaBetaWithMemory(board, depth - 1, alpha, beta, !estMaximisant, bestPromotion);
@@ -325,15 +325,15 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     return bestScore;
 }
 
-void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& move, Color currentColor, char promotionForMove, bool isPromotion, uint64_t& zobristHash) {
-    Piece* piece_depart = board.getPieceAt(move.first);
-    Piece* piece_arrivee = board.getPieceAt(move.second);
+void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& move, Color currentColor, char promotionForMove, bool isPromotion, uint64_t& zobristHash, Piece* capturedPiece) {
+    Piece* piece_depart = board.getPieceAt(move.second);
+    Piece* piece_arrivee = capturedPiece;
 
     if(!piece_depart) {
-        std::cerr << "Warning: No piece found at start square (" << move.first << "). Check board state." << std::endl;
+        board.displayBoard();
+        std::cerr << "Warning: No piece found at start square (" << move.second << "). Check board state." << std::endl;
     }
 
-    std::vector<int> boardState = board.getBoardStateAsVector();
     std::vector<int> castlingRights = board.getCastlingStateAsVector();
     int enPassantState = board.getEnPassantState();
 
@@ -379,12 +379,13 @@ int Bot::evaluateMoveWithMinimaxv2(Board& board, int profondeur, bool estMaximis
     uint64_t originalHash = board.getZobristHash();
     uint64_t zobristHash = board.getZobristHash();  // Sauvegarder le hash original
 
-    // Calculer le nouveau hash avant de jouer le coup
-    calculateZobristHashForMove(board, move, currentColor, promotionForMove, isPromotion, zobristHash);
-    board.setZobristHash(zobristHash);
-
     //Exécution du mouvement + récurssif
     board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promotionForMove), &enPassantPos);
+
+    // Calculer le nouveau hash avant de jouer le coup
+    calculateZobristHashForMove(board, move, currentColor, promotionForMove, isPromotion, zobristHash, capturedPiece);
+    board.setZobristHash(zobristHash);
+
     //board.setZobristHash(zobristHash);
     board.setZobristHash(zobristHash);
     int score = alphaBetaWithMemory(board, profondeur - 1, alpha, beta, !estMaximisant, promotionForMove);
