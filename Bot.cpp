@@ -207,9 +207,10 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     uint64_t zobristHash = board.getZobristHash();
 
     // Recherche dans la table de transposition
-    if (transpositionTable.find(zobristHash) != transpositionTable.end()) {
-        const TranspositionTableEntry& entry = transpositionTable[zobristHash];
-        if (entry.depth == depth) {
+    auto it = transpositionTable.find(zobristHash);
+    if (it != transpositionTable.end()) {
+        const TranspositionTableEntry& entry = it->second;
+        if (entry.depth >= depth) {
             if (entry.flag == EXACT) return entry.score;
             if (entry.flag == LOWERBOUND && entry.score >= beta) return entry.score;
             if (entry.flag == UPPERBOUND && entry.score <= alpha) return entry.score;
@@ -218,7 +219,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
 
     // Cas de base : profondeur 0
     if (depth == 0) {
-        int evaluation = board.evaluateTest(m_color);  // Évaluation de la position pour le joueur courant
+        int evaluation = board.evaluateTest(m_color);
         transpositionTable[zobristHash] = {depth, evaluation, EXACT};
         return evaluation;
     }
@@ -233,49 +234,73 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
         return board.evaluateMove(move, m_color);
     });
 
-    if (possibleMoves.empty()) return estMaximisant ? std::numeric_limits<int>::min(): std::numeric_limits<int>::max();
+    //Mise en echec et mat ou PAT
+    if (possibleMoves.empty()) {
+        return estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
+    }
 
+    //Rénitialisation des variables
     int bestScore = estMaximisant ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
-    char promotion = '\0';
-    //char promotion = bestPromotion;
-    //bestPromotion = '\0';
 
-    for (const auto& move : possibleMoves) {
+
+    for (const std::pair<int, int>& move : possibleMoves) {
+        //Pour gérer les promotions (car pas gérer de base, les mouvements sont des pairs de int)
+        const char* promotionTypes;
+        size_t promotionCount;
+
         if (board.isPromotionMove(move.first, move.second, currentColor)) {
-            // Essayer chaque promotion
-            for (char promoType : {'q', 'n', 'b', 'r'}) {
-                promotion = promoType;
-                int score = evaluateMoveWithMinimaxv2(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
-
-                if (estMaximisant) {
-                    if (score > bestScore) bestScore = score, bestPromotion = promoType;
-                    alpha = std::max(alpha, bestScore);
-                    if (bestScore >= beta) break;
-                }
-                else {
-                    if (score < bestScore) bestScore = score, bestPromotion = promoType;
-                    beta = std::min(beta, bestScore);
-                    if (bestScore <= alpha) break;
-                }
-            }
+            promotionTypes = PROMOTION_TYPES;
+            promotionCount = std::size(PROMOTION_TYPES);
         }
         else {
-            int score = evaluateMoveWithMinimaxv2(board, depth, estMaximisant, alpha, beta, move, currentColor, promotion);
+            promotionTypes = NO_PROMOTION;
+            promotionCount = std::size(NO_PROMOTION);
+        }
+
+        for (size_t i = 0; i < promotionCount; ++i) {
+            char promoType = promotionTypes[i];
+            uint64_t originalHash = board.getZobristHash();
+            Piece* capturedPiece = nullptr;
+            int enPassantPos = -1;
+
+            // Mise à jour du hash pour le coup
+            calculateZobristHashForMove(board, move, currentColor, promoType, promoType != '\0', zobristHash);
+            board.setZobristHash(zobristHash);
+
+            // Jouer le coup
+            board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+
+            // Appel récursif
+            int score = alphaBetaWithMemory(board, depth - 1, alpha, beta, !estMaximisant, bestPromotion);
+
+            // Annuler le coup
+            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0');
+            board.setZobristHash(originalHash);
+
+            // Mise à jour des scores et alpha/beta
             if (estMaximisant) {
-                if (score > bestScore) bestScore = score, bestPromotion = promotion;
-                alpha = std::max(alpha, bestScore);
-                if (bestScore >= beta) {
-                    transpositionTable[zobristHash] = {depth, bestScore, LOWERBOUND};
-                    break;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestPromotion = promoType;
                 }
-            } else {
-                if (score < bestScore) bestScore = score, bestPromotion = promotion;
-                beta = std::min(beta, bestScore);
-                if (bestScore <= alpha) {
-                    transpositionTable[zobristHash] = {depth, bestScore, UPPERBOUND};
-                    break;
+                alpha = std::max(alpha, score);
+                if (alpha >= beta) {
+                    transpositionTable[zobristHash] = {depth, bestScore, LOWERBOUND};
+                    return bestScore;
                 }
             }
+            else {
+                if (score < bestScore) {
+                    bestScore = score;
+                    bestPromotion = promoType;
+                }
+                beta = std::min(beta, score);
+                if (beta <= alpha) {
+                    transpositionTable[zobristHash] = {depth, bestScore, UPPERBOUND};
+                    return bestScore;
+                }
+            }
+
         }
     }
 

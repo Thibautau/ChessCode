@@ -24,8 +24,6 @@ struct TranspositionTableEntry {
     int depth;
     int score;
     int bestMoveIndex;
-    int lowerBound;
-    int upperBound;
     int flag; // 0: Exact, -1: Alpha cut, 1: Beta cut
 };
 
@@ -35,6 +33,8 @@ private:
     std::unordered_map<uint64_t, TranspositionTableEntry> transpositionTable;
     //LogInFile* m_logFile;
     LogFile* m_logFile;
+    static constexpr char PROMOTION_TYPES[4] = {'q', 'n', 'b', 'r'};
+    static constexpr char NO_PROMOTION[1] = {'\0'};
 
 
 public:
