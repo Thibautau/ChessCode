@@ -1218,3 +1218,19 @@ TEST_F(BoardTest, KingCanMoveButGameCrashed)
     EXPECT_FALSE(isGameOver);
     EXPECT_EQ(Color::NONE, colWinner);
 }
+
+// Test pour voir si le roi noir se change en dame (pas le droit)
+TEST_F(BoardTest, BugWithPromotion)
+{
+    board.clearBoard();
+    board.setupFromFEN("6k1/6pp/8/8/5p2/5P2/6PP/Q6K w - - 21 13");
+
+    bool result = board.movePiece("g2g3");
+    EXPECT_TRUE(result);
+    bool result2 = board.movePiece("f4g3", Color::BLACK);
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt("f4"), nullptr);
+    EXPECT_EQ(board.getPieceAt("g4"), nullptr);
+    EXPECT_EQ(board.getPieceAt("g3")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("g3")->getColor(), Color::BLACK);
+}

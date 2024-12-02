@@ -237,6 +237,8 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
         return evaluation;
     }
 
+
+
     // Détermination de la couleur à maximiser ou minimiser
     Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
     std::pair<int, int> possibleMoves[128];
@@ -334,7 +336,8 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
         std::cerr << "Warning: No piece found at start square (" << move.second << "). Check board state." << std::endl;
     }
 
-    std::vector<int> castlingRights = board.getCastlingStateAsVector();
+    int itabCastlingRights[4];
+    board.getCastlingRightsLostByMoving(itabCastlingRights);
     int enPassantState = board.getEnPassantState();
 
     // If it's at the black to play
@@ -360,9 +363,12 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     }
 
     // XOR the castling rights
-    /*for (int castlingRight : castlingRights) {
-        zobristHash ^= Zobrist::zobristCastlingRights[castlingRight];
-    }*/
+    for (int castlingRight : itabCastlingRights) {
+        if(castlingRight != -1)
+        {
+            zobristHash ^= Zobrist::zobristCastlingRights[castlingRight];
+        }
+    }
 
     // XOR en passant square
     if (enPassantState != -1) {
@@ -379,6 +385,9 @@ int Bot::evaluateMoveWithMinimaxv2(Board& board, int profondeur, bool estMaximis
     uint64_t originalHash = board.getZobristHash();
     uint64_t zobristHash = board.getZobristHash();  // Sauvegarder le hash original
 
+    std::string logMessage = "Plateau à la profondeur " + std::to_string(profondeur) + " :\n" + board.getBoardAsString() + "\n";
+    m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+
     //Exécution du mouvement + récurssif
     board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promotionForMove), &enPassantPos);
 
@@ -389,7 +398,7 @@ int Bot::evaluateMoveWithMinimaxv2(Board& board, int profondeur, bool estMaximis
     //board.setZobristHash(zobristHash);
     board.setZobristHash(zobristHash);
     int score = alphaBetaWithMemory(board, profondeur - 1, alpha, beta, !estMaximisant, promotionForMove);
-    board.undoMove(move.first, move.second, capturedPiece, isPromotion);
+    board.undoMove(move.first, move.second, capturedPiece, isPromotion, enPassantPos);
 
     board.setZobristHash(originalHash);
 

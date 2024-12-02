@@ -77,6 +77,11 @@ void Board::clearBoard()
 
     m_iBlackKingPosition = 60;
     m_iWhiteKingPosition = 4;
+
+    for (int i = 0; i < 4; i++)
+    {
+        m_itabIndexRockPrivilegeLostOnMove[i] = -1;
+    }
 }
 
 void Board::setupFromFEN(const std::string& fen) {
@@ -219,6 +224,13 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
 
     if (isMovementPossible(in_iStartPosition,in_iEndPosition))
     {
+        { // We reset those indexs because we want to update those values with this move
+            m_itabIndexRockPrivilegeLostOnMove[0] = -1;
+            m_itabIndexRockPrivilegeLostOnMove[1] = -1;
+            m_itabIndexRockPrivilegeLostOnMove[2] = -1;
+            m_itabIndexRockPrivilegeLostOnMove[3] = -1;
+        }
+
         if(pPiece->getTypePiece() == TypePieces::PAWN) {
             if(in_iEndPosition==m_ipositionEnPassant) {
                 int direction = (in_colPlayer == Color::WHITE) ? -1 : 1;
@@ -1940,24 +1952,56 @@ void Board::promotePawn(Color in_colPlayer, Piece** ppPiece, TypePieces promotio
 void Board::removeRockPossibility(Color in_color, int i_columnRook) {
     if (in_color == Color::WHITE) {
         if (i_columnRook == 0) {
+            if(m_bWhiteKingCanBigRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[1] = 1;
+            }
             m_bWhiteKingCanBigRock = false;
         }
         else if (i_columnRook == 7) {
+            if(m_bWhiteKingCanLittleRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[0] = 0;
+            }
             m_bWhiteKingCanLittleRock = false;
         }
         else {
+            if(m_bWhiteKingCanLittleRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[0] = 0;
+            }
+            if(m_bWhiteKingCanBigRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[1] = 1;
+            }
             m_bWhiteKingCanBigRock = false;
             m_bWhiteKingCanLittleRock = false;
         }
     }
     else {
         if (i_columnRook == 0) {
+            if(m_bBlackKingCanBigRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[3] = 3;
+            }
             m_bBlackKingCanBigRock = false;
         }
         else if (i_columnRook == 7) {
+            if(m_bBlackKingCanLittleRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[2] = 2;
+            }
             m_bBlackKingCanLittleRock = false;
         }
         else {
+            if(m_bBlackKingCanBigRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[3] = 3;
+            }
+            if(m_bBlackKingCanLittleRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[2] = 2;
+            }
             m_bBlackKingCanBigRock = false;
             m_bBlackKingCanLittleRock = false;
         }
@@ -2032,6 +2076,14 @@ std::vector<int> Board::getCastlingStateAsVector() const
         castling[3] = 3;
     }
     return castling;
+}
+
+void Board::getCastlingRightsLostByMoving(int out_itabCastlingRightsLost[4]) const
+{
+    out_itabCastlingRightsLost[0] = m_itabIndexRockPrivilegeLostOnMove[0];
+    out_itabCastlingRightsLost[1] = m_itabIndexRockPrivilegeLostOnMove[1];
+    out_itabCastlingRightsLost[2] = m_itabIndexRockPrivilegeLostOnMove[2];
+    out_itabCastlingRightsLost[3] = m_itabIndexRockPrivilegeLostOnMove[3];
 }
 
 int Board::getEnPassantState() const

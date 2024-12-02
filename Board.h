@@ -26,6 +26,8 @@ private:
     int m_iWhiteKingPosition = 4;
     int m_ipositionEnPassant = -1;
 
+    int m_itabIndexRockPrivilegeLostOnMove[4] = {-1, -1, -1, -1}; // Used for Zobrist
+
     uint64_t zobristHash;
 
     const int MVV_LVA[7][7] = {
@@ -684,6 +686,7 @@ public:
     * et les pièces blanches en minuscule. Les cases vides sont représentées par un point (".").
     */
     void displayBoard() const;
+    void getCastlingRightsLostByMoving(int out_itabCastlingRightsLost[4]) const;
     std::string getBoardAsString() const;
     uint64_t getZobristHash() const { return zobristHash; }
     void setZobristHash(uint64_t hash) { zobristHash = hash; }
