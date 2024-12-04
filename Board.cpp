@@ -228,7 +228,7 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
     }
 
     //DEBUG
-    if(in_iStartPosition == 24 && in_iEndPosition == 17)
+    if(in_iStartPosition == 49 && in_iEndPosition == 41)
     {
         int a = 2;
     }

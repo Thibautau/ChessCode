@@ -194,14 +194,14 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             // Gérer les cas où aucun bon coup n'est trouvé
             if (score == std::numeric_limits<int>::min() && meilleurScore == std::numeric_limits<int>::min()) {
                 previousBestMove = move;
-                if (bestPromotion) *bestPromotion = promotion;
+                if (bestPromotion) *bestPromotion = promoType; //promotion
             }
 
             // Mettre à jour le meilleur coup
             if (score > meilleurScore) {
                 meilleurScore = score;
                 previousBestMove = move;
-                if (bestPromotion) *bestPromotion = promotion;
+                if (bestPromotion) *bestPromotion = promoType; //promotion
             }
         }
     }
