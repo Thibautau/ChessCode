@@ -165,3 +165,31 @@ TEST_F(TestBotAI, TestBugEnPassant)
     EXPECT_EQ(iEnd, 17); // b3
     EXPECT_EQ(cPromotion, '\0');
 }
+
+TEST_F(TestBotAI, TestUndo)
+{
+    board.clearBoard();
+    board.setupFromFEN("8/7k/8/8/pPp5/8/R6K/8 b - b3 0 1");
+
+
+    //Try to move the black pawn at h2 (promotion)
+    Piece* capturedPiece = nullptr;
+    int enPassantPos = -1;
+    char promoType = '\0';
+
+    // Jouer le coup
+    board.movePiece(24, 17, Color::BLACK, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+
+    EXPECT_EQ(board.getPieceAt("a4"), nullptr);
+    EXPECT_EQ(board.getPieceAt("b4"), nullptr);
+    EXPECT_EQ(board.getPieceAt("b3")->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt("b3")->getTypePiece(), TypePieces::PAWN);
+
+    //Undo le coup
+    board.undoMove(24, 17, capturedPiece, false,enPassantPos);
+    EXPECT_EQ(board.getPieceAt("a4")->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt("b4")->getColor(), Color::WHITE);
+    EXPECT_EQ(board.getPieceAt("a4")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("b4")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("b3"), nullptr);
+}
