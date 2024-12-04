@@ -93,6 +93,8 @@ add_executable(runTestBotAI
         Type.h
         Zobrist.cpp
         Zobrist.h
+        MainChessGame.h
+        MainChessGame.cpp
 )
 
 add_executable(runTestZobrist
