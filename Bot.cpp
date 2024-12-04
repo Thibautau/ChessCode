@@ -173,7 +173,7 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             if(! bCanMove)
             {
                 board.displayBoard();
-                std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in alphaBetaWithMemory." << std::endl;
+                std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in choisir_meilleur_coupV2." << std::endl;
             }
 
             // Mise à jour du hash pour le coup
