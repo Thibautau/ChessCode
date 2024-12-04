@@ -27,7 +27,7 @@ protected:
 TEST_F(TestBotAI, KingCanMoveButGameCrashed)
 {
     board.clearBoard();
-    board.setupFromFEN("3k4/8/7B/2Q1R2P/3P4/4K3/P1P4P/8 w - - 21 13");
+    MainChessGame::setBoardFromFENStatic("3k4/8/7B/2Q1R2P/3P4/4K3/P1P4P/8 w - - 21 13", &board);
 
     bool result = board.movePiece("h6g5");
     EXPECT_TRUE(result);
@@ -75,7 +75,7 @@ TEST_F(TestBotAI, KingCanMoveButGameCrashed)
 TEST_F(TestBotAI, GameCrashDueToPawnPromotion)
 {
     board.clearBoard();
-    board.setupFromFEN("4k3/1p1r3p/pB6/3pK3/4p1P1/3b4/7p/8 w - - 21 13");
+    MainChessGame::setBoardFromFENStatic("4k3/1p1r3p/pB6/3pK3/4p1P1/3b4/7p/8 w - - 21 13", &board);
 
     bool result = board.movePiece("e5f5");
     EXPECT_TRUE(result);
@@ -122,13 +122,13 @@ TEST_F(TestBotAI, GameCrashDueToPawnPromotion)
 TEST_F(TestBotAI, GameCrashDueToPawnPromotion2)
 {
     board.clearBoard();
-    board.setupFromFEN("8/8/8/3K4/8/8/7p/8 w - - 21 13");
+    MainChessGame::setBoardFromFENStatic("k7/8/8/3K4/8/8/7p/8 w - - 21 13", &board);
 
     //Try to move the black pawn at h2 (promotion)
     Bot* botBlack = new Bot(Color::BLACK);
     int iStart, iEnd = -1;
     char cPromotion = '\0';
-    botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
+    botBlack->playWithDepth(board, iStart, iEnd, 1,cPromotion);
     EXPECT_EQ(iStart, 15);
     EXPECT_EQ(iEnd, 7);
     EXPECT_EQ(cPromotion, 'q'); // The queen seems to be the best choice
@@ -203,4 +203,27 @@ TEST_F(TestBotAI, TestUndo)
     EXPECT_EQ(board.getPieceAt("a4")->getTypePiece(), TypePieces::PAWN);
     EXPECT_EQ(board.getPieceAt("b4")->getTypePiece(), TypePieces::PAWN);
     EXPECT_EQ(board.getPieceAt("b3"), nullptr);
+}
+
+TEST_F(TestBotAI, TestPourTrouverUnBug)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("k7/8/8/8/5PpP/8/8/K7 w - f3 0 1 ", &board);
+
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 6,cPromotion);
+    bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(board.getPieceAt("g4"), nullptr);
+    EXPECT_EQ(board.getPieceAt("f4"), nullptr);
+    EXPECT_EQ(board.getPieceAt("f3")->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt("f3")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(iStart, 30); // a4
+    EXPECT_EQ(iEnd, 21); // b3
+    EXPECT_EQ(cPromotion, '\0');
 }
