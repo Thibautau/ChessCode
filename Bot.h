@@ -18,7 +18,7 @@ const int EXACT = 0;
 const int ALPHA_CUT = -1;
 const int BETA_CUT = 1;
 const int UPPERBOUND = 1;
-const int LOWERBOUND = 1;
+const int LOWERBOUND = -1;
 
 struct TranspositionTableEntry {
     int depth;

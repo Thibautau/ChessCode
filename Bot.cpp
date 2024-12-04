@@ -281,8 +281,11 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             int enPassantPos = -1;
 
             // Jouer le coup
-            board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
-
+            bool bCanMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+            if(! bCanMove)
+            {
+                std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in alphaBetaWithMemory." << std::endl;
+            }
             // Mise à jour du hash pour le coup
             calculateZobristHashForMove(board, move, currentColor, promoType, promoType != '\0', zobristHash, capturedPiece);
             board.setZobristHash(zobristHash);
@@ -291,7 +294,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             int score = alphaBetaWithMemory(board, depth - 1, alpha, beta, !estMaximisant, bestPromotion);
 
             // Annuler le coup
-            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0');
+            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos);
             board.setZobristHash(originalHash);
 
             // Mise à jour des scores et alpha/beta
@@ -328,12 +331,12 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
 }
 
 void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& move, Color currentColor, char promotionForMove, bool isPromotion, uint64_t& zobristHash, Piece* capturedPiece) {
-    Piece* piece_depart = board.getPieceAt(move.second);
+    Piece* piece_depart = board.getPieceAt(move.first);
     Piece* piece_arrivee = capturedPiece;
 
     if(!piece_depart) {
         board.displayBoard();
-        std::cerr << "Warning: No piece found at start square (" << move.second << "). Check board state." << std::endl;
+        std::cerr << "Warning: No piece found at start square (" << move.first << "). Check board state." << std::endl;
     }
 
     int itabCastlingRights[4];

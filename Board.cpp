@@ -1166,7 +1166,8 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
     }
 
     if (enPassantPos!=-1) {
-        placePiece(enPassantPos, capturedPiece);
+        int iMovePiece = movingPiece->getColor() == Color::WHITE ? enPassantPos + 8 : enPassantPos - 8;
+        placePiece(iMovePiece, capturedPiece);
     }
     else if(capturedPiece) {
         placePiece(in_iEndPosition, capturedPiece);

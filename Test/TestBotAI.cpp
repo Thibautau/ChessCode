@@ -5,8 +5,13 @@
 #include "TestBotAI.h"
 
 #include <gtest/gtest.h>
-#include "Board.h"
-#include "Bot.h"
+#include "Board.cpp"
+#include "Bot.cpp"
+#include "MainChessGame.cpp"
+#include "PlayerHuman.cpp"
+#include "Zobrist.cpp"
+#include "LogFile.cpp"
+#include "Piece.cpp"
 
 
 class TestBotAI : public ::testing::Test {
@@ -149,7 +154,7 @@ TEST_F(TestBotAI, TestBugAfterRock)
 TEST_F(TestBotAI, TestBugEnPassant)
 {
     board.clearBoard();
-    board.setupFromFEN("8/7k/8/8/pPp5/8/R6K/8 b - b3 0 1");
+    MainChessGame::setBoardFromFENStatic("8/7k/8/8/pPp5/8/R6K/8 b - b3 0 1", &board);
 
 
     //Try to move the black pawn at h2 (promotion)
@@ -169,7 +174,7 @@ TEST_F(TestBotAI, TestBugEnPassant)
 TEST_F(TestBotAI, TestUndo)
 {
     board.clearBoard();
-    board.setupFromFEN("8/7k/8/8/pPp5/8/R6K/8 b - b3 0 1");
+    MainChessGame::setBoardFromFENStatic("8/7k/8/8/pPp5/8/R6K/8 b - b3 0 1", &board);
 
 
     //Try to move the black pawn at h2 (promotion)
@@ -178,15 +183,18 @@ TEST_F(TestBotAI, TestUndo)
     char promoType = '\0';
 
     // Jouer le coup
-    board.movePiece(24, 17, Color::BLACK, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+    bool result = board.movePiece(24, 17, Color::BLACK, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
 
+    EXPECT_TRUE(result);
     EXPECT_EQ(board.getPieceAt("a4"), nullptr);
     EXPECT_EQ(board.getPieceAt("b4"), nullptr);
     EXPECT_EQ(board.getPieceAt("b3")->getColor(), Color::BLACK);
     EXPECT_EQ(board.getPieceAt("b3")->getTypePiece(), TypePieces::PAWN);
 
     //Undo le coup
-    board.undoMove(24, 17, capturedPiece, false,enPassantPos);
+    bool result2 = board.undoMove(24, 17, capturedPiece, false,enPassantPos);
+
+    EXPECT_TRUE(result2);
     EXPECT_EQ(board.getPieceAt("a4")->getColor(), Color::BLACK);
     EXPECT_EQ(board.getPieceAt("b4")->getColor(), Color::WHITE);
     EXPECT_EQ(board.getPieceAt("a4")->getTypePiece(), TypePieces::PAWN);

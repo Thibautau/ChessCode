@@ -82,19 +82,8 @@ add_executable(runPerf
 add_executable(runTestBotAI
         Test/TestBotAI.cpp
         Test/TestBotAI.h
-        Board.cpp
-        Board.h
-        Bot.cpp
-        Bot.h
-        Piece.cpp
-        Piece.h
-        LogFile.cpp
         LogFile.h
         Type.h
-        Zobrist.cpp
-        Zobrist.h
-        MainChessGame.h
-        MainChessGame.cpp
 )
 
 add_executable(runTestZobrist
