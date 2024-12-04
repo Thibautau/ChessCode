@@ -1181,7 +1181,7 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
         movingPiece->setTypePiece(TypePieces::PAWN);
     }
 
-    if (enPassantPos!=-1 && in_iEndPosition == enPassantPos) {
+    if (enPassantPos!=-1 && in_iEndPosition == enPassantPos && movingPiece->getTypePiece() == TypePieces::PAWN) {
         int iMovePiece = movingPiece->getColor() == Color::WHITE ? enPassantPos - 8 : enPassantPos + 8;
         placePiece(iMovePiece, capturedPiece);
     }

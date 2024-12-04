@@ -170,9 +170,13 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
 
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+            std::string logMessage = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
+            m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
             if(! bCanMove)
             {
                 board.displayBoard();
+                std::string logMessage2 = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
+                m_logFile->logError(logMessage2 + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
                 std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in choisir_meilleur_coupV2." << std::endl;
             }
 
@@ -287,9 +291,13 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
 
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+            std::string logMessage = "Plateau à la profondeur " + std::to_string(depth) + " :\n" + board.getBoardAsString() + "\n";
+            m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
             if(! bCanMove)
             {
                 board.displayBoard();
+                std::string logMessage2 = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
+                m_logFile->logError(logMessage2 + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
                 std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in alphaBetaWithMemory." << std::endl;
             }
             // Mise à jour du hash pour le coup

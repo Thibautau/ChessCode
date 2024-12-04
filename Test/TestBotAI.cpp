@@ -23,7 +23,7 @@ protected:
     }
 };
 
-// Test d'un crash qu'on a eu où le roi a le droit de bouger
+// Test d'un crash qu'on a eu où le roi a le droit de bouger (TODO FONCTIONNE ?)
 TEST_F(TestBotAI, KingCanMoveButGameCrashed)
 {
     board.clearBoard();
@@ -206,6 +206,29 @@ TEST_F(TestBotAI, TestUndo)
 }
 
 TEST_F(TestBotAI, TestPourTrouverUnBug)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("k7/8/8/8/5PpP/8/8/K7 w - f3 0 1 ", &board);
+
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 6,cPromotion);
+    bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(board.getPieceAt("g4"), nullptr);
+    EXPECT_EQ(board.getPieceAt("f4"), nullptr);
+    EXPECT_EQ(board.getPieceAt("f3")->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt("f3")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(iStart, 30); // a4
+    EXPECT_EQ(iEnd, 21); // b3
+    EXPECT_EQ(cPromotion, '\0');
+}
+
+TEST_F(TestBotAI, TestPourTrouverUnBug2)
 {
     board.clearBoard();
     MainChessGame::setBoardFromFENStatic("k7/8/8/8/5PpP/8/8/K7 w - f3 0 1 ", &board);
