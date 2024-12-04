@@ -279,11 +279,16 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             uint64_t originalHash = board.getZobristHash();
             Piece* capturedPiece = nullptr;
             int enPassantPos = -1;
+            if(move.second == board.getEnPassantPosition())
+            {
+                enPassantPos = board.getEnPassantPosition();
+            }
 
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
             if(! bCanMove)
             {
+                board.displayBoard();
                 std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in alphaBetaWithMemory." << std::endl;
             }
             // Mise à jour du hash pour le coup
@@ -331,12 +336,12 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
 }
 
 void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& move, Color currentColor, char promotionForMove, bool isPromotion, uint64_t& zobristHash, Piece* capturedPiece) {
-    Piece* piece_depart = board.getPieceAt(move.first);
+    Piece* piece_depart = board.getPieceAt(move.second);
     Piece* piece_arrivee = capturedPiece;
 
     if(!piece_depart) {
         board.displayBoard();
-        std::cerr << "Warning: No piece found at start square (" << move.first << "). Check board state." << std::endl;
+        std::cerr << "Warning: No piece found at start square (" << move.second << "). Check board state." << std::endl;
     }
 
     int itabCastlingRights[4];

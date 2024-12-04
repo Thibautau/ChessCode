@@ -310,7 +310,8 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
             m_ipositionEnPassant = -1;
         }
 
-        if(piece && !wasEnPassant) {
+        if(piece && !wasEnPassant && getPieceAt(in_iEndPosition) != nullptr) // getPieceAt(in_iEndPosition) != nullptr because we don't want to get here when we are doing enPassant (eating)
+        {
             *piece = getPieceAt(in_iEndPosition);
         }
         placePiece(in_iEndPosition, pPiece);
@@ -1166,7 +1167,7 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
     }
 
     if (enPassantPos!=-1) {
-        int iMovePiece = movingPiece->getColor() == Color::WHITE ? enPassantPos + 8 : enPassantPos - 8;
+        int iMovePiece = movingPiece->getColor() == Color::WHITE ? enPassantPos - 8 : enPassantPos + 8;
         placePiece(iMovePiece, capturedPiece);
     }
     else if(capturedPiece) {

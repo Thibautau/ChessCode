@@ -179,7 +179,7 @@ TEST_F(TestBotAI, TestUndo)
 
     //Try to move the black pawn at h2 (promotion)
     Piece* capturedPiece = nullptr;
-    int enPassantPos = -1;
+    int enPassantPos = board.getEnPassantPosition();
     char promoType = '\0';
 
     // Jouer le coup
