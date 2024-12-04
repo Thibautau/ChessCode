@@ -820,7 +820,7 @@ TEST_F(BoardTest, UndoEnPassantMove) {
     EXPECT_EQ(board.getPieceAt("e5"), nullptr);
     EXPECT_EQ(board.getPieceAt("f5"), nullptr);
 
-    board.undoMove(36, 45, new Piece(TypePieces::PAWN, Color::BLACK), false, 37);
+    board.undoMove(36, 45, new Piece(TypePieces::PAWN, Color::BLACK), false, 45);
     EXPECT_EQ(board.getPieceAt("e5")->getTypePiece(), TypePieces::PAWN);
     EXPECT_EQ(board.getPieceAt("f5")->getTypePiece(), TypePieces::PAWN);
     EXPECT_EQ(board.getPieceAt("f6"), nullptr);
