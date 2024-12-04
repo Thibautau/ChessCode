@@ -222,6 +222,17 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
     Color colPieceToMove = pPiece->getColor();
     Color colEnemyPieceToMove = pPiece->getEnemyColor();
 
+    if(enPassantPos) // Optional argument so we have to verify if it exists
+    {
+        *enPassantPos = m_ipositionEnPassant;
+    }
+
+    //DEBUG
+    if(in_iStartPosition == 24 && in_iEndPosition == 17)
+    {
+        int a = 2;
+    }
+
     if (isMovementPossible(in_iStartPosition,in_iEndPosition))
     {
         { // We reset those indexs because we want to update those values with this move
@@ -237,9 +248,9 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
                 if(piece) {
                     *piece = getPieceAt(m_ipositionEnPassant+direction*8);
                 }
-                if (enPassantPos) {
-                    *enPassantPos = m_ipositionEnPassant;
-                }
+                //if (enPassantPos) {
+                    //*enPassantPos = m_ipositionEnPassant;
+                //}
                 placePiece(m_ipositionEnPassant+direction*8,nullptr);
             }
             if(abs(in_iEndPosition - in_iStartPosition) == 16) {
@@ -776,7 +787,6 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             Piece* pPiecePawnEnPassant = getPieceAt(iPositionPawnEnPassant);
             if(m_ipositionEnPassant!=-1 && pPiecePawnEnPassant != nullptr && pPiecePawnEnPassant->getColor() != colPieceToSeeMoves && pPiecePawnEnPassant->getTypePiece() == TypePieces::PAWN) // Verify that it is not a pawn of the same color
             {
-                displayBoard();
                 if(captureLeft==m_ipositionEnPassant) {
                     putNextMoveIfValid(captureLeft, pPieceToSeeMoves, in_vectPossibleMoves);
                 }
@@ -1165,12 +1175,13 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
 
     placePiece(in_iStartPosition, movingPiece);
     m_tabpiBoard[in_iEndPosition] = nullptr;
+    m_ipositionEnPassant = enPassantPos;
 
     if(promotion) {
         movingPiece->setTypePiece(TypePieces::PAWN);
     }
 
-    if (enPassantPos!=-1) {
+    if (enPassantPos!=-1 && in_iEndPosition == enPassantPos) {
         int iMovePiece = movingPiece->getColor() == Color::WHITE ? enPassantPos - 8 : enPassantPos + 8;
         placePiece(iMovePiece, capturedPiece);
     }

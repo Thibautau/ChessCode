@@ -169,7 +169,12 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             int enPassantPos = -1;
 
             // Jouer le coup
-            board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+            bool bCanMove = board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+            if(! bCanMove)
+            {
+                board.displayBoard();
+                std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in alphaBetaWithMemory." << std::endl;
+            }
 
             // Mise à jour du hash pour le coup
             calculateZobristHashForMove(board, move, m_color, promoType, promoType != '\0', zobristHash, capturedPiece);
@@ -178,7 +183,7 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             int score = alphaBetaWithMemory(board, profondeur_max-1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false, promotion);
 
             // Annuler le coup
-            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0');
+            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos);
             board.setZobristHash(originalHash);
 
             // Vérification de la table de transposition avant d'ajouter

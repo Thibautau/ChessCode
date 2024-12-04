@@ -161,7 +161,10 @@ TEST_F(TestBotAI, TestBugEnPassant)
     Bot* botBlack = new Bot(Color::BLACK);
     int iStart, iEnd = -1;
     char cPromotion = '\0';
-    botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
+    botBlack->playWithDepth(board, iStart, iEnd, 1,cPromotion);
+    bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    EXPECT_TRUE(result);
     EXPECT_EQ(board.getPieceAt("a4"), nullptr);
     EXPECT_EQ(board.getPieceAt("b4"), nullptr);
     EXPECT_EQ(board.getPieceAt("b3")->getColor(), Color::BLACK);
