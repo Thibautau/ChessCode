@@ -145,3 +145,23 @@ TEST_F(TestBotAI, TestBugAfterRock)
     botBlack->playWithDepth(board, iStart, iEnd, 6,cPromotion);
     EXPECT_EQ(cPromotion, '\0');
 }
+
+TEST_F(TestBotAI, TestBugEnPassant)
+{
+    board.clearBoard();
+    board.setupFromFEN("8/7k/8/8/pPp5/8/R6K/8 b - b3 0 1");
+
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
+    EXPECT_EQ(board.getPieceAt("a4"), nullptr);
+    EXPECT_EQ(board.getPieceAt("b4"), nullptr);
+    EXPECT_EQ(board.getPieceAt("b3")->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt("b3")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(iStart, 24); // a4
+    EXPECT_EQ(iEnd, 17); // b3
+    EXPECT_EQ(cPromotion, '\0');
+}
