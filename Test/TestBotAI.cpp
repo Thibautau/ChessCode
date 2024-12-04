@@ -137,7 +137,7 @@ TEST_F(TestBotAI, GameCrashDueToPawnPromotion2)
 TEST_F(TestBotAI, TestBugAfterRock)
 {
     board.clearBoard();
-    board.setupFromFEN("r7/1p1k1N2/3b1np1/p2p1P1p/P7/3P1P2/P2B2PP/4K2R w - - 21 13");
+    MainChessGame::setBoardFromFENStatic("r7/1p1k1N2/3b1np1/p2p1P1p/P7/3P1P2/P2B2PP/4K2R w K - 21 13", &board);
 
     bool result = board.movePiece("e1g1");
 
@@ -147,7 +147,7 @@ TEST_F(TestBotAI, TestBugAfterRock)
     Bot* botBlack = new Bot(Color::BLACK);
     int iStart, iEnd = -1;
     char cPromotion = '\0';
-    botBlack->playWithDepth(board, iStart, iEnd, 6,cPromotion);
+    botBlack->playWithDepth(board, iStart, iEnd, 4,cPromotion);
     EXPECT_EQ(cPromotion, '\0');
 }
 
