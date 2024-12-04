@@ -279,10 +279,6 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             uint64_t originalHash = board.getZobristHash();
             Piece* capturedPiece = nullptr;
             int enPassantPos = -1;
-            if(move.second == board.getEnPassantPosition())
-            {
-                enPassantPos = board.getEnPassantPosition();
-            }
 
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);

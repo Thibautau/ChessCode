@@ -237,13 +237,16 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
                 if(piece) {
                     *piece = getPieceAt(m_ipositionEnPassant+direction*8);
                 }
+                if (enPassantPos) {
+                    *enPassantPos = m_ipositionEnPassant;
+                }
                 placePiece(m_ipositionEnPassant+direction*8,nullptr);
             }
             if(abs(in_iEndPosition - in_iStartPosition) == 16) {
                 int direction = (in_colPlayer == Color::WHITE) ? 1 : -1;
                 m_ipositionEnPassant = in_iStartPosition + direction * 8;
                 if (enPassantPos) {
-                    *enPassantPos = in_iEndPosition;
+                    *enPassantPos = m_ipositionEnPassant;
                 }
                 wasEnPassant = true;
             }
@@ -773,6 +776,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             Piece* pPiecePawnEnPassant = getPieceAt(iPositionPawnEnPassant);
             if(m_ipositionEnPassant!=-1 && pPiecePawnEnPassant != nullptr && pPiecePawnEnPassant->getColor() != colPieceToSeeMoves && pPiecePawnEnPassant->getTypePiece() == TypePieces::PAWN) // Verify that it is not a pawn of the same color
             {
+                displayBoard();
                 if(captureLeft==m_ipositionEnPassant) {
                     putNextMoveIfValid(captureLeft, pPieceToSeeMoves, in_vectPossibleMoves);
                 }
@@ -1896,7 +1900,7 @@ int Board::evaluateKingSafety(Color color) const {
 
 int Board::getPieceValue(TypePieces type) {
     switch (type) {
-        case TypePieces::PAWN:   return 100;
+        case TypePieces::PAWN:   return 90;
         case TypePieces::KNIGHT: return 320;
         case TypePieces::BISHOP: return 330;
         case TypePieces::ROOK:   return 500;
