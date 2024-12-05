@@ -334,6 +334,7 @@ bool Board::isBlackKingCheck() const
     return m_isBlackKingChecked;
 }
 
+//@TODO Enlever le tableau dynamique vector et le remplacer par autre chose?
 bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition)
 {
     if(! isValidPosition(in_iStartPosition) || ! isValidPosition(in_iTargetPosition))
@@ -355,17 +356,14 @@ bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition)
     std::vector<int> itabValidPositions;
     possibleMovesForPiece(in_iStartPosition, itabValidPositions);
 
-    for(int iIndiceValidPosition = 0; iIndiceValidPosition < itabValidPositions.size(); iIndiceValidPosition++)
-    {
-        if(itabValidPositions[iIndiceValidPosition] == in_iTargetPosition)
-        {
-            return true;
-        }
+    if (std::ranges::find(itabValidPositions.begin(), itabValidPositions.end(), in_iTargetPosition) != itabValidPositions.end()) {
+        return true;
     }
 
     return false;
 }
 
+//@TODO Il y a une consition impossible, why????
 bool Board::isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer) {
     m_isWhiteKingChecked = true;
     if(in_colPlayer == Color::WHITE) {
@@ -385,6 +383,7 @@ bool Board::isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer)
     return true;
 }
 
+//@TODO Voir pour virer les vector et mettre des tableaux statiques
 bool Board::isKingAttackedAfterMove(Color in_kingColor, Color in_attackerColor) const
 {
     int iKingPosition = getKingPosition(in_kingColor);
@@ -399,16 +398,17 @@ bool Board::isKingAttackedAfterMove(Color in_kingColor, Color in_attackerColor) 
 
 bool Board::isKingInCheck(Color in_kingColor) const
 {
-    if(in_kingColor == Color::WHITE)
-    {
-        return m_isWhiteKingChecked;
-    }
-    return m_isBlackKingChecked;
+    return in_kingColor == Color::WHITE ? m_isWhiteKingChecked : m_isBlackKingChecked;
 }
 
+//@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 void Board::putOrRemoveKingInCheck(Color in_kingColor, bool in_bPutKingInCheck)
 {
-    switch (in_kingColor) {
+    if (in_kingColor == Color::WHITE || in_kingColor == Color::BLACK) {
+        bool& kingCheck = (in_kingColor == Color::WHITE) ? m_isWhiteKingChecked : m_isBlackKingChecked;
+        kingCheck = in_bPutKingInCheck;
+    }
+    /*switch (in_kingColor) {
         case Color::WHITE:
             m_isWhiteKingChecked = in_bPutKingInCheck;
         break;
@@ -417,25 +417,37 @@ void Board::putOrRemoveKingInCheck(Color in_kingColor, bool in_bPutKingInCheck)
         break;
         default:
             return;
-    }
+    }*/
 }
 
+//@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 bool Board::isPromotionMove(int start, int end, Color color) {
     Piece* piece = getPieceAt(start);
-    if (piece && piece->getTypePiece() == TypePieces::PAWN) {
+    return piece && piece->getTypePiece() == TypePieces::PAWN && ((color == Color::WHITE && end / 8 == 7) || (color == Color::BLACK && end / 8 == 0));
+    /*if (piece && piece->getTypePiece() == TypePieces::PAWN) {
         int endRow = end / 8;
         if ((color == Color::WHITE && endRow == 7) || (color == Color::BLACK && endRow == 0)) {
             return true;
         }
     }
-    return false;
+    return false;*/
 }
 
+//@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 // DO not check if the cases are attacked
 bool Board::doesKingCanRock(Color in_colKing, int in_iDirectionForRock) const
 {
-    int iKingPosition;
-    switch(in_colKing)
+    //int iKingPosition;
+
+
+    if ((in_colKing == Color::WHITE && m_isWhiteKingChecked) || (in_colKing == Color::BLACK && m_isBlackKingChecked) || (in_colKing==Color::NONE))  {
+        return false;
+    }
+
+    int iKingPosition = (in_colKing == Color::WHITE) ? m_iWhiteKingPosition : m_iBlackKingPosition;
+
+
+    /*switch(in_colKing)
     {
         case Color::WHITE:
             if(m_isWhiteKingChecked)
@@ -453,7 +465,7 @@ bool Board::doesKingCanRock(Color in_colKing, int in_iDirectionForRock) const
         break;
         default:
             return false;
-    }
+    }*/
 
     int iPositionPieceFound = -1;
     Piece* pPieceFound = findFirstPieceOnDirection(iKingPosition, in_iDirectionForRock, 7, iPositionPieceFound);
@@ -464,6 +476,12 @@ bool Board::doesKingCanRock(Color in_colKing, int in_iDirectionForRock) const
 
     if(pPieceFound->getTypePiece() == TypePieces::ROOK && iPositionPieceFound != -1)
     {
+        if ((in_colKing == Color::WHITE && ((iPositionPieceFound == 7 && m_bWhiteKingCanLittleRock) || iPositionPieceFound == 0 && m_bWhiteKingCanBigRock)) ||
+            (in_colKing == Color::BLACK && ((iPositionPieceFound == 56 && m_bBlackKingCanLittleRock) || iPositionPieceFound == 63 && m_bBlackKingCanBigRock)))  {
+            return true;
+        }
+        return false;
+
         switch(in_colKing)
         {
             case Color::WHITE:
@@ -493,9 +511,11 @@ bool Board::doesKingCanRock(Color in_colKing, int in_iDirectionForRock) const
     return false;
 }
 
+//@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 bool Board::kingCanLittleRock(Color in_kingColor) const
 {
-    switch (in_kingColor)
+    return (in_kingColor==Color::WHITE) ? m_bWhiteKingCanLittleRock : m_bBlackKingCanLittleRock;
+    /*switch (in_kingColor)
     {
         case Color::WHITE:
             return m_bWhiteKingCanLittleRock;
@@ -503,12 +523,14 @@ bool Board::kingCanLittleRock(Color in_kingColor) const
             return m_bBlackKingCanLittleRock;
         default:
             return false;
-    }
+    }*/
 }
 
+//@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 bool Board::kingCanBigRock(Color in_kingColor) const
 {
-    switch (in_kingColor)
+    return (in_kingColor==Color::WHITE) ? m_bWhiteKingCanBigRock : m_bBlackKingCanBigRock;
+    /*switch (in_kingColor)
     {
         case Color::WHITE:
             return m_bWhiteKingCanBigRock;
@@ -516,13 +538,14 @@ bool Board::kingCanBigRock(Color in_kingColor) const
             return m_bBlackKingCanBigRock;
         default:
             return false;
-    }
+    }*/
 }
 
 //************************************************************************************//
 
 //************************* Attack and Threat Detection Functions ********************//
 
+//@TODO Je suis sûr on peux gérer la boucle plus simplement
 bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound) const
 {
     if(! isValidPosition(in_iPosition))
@@ -551,6 +574,7 @@ bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, 
     return false;
 }
 
+//@TODO Les vecteurs sont surements un problème
 bool Board::isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
 {
     if(! isValidPosition(in_iPosition))
@@ -562,12 +586,11 @@ bool Board::isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vect
     findFirstPiecesOnEachBishopMovementsThatAttacksInitialPosition(in_iPosition, in_vectPositionPieceFound);
     findFirstPiecesOnEachRookMovementsThatAttacksInitialPosition(in_iPosition, in_vectPositionPieceFound);
 
-    if(in_vectPositionPieceFound.empty()) {
-        return false;
-    }
-    return true;
+    return !in_vectPositionPieceFound.empty();
 }
 
+
+//@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 Piece* Board::findFirstPieceOnDirectionThatAttacksInitialPosition(int in_iPosition, int in_iDirection, int in_iNbOfRepetition, int& in_iPositionPieceFound) const {
 
     if(! isValidPosition(in_iPosition) || in_iNbOfRepetition <= 0)
@@ -577,37 +600,30 @@ Piece* Board::findFirstPieceOnDirectionThatAttacksInitialPosition(int in_iPositi
 
     Piece* pPieceFound = findFirstPieceOnDirection(in_iPosition, in_iDirection, in_iNbOfRepetition, in_iPositionPieceFound);
 
-    if(pPieceFound != nullptr && in_iPositionPieceFound != -1)
-    {
-        if(pPieceFound->doesPieceMoveInDirection(- in_iDirection)) // We want to see if the piece can attack our initial position
-        {
-            int iPositionDifference = std::abs(in_iPosition - in_iPositionPieceFound);
-            if(pPieceFound->getTypePiece() == TypePieces::PAWN) // Un pion qui peut avancer n'est pas un pion qui peut attaquer
-            {
-                if(iPositionDifference == 7 || iPositionDifference == 9)
-                {
-                    return pPieceFound;
-                }
-                in_iPositionPieceFound = -1;
-                return nullptr;
-            }
-            if(pPieceFound->getTypePiece() == TypePieces::KING) // Un pion qui peut avancer n'est pas un pion qui peut attaquer
-            {
-                if(iPositionDifference == 1 || iPositionDifference == 7 || iPositionDifference == 8 || iPositionDifference == 9) // Comme c'est la valeur absolue, il n'y a que les 4 valeurs positives à vérifier
-                {
-                    return pPieceFound;
-                }
-                in_iPositionPieceFound = -1;
-                return nullptr;
-            }
-
-            return pPieceFound;
-        }
-
+    if(pPieceFound == nullptr || in_iPositionPieceFound == -1 || !pPieceFound->doesPieceMoveInDirection(-in_iDirection)) {
+        in_iPositionPieceFound = -1;
+        return nullptr;
     }
 
-    in_iPositionPieceFound = -1;
-    return nullptr;
+    int iPositionDifference = std::abs(in_iPosition - in_iPositionPieceFound);
+
+    if (pPieceFound->getTypePiece() == TypePieces::PAWN) {
+        if (iPositionDifference == 7 || iPositionDifference == 9) {
+            return pPieceFound;
+        }
+        in_iPositionPieceFound = -1;
+        return nullptr;
+    }
+
+    if (pPieceFound->getTypePiece() == TypePieces::KING) {
+        if (iPositionDifference == 1 || iPositionDifference == 7 || iPositionDifference == 8 || iPositionDifference == 9) {
+            return pPieceFound;
+        }
+        in_iPositionPieceFound = -1;
+        return nullptr;
+    }
+
+    return pPieceFound;
 }
 
 Piece* Board::findFirstPieceOnDirection(int in_iPosition,int in_iDirection, int in_iNbOfRepetition, int& in_iPositionPieceFound) const {
