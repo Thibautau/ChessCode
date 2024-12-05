@@ -13,7 +13,6 @@
 class Board {
 private:
     Piece* m_tabpiBoard[64]{};
-    bool m_isGameOver = false;
     bool m_isWhiteKingChecked = false;
     bool m_isBlackKingChecked = false;
 
@@ -465,7 +464,7 @@ public:
     *                     la valeur par défaut de -1 sera utilisée.
     * @return `true` si le mouvement a été annulé avec succès, `false` en cas d'erreur.
     */
-    bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion=false,int enPassantPos=-1);
+    bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion=false,int enPassantPos=-1, int in_itabCastlingRights[4] = nullptr, bool in_bIsWhiteKingChecked = false, bool in_bIsBlackKingChecked = false, int in_iWhiteKingPosition = -1, int in_iBlackKingPosition = -1);
 
     //Evaluation and Heuristic Functions
     /**
@@ -610,6 +609,8 @@ public:
      * @return Un vecteur d'entiers de taille 4 représentant l'état des droits de roque.
      */
     std::vector<int> getCastlingStateAsVector() const;
+
+    void getCastlingStateAsTableau(int out_itabCastlingRights[4]) const;
 
     /**
      * Les indices retournés vont de 0 à 15.    0-7 : EnPassant noir en lisant de gauche à droite ||    8-15 : EnPassant blanc en lisant de gauche à droite

@@ -160,8 +160,8 @@ TEST_F(TestBotAI, TestBugBeforeRock)
     int iStart, iEnd = -1;
     char cPromotion = '\0';
     botBlack->playWithDepth(board, iStart, iEnd, 4,cPromotion);
-    EXPECT_EQ(iStart, 60);
-    EXPECT_EQ(iEnd, 62);
+    EXPECT_EQ(iStart, 63);
+    EXPECT_EQ(iEnd, 61);
     EXPECT_EQ(cPromotion, '\0');
 }
 
@@ -290,7 +290,7 @@ TEST_F(TestBotAI, TestPourTrouverUnBug3)
 TEST_F(TestBotAI, TestPourTrouverUnBugRock)
 {
     board.clearBoard();
-    MainChessGame::setBoardFromFENStatic("4k2r/8/8/8/8/8/8/K7 b k - 9 13 ", &board);
+    MainChessGame::setBoardFromFENStatic("4k2r/7p/8/8/8/8/8/5k2 b k - 9 13 ", &board);
 
     //Try to move the black pawn at h2 (promotion)
     Bot* botBlack = new Bot(Color::BLACK);
@@ -300,11 +300,13 @@ TEST_F(TestBotAI, TestPourTrouverUnBugRock)
     bool result = board.movePiece(iStart, iEnd, Color::BLACK);
 
     EXPECT_TRUE(result);
-    EXPECT_EQ(board.getPieceAt("g4"), nullptr);
-    EXPECT_EQ(board.getPieceAt("f4"), nullptr);
-    EXPECT_EQ(board.getPieceAt("f3")->getColor(), Color::BLACK);
-    EXPECT_EQ(board.getPieceAt("f3")->getTypePiece(), TypePieces::PAWN);
-    EXPECT_EQ(iStart, 30); // a4
-    EXPECT_EQ(iEnd, 21); // b3
+    EXPECT_EQ(board.getPieceAt("e8"), nullptr);
+    EXPECT_EQ(board.getPieceAt("h8"), nullptr);
+    EXPECT_EQ(board.getPieceAt("f8")->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt("g8")->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt("f8")->getTypePiece(), TypePieces::ROOK);
+    EXPECT_EQ(board.getPieceAt("g8")->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(iStart, 60); // a4
+    EXPECT_EQ(iEnd, 62); // b3
     EXPECT_EQ(cPromotion, '\0');
 }

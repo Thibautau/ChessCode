@@ -1167,7 +1167,7 @@ void Board::listOfPossibleMoves(Color in_colPlayer, std::pair<int, int> out_move
 }
 
 
-bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion,int enPassantPos) {
+bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion,int enPassantPos, int in_itabCastlingRights[4], bool in_bIsWhiteKingChecked, bool in_bIsBlackKingChecked, int in_iWhiteKingPosition, int in_iBlackKingPosition) {
     Piece* movingPiece = getPieceAt(in_iEndPosition);
     if(movingPiece == nullptr) {
         return false;
@@ -1176,6 +1176,20 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
     placePiece(in_iStartPosition, movingPiece);
     m_tabpiBoard[in_iEndPosition] = nullptr;
     m_ipositionEnPassant = enPassantPos;
+
+    if(in_itabCastlingRights != nullptr)
+    {
+        m_bWhiteKingCanLittleRock = in_itabCastlingRights[0] == 0;
+        m_bWhiteKingCanBigRock = in_itabCastlingRights[1] == 1;
+        m_bBlackKingCanLittleRock = in_itabCastlingRights[2] == 2;
+        m_bBlackKingCanBigRock = in_itabCastlingRights[3] == 3;
+    }
+
+    m_isWhiteKingChecked = in_bIsWhiteKingChecked;
+    m_isBlackKingChecked = in_bIsBlackKingChecked;
+    m_iWhiteKingPosition = in_iWhiteKingPosition;
+    m_iBlackKingPosition = in_iBlackKingPosition;
+
 
     if(promotion) {
         movingPiece->setTypePiece(TypePieces::PAWN);
@@ -2093,6 +2107,26 @@ std::vector<int> Board::getCastlingStateAsVector() const
         castling[3] = 3;
     }
     return castling;
+}
+
+void Board::getCastlingStateAsTableau(int out_itabCastlingRights[4]) const
+{
+    if(m_bWhiteKingCanLittleRock)
+    {
+        out_itabCastlingRights[0] = 0;
+    }
+    if(m_bWhiteKingCanBigRock)
+    {
+        out_itabCastlingRights[1] = 1;
+    }
+    if(m_bBlackKingCanLittleRock)
+    {
+        out_itabCastlingRights[2] = 2;
+    }
+    if(m_bBlackKingCanBigRock)
+    {
+        out_itabCastlingRights[3] = 3;
+    }
 }
 
 void Board::getCastlingRightsLostByMoving(int out_itabCastlingRightsLost[4]) const

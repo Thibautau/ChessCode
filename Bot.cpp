@@ -30,7 +30,7 @@ int Bot::uniqueNodeIterated = 0;
 
 Bot::Bot(Color color) : m_color(color)
 {
-    m_logFile = new LogFile("Bot_Evaluation_Log.txt", false);
+    m_logFile = new LogFile("Bot_Evaluation_Log.txt", true);
 }
 
 Color Bot::getPlayerColor() const {
@@ -167,6 +167,17 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             uint64_t originalHash = board.getZobristHash();
             Piece* capturedPiece = nullptr;
             int enPassantPos = -1;
+            int itabCastlingRights[4] = { -1, -1, -1, -1 };
+            board.getCastlingStateAsTableau(itabCastlingRights);
+            bool bisWhiteKingCheked = board.isWhiteKingCheck();
+            bool bisBlackKingCheked = board.isBlackKingCheck();
+            int iWhiteKingPosition = board.getKingPosition(Color::WHITE);
+            int iBlackKingPosition = board.getKingPosition(Color::BLACK);
+
+            if(move.first == 60 && move.second == 62)
+            {
+                int a = 2;
+            }
 
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
@@ -176,7 +187,7 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             {
                 board.displayBoard();
                 std::string logMessage2 = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
-                m_logFile->logError(logMessage2 + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+                m_logFile->logInfo(logMessage2 + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
                 std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in choisir_meilleur_coupV2." << std::endl;
             }
 
@@ -187,7 +198,7 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             int score = alphaBetaWithMemory(board, profondeur_max-1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false, promotion);
 
             // Annuler le coup
-            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos);
+            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos, itabCastlingRights, bisWhiteKingCheked, bisBlackKingCheked, iWhiteKingPosition, iBlackKingPosition);
             board.setZobristHash(originalHash);
 
             // Vérification de la table de transposition avant d'ajouter
@@ -288,6 +299,12 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             uint64_t originalHash = board.getZobristHash();
             Piece* capturedPiece = nullptr;
             int enPassantPos = -1;
+            int itabCastlingRights[4] = { -1, -1, -1, -1 };
+            board.getCastlingStateAsTableau(itabCastlingRights);
+            bool bisWhiteKingCheked = board.isWhiteKingCheck();
+            bool bisBlackKingCheked = board.isBlackKingCheck();
+            int iWhiteKingPosition = board.getKingPosition(Color::WHITE);
+            int iBlackKingPosition = board.getKingPosition(Color::BLACK);
 
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
@@ -297,7 +314,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             {
                 board.displayBoard();
                 std::string logMessage2 = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
-                m_logFile->logError(logMessage2 + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+                m_logFile->logInfo(logMessage2 + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
                 std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in alphaBetaWithMemory." << std::endl;
             }
             // Mise à jour du hash pour le coup
@@ -308,7 +325,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             int score = alphaBetaWithMemory(board, depth - 1, alpha, beta, !estMaximisant, bestPromotion);
 
             // Annuler le coup
-            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos);
+            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos, itabCastlingRights, bisWhiteKingCheked, bisBlackKingCheked, iWhiteKingPosition, iBlackKingPosition);
             board.setZobristHash(originalHash);
 
             // Mise à jour des scores et alpha/beta
