@@ -151,6 +151,20 @@ TEST_F(TestBotAI, TestBugAfterRock)
     EXPECT_EQ(cPromotion, '\0');
 }
 
+TEST_F(TestBotAI, TestBugBeforeRock)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("4k2r/8/8/8/8/8/4P1P1/4RKR1 b k - 0 1", &board);
+
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 4,cPromotion);
+    EXPECT_EQ(iStart, 60);
+    EXPECT_EQ(iEnd, 62);
+    EXPECT_EQ(cPromotion, '\0');
+}
+
 TEST_F(TestBotAI, TestBugEnPassant)
 {
     board.clearBoard();
