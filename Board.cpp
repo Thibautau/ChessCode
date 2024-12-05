@@ -213,136 +213,110 @@ bool Board::movePiece(Color in_colPlayer, const std::string& move, Piece** piece
 bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer,Piece** piece, TypePieces promotionType, int* enPassantPos)
 {
     Piece* pPiece = getPieceAt(in_iStartPosition);
-    bool wasEnPassant = false;
+
     if(pPiece == nullptr || pPiece->getColor() != in_colPlayer) //If the player try to move a piece of another color, return false
     {
         return false;
     }
 
-    Color colPieceToMove = pPiece->getColor();
-    Color colEnemyPieceToMove = pPiece->getEnemyColor();
+    //Color colPieceToMove = pPiece->getColor();
+    //Color colEnemyPieceToMove = pPiece->getEnemyColor();
+
+    Color colEnemy = pPiece->getEnemyColor();
 
     if(enPassantPos) // Optional argument so we have to verify if it exists
     {
         *enPassantPos = m_ipositionEnPassant;
     }
 
-    //DEBUG
-    if(in_iStartPosition == 49 && in_iEndPosition == 41)
-    {
-        int a = 2;
+    //If movement isn't possible we stop the move
+    if (!isMovementPossible(in_iStartPosition, in_iEndPosition)) {
+        return false;
     }
 
-    if (isMovementPossible(in_iStartPosition,in_iEndPosition))
-    {
-        { // We reset those indexs because we want to update those values with this move
-            m_itabIndexRockPrivilegeLostOnMove[0] = -1;
-            m_itabIndexRockPrivilegeLostOnMove[1] = -1;
-            m_itabIndexRockPrivilegeLostOnMove[2] = -1;
-            m_itabIndexRockPrivilegeLostOnMove[3] = -1;
+    //@TODO je comprend pas pourquoi tu les reset, donc je peux plus roque après un coup c'est ça?
+    /*{ // We reset those indexs because we want to update those values with this move
+        m_itabIndexRockPrivilegeLostOnMove[0] = -1;
+        m_itabIndexRockPrivilegeLostOnMove[1] = -1;
+        m_itabIndexRockPrivilegeLostOnMove[2] = -1;
+        m_itabIndexRockPrivilegeLostOnMove[3] = -1;
+    }*/
+
+    bool wasEnPassant = false;
+
+    //Gestion des cas spécifique du pion
+    if(pPiece->getTypePiece() == TypePieces::PAWN) {
+
+        //Capture enPassant
+        if(in_iEndPosition==m_ipositionEnPassant) {
+            int direction = (in_colPlayer == Color::WHITE) ? -1 : 1;
+            if(piece) {
+                *piece = getPieceAt(m_ipositionEnPassant+direction*8);
+            }
+            placePiece(m_ipositionEnPassant+direction*8,nullptr);
         }
 
-        if(pPiece->getTypePiece() == TypePieces::PAWN) {
-            if(in_iEndPosition==m_ipositionEnPassant) {
-                int direction = (in_colPlayer == Color::WHITE) ? -1 : 1;
-                if(piece) {
-                    *piece = getPieceAt(m_ipositionEnPassant+direction*8);
-                }
-                //if (enPassantPos) {
-                    //*enPassantPos = m_ipositionEnPassant;
-                //}
-                placePiece(m_ipositionEnPassant+direction*8,nullptr);
-            }
-            if(abs(in_iEndPosition - in_iStartPosition) == 16) {
-                int direction = (in_colPlayer == Color::WHITE) ? 1 : -1;
-                m_ipositionEnPassant = in_iStartPosition + direction * 8;
-                if (enPassantPos) {
-                    *enPassantPos = m_ipositionEnPassant;
-                }
-                wasEnPassant = true;
-            }
-            if(in_iEndPosition/8 == 0 || in_iEndPosition/8 == 7) {
-                promotePawn(in_colPlayer, &pPiece,promotionType);
-            }
+        // Set en passant position
+        if(abs(in_iEndPosition - in_iStartPosition) == 16) {
+            m_ipositionEnPassant = in_iStartPosition + ((in_colPlayer == Color::WHITE) ? 8 : -8);
+            if (enPassantPos) {*enPassantPos = m_ipositionEnPassant;}
+            wasEnPassant = true;
         }
 
-        if(pPiece->getTypePiece() == TypePieces::KING) // If the king rocked (move of length 2, we move the rook)
-        {
-            bool bKingWentRightForRock = in_iEndPosition - in_iStartPosition == 2;
-            bool bKingWentLeftForRock = in_iEndPosition - in_iStartPosition == -2;
-
-            if(in_colPlayer == Color::WHITE)
-            {
-                m_iWhiteKingPosition = in_iEndPosition;
-            }
-            else
-            {
-                m_iBlackKingPosition = in_iEndPosition;
-            }
-
-            Piece* pRookForRock = nullptr;
-            if(bKingWentRightForRock)
-            {
-                int iLastPositionOnTheRow = in_iStartPosition + (7 - in_iStartPosition%8);
-                pRookForRock = getPieceAt(iLastPositionOnTheRow);
-
-                if(pRookForRock != nullptr)
-                {
-                    //pRookForRock->setAlreadyMoved(true);
-                    bool bCouldPLacePiece = placePiece(in_iStartPosition + 1, pRookForRock);
-                    if(! bCouldPLacePiece)
-                    {
-                        return false;
-                    }
-                    m_tabpiBoard[iLastPositionOnTheRow] = nullptr; // La dernière case de la ligne
-                }
-            }
-            else if(bKingWentLeftForRock)
-            {
-                int iFirstPositionOnTheRow = in_iStartPosition - in_iStartPosition%8;
-                pRookForRock = getPieceAt(iFirstPositionOnTheRow);
-
-                if(pRookForRock != nullptr)
-                {
-                    //pRookForRock->setAlreadyMoved(true);
-                    bool bCouldPLacePiece = placePiece(in_iStartPosition - 1, pRookForRock);
-                    if(! bCouldPLacePiece)
-                    {
-                        return false;
-                    }
-                    m_tabpiBoard[iFirstPositionOnTheRow] = nullptr; // La première case de la ligne
-                }
-            }
-            removeRockPossibility(in_colPlayer, in_iStartPosition % 8);
+        //Promotion du pion
+        if(in_iEndPosition/8 == 0 || in_iEndPosition/8 == 7) {
+            promotePawn(in_colPlayer, &pPiece,promotionType);
         }
-
-        if (pPiece->getTypePiece() == TypePieces::ROOK) {
-            removeRockPossibility(in_colPlayer, in_iStartPosition % 8);
-        }
-
-        if(!wasEnPassant && m_ipositionEnPassant !=-1) {
-            m_ipositionEnPassant = -1;
-        }
-
-        if(piece && !wasEnPassant && getPieceAt(in_iEndPosition) != nullptr) // getPieceAt(in_iEndPosition) != nullptr because we don't want to get here when we are doing enPassant (eating)
-        {
-            *piece = getPieceAt(in_iEndPosition);
-        }
-        placePiece(in_iEndPosition, pPiece);
-        m_tabpiBoard[in_iStartPosition] = nullptr;
-
-        // If we were able to move, it means that we are not in check anymore
-        putOrRemoveKingInCheck(colPieceToMove, false);
-
-        if(isKingAttackedAfterMove(colEnemyPieceToMove, colPieceToMove)) //Verify if the king has been put in check or not
-        {
-            putOrRemoveKingInCheck(colEnemyPieceToMove, true);
-        }
-
-        return true;
     }
 
-    return false;
+    //Gestion cas spécifique du roi
+    if(pPiece->getTypePiece() == TypePieces::KING) // If the king rocked (move of length 2, we move the rook)
+    {
+        int delta = in_iEndPosition - in_iStartPosition;
+        bool bKingWentRightForRock = (delta == 2);
+        bool bKingWentLeftForRock = (delta == -2);
+
+        (in_colPlayer == Color::WHITE ? m_iWhiteKingPosition : m_iBlackKingPosition) = in_iEndPosition;
+
+        int rookStartPos = bKingWentRightForRock? in_iStartPosition + 7 - (in_iStartPosition % 8) : in_iStartPosition - (in_iStartPosition % 8);
+        int rookEndPos = bKingWentRightForRock? in_iStartPosition + 1 : in_iStartPosition - 1;
+
+        Piece* pRookForRock = nullptr;
+        pRookForRock = getPieceAt(rookStartPos);
+        if((bKingWentRightForRock || bKingWentLeftForRock) && pRookForRock != nullptr)
+        {
+            bool bCouldPLacePiece = placePiece(rookEndPos, pRookForRock);
+            if(! bCouldPLacePiece){
+                return false;
+            }
+            m_tabpiBoard[rookStartPos] = nullptr; // La dernière case de la ligne
+        }
+        removeRockPossibility(in_colPlayer, in_iStartPosition % 8);
+    }
+
+    //Gestion cas spécifique de la tour
+    if (pPiece->getTypePiece() == TypePieces::ROOK) {
+        removeRockPossibility(in_colPlayer, in_iStartPosition % 8);
+    }
+
+    if(!wasEnPassant && m_ipositionEnPassant !=-1) {
+        m_ipositionEnPassant = -1;
+    }
+
+    if(piece && !wasEnPassant && getPieceAt(in_iEndPosition) != nullptr) // getPieceAt(in_iEndPosition) != nullptr because we don't want to get here when we are doing enPassant (eating)
+    {
+        *piece = getPieceAt(in_iEndPosition);
+    }
+    placePiece(in_iEndPosition, pPiece);
+    m_tabpiBoard[in_iStartPosition] = nullptr;
+
+    // If we were able to move, it means that we are not in check anymore
+    putOrRemoveKingInCheck(pPiece->getColor(), false);
+    if (isKingAttackedAfterMove(colEnemy, in_colPlayer)) {
+        putOrRemoveKingInCheck(colEnemy, true);
+    }
+
+    return true;
 }
 
 //************************************************************************************//

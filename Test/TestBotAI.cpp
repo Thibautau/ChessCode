@@ -286,6 +286,21 @@ TEST_F(TestBotAI, TestBug5)
     board.clearBoard();
     MainChessGame::setBoardFromFENStatic("r1b1k2r/2p2p2/p1n2q1p/1pbpp2Q/8/1BNP2B1/PPP2PRP/R3K3 b Qkq - 0 1", &board);
 
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 4,cPromotion);
+    bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    EXPECT_TRUE(result);
+}
+
+TEST_F(TestBotAI, TestBug6)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("1r2k1nr/2p2ppp/p1nbb2q/1p1p4/1P2p2P/P1P1P1P1/3P1P2/RNBQKBNR w KQk - 0 1", &board);
+
 
     //Try to move the black pawn at h2 (promotion)
     Bot* botBlack = new Bot(Color::BLACK);
@@ -296,6 +311,28 @@ TEST_F(TestBotAI, TestBug5)
 
     EXPECT_TRUE(result);
 }
+
+TEST_F(TestBotAI, TestBug7)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("1R3R2/6pp/8/k7/4q1PK/8/8/8 w - - 0 1", &board);
+
+    bool result2 = board.movePiece("h4h5");
+    EXPECT_TRUE(result2);
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
+    bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    EXPECT_TRUE(result);
+}
+
+
+
+
 
 TEST_F(TestBotAI, TestPourTrouverUnBug3)
 {
@@ -319,10 +356,12 @@ TEST_F(TestBotAI, TestPourTrouverUnBug3)
     EXPECT_EQ(cPromotion, '\0');
 }
 
+
+//@TODO Explique moi il sert à quoi le test xD (il est faux et test rien de particulier)
 TEST_F(TestBotAI, TestPourTrouverUnBugRock)
 {
     board.clearBoard();
-    MainChessGame::setBoardFromFENStatic("4k2r/7p/8/8/8/8/8/5k2 b k - 9 13 ", &board);
+    MainChessGame::setBoardFromFENStatic("4k2r/7p/8/8/8/8/8/5k2 b K - 9 13 ", &board);
 
     //Try to move the black pawn at h2 (promotion)
     Bot* botBlack = new Bot(Color::BLACK);
@@ -330,6 +369,8 @@ TEST_F(TestBotAI, TestPourTrouverUnBugRock)
     char cPromotion = '\0';
     botBlack->playWithDepth(board, iStart, iEnd, 1,cPromotion);
     bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    board.displayBoard();
 
     EXPECT_TRUE(result);
     EXPECT_EQ(board.getPieceAt("e8"), nullptr);

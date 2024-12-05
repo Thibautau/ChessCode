@@ -166,6 +166,8 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             char promoType = promotionTypes[i];
             uint64_t originalHash = board.getZobristHash();
             Piece* capturedPiece = nullptr;
+
+            //Etat actuel du plateau
             int enPassantPos = board.getEnPassantPosition();
             int itabCastlingRights[4] = { -1, -1, -1, -1 };
             board.getCastlingStateAsTableau(itabCastlingRights);
@@ -173,11 +175,6 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             bool bisBlackKingCheked = board.isBlackKingCheck();
             int iWhiteKingPosition = board.getKingPosition(Color::WHITE);
             int iBlackKingPosition = board.getKingPosition(Color::BLACK);
-
-            if(move.first == 60 && move.second == 62)
-            {
-                int a = 2;
-            }
 
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType));
@@ -257,8 +254,6 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
         return evaluation;
     }
 
-
-
     // Détermination de la couleur à maximiser ou minimiser
     Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
     std::pair<int, int> possibleMoves[128];
@@ -298,6 +293,8 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             char promoType = promotionTypes[i];
             uint64_t originalHash = board.getZobristHash();
             Piece* capturedPiece = nullptr;
+
+            //Etat actuel du plateau
             int enPassantPos = board.getEnPassantPosition();
             int itabCastlingRights[4] = { -1, -1, -1, -1 };
             board.getCastlingStateAsTableau(itabCastlingRights);
