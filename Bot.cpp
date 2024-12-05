@@ -166,7 +166,7 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             char promoType = promotionTypes[i];
             uint64_t originalHash = board.getZobristHash();
             Piece* capturedPiece = nullptr;
-            int enPassantPos = -1;
+            int enPassantPos = board.getEnPassantPosition();
             int itabCastlingRights[4] = { -1, -1, -1, -1 };
             board.getCastlingStateAsTableau(itabCastlingRights);
             bool bisWhiteKingCheked = board.isWhiteKingCheck();
@@ -180,7 +180,7 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             }
 
             // Jouer le coup
-            bool bCanMove = board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+            bool bCanMove = board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType));
             std::string logMessage = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
             m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
             if(! bCanMove)
@@ -298,7 +298,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             char promoType = promotionTypes[i];
             uint64_t originalHash = board.getZobristHash();
             Piece* capturedPiece = nullptr;
-            int enPassantPos = -1;
+            int enPassantPos = board.getEnPassantPosition();
             int itabCastlingRights[4] = { -1, -1, -1, -1 };
             board.getCastlingStateAsTableau(itabCastlingRights);
             bool bisWhiteKingCheked = board.isWhiteKingCheck();
@@ -307,7 +307,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             int iBlackKingPosition = board.getKingPosition(Color::BLACK);
 
             // Jouer le coup
-            bool bCanMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType), &enPassantPos);
+            bool bCanMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType));
             std::string logMessage = "Plateau à la profondeur " + std::to_string(depth) + " :\n" + board.getBoardAsString() + "\n";
             m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
             if(! bCanMove)

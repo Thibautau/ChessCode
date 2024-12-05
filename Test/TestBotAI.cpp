@@ -188,6 +188,22 @@ TEST_F(TestBotAI, TestBugEnPassant)
     EXPECT_EQ(cPromotion, '\0');
 }
 
+TEST_F(TestBotAI, TestEnPassant2)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("r1bqkb1r/pppp1ppp/2n1pn2/4P3/8/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 0 1", &board);
+
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
+    bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    EXPECT_TRUE(result);
+}
+
 TEST_F(TestBotAI, TestUndo)
 {
     board.clearBoard();
@@ -263,6 +279,22 @@ TEST_F(TestBotAI, TestPourTrouverUnBug2)
     EXPECT_EQ(iStart, 30); // a4
     EXPECT_EQ(iEnd, 21); // b3
     EXPECT_EQ(cPromotion, '\0');
+}
+
+TEST_F(TestBotAI, TestBug5)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("r1b1k2r/2p2p2/p1n2q1p/1pbpp2Q/8/1BNP2B1/PPP2PRP/R3K3 b Qkq - 0 1", &board);
+
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 4,cPromotion);
+    bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    EXPECT_TRUE(result);
 }
 
 TEST_F(TestBotAI, TestPourTrouverUnBug3)
