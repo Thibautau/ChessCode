@@ -604,10 +604,11 @@ Piece* Board::findFirstPieceOnDirectionThatAttacksInitialPosition(int in_iPositi
         return nullptr;
     }
 
-    int iPositionDifference = std::abs(in_iPosition - in_iPositionPieceFound);
+    int iPositionDifferenceAbsolute = std::abs(in_iPosition - in_iPositionPieceFound);
+    int iPositionDifference = in_iPositionPieceFound - in_iPosition;
 
     if (pPieceFound->getTypePiece() == TypePieces::PAWN) {
-        if (iPositionDifference == 7 || iPositionDifference == 9) {
+        if (iPositionDifferenceAbsolute == 7 || iPositionDifferenceAbsolute == 9) {
             return pPieceFound;
         }
         in_iPositionPieceFound = -1;
@@ -615,7 +616,18 @@ Piece* Board::findFirstPieceOnDirectionThatAttacksInitialPosition(int in_iPositi
     }
 
     if (pPieceFound->getTypePiece() == TypePieces::KING) {
-        if (iPositionDifference == 1 || iPositionDifference == 7 || iPositionDifference == 8 || iPositionDifference == 9) {
+        if(in_iPosition%8 == 7 && (iPositionDifference == -7 || iPositionDifference == 9)) // SI on est sur la colonne à droite, le roi ne peut pas aller en diagonale à droite (dépassement)
+        {
+            in_iPositionPieceFound = -1;
+            return nullptr;
+        }
+        if (in_iPosition%8 == 0 && (iPositionDifference == 7 || iPositionDifference == -9)) // SI on est sur la colonne à droite, le roi ne peut pas aller en diagonale à gauche (dépassement)
+        {
+            in_iPositionPieceFound = -1;
+            return nullptr;
+        }
+
+        if (iPositionDifferenceAbsolute == 1 || iPositionDifferenceAbsolute == 7 || iPositionDifferenceAbsolute == 8 || iPositionDifferenceAbsolute == 9) {
             return pPieceFound;
         }
         in_iPositionPieceFound = -1;

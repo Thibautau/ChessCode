@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "Board.h"
+#include "MainChessGame.h"
 
 class BoardTest : public ::testing::Test {
 protected:
@@ -1233,4 +1234,22 @@ TEST_F(BoardTest, BugWithPromotion)
     EXPECT_EQ(board.getPieceAt("g4"), nullptr);
     EXPECT_EQ(board.getPieceAt("g3")->getTypePiece(), TypePieces::PAWN);
     EXPECT_EQ(board.getPieceAt("g3")->getColor(), Color::BLACK);
+}
+
+// Test pour voir si le roi noir se change en dame (pas le droit)
+TEST_F(BoardTest, PiecesEatsOnMultipleLines)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("1R3R2/6pp/8/k7/4q1PK/8/8/8 w - - 0 1", &board);
+
+    //bool result = board.movePiece("h4h5");
+    //EXPECT_TRUE(result);
+
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("1R3R2/p5pb/8/k7/4q1PK/8/8/8 w - - 0 1", &board); //Not the same board
+
+    int iPositionPieceFound = -1;
+    Piece* pPieceFound = board.findFirstPieceOnDirectionThatAttacksInitialPosition(55, -7, 1, iPositionPieceFound); //black bishop at h7 tries to move at g6
+    EXPECT_EQ(pPieceFound, nullptr);
+    EXPECT_EQ(iPositionPieceFound, -1);
 }
