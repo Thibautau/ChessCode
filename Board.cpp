@@ -29,6 +29,9 @@ Board::Board()
 
     m_iBlackKingPosition = 60;
     m_iWhiteKingPosition = 4;
+
+    m_iPreviousMoveInitialPosition = -1;
+    m_iPreviousMoveTargetPosition = -1;
 }
 
 void Board::initializeBoard()
@@ -77,6 +80,9 @@ void Board::clearBoard()
 
     m_iBlackKingPosition = 60;
     m_iWhiteKingPosition = 4;
+
+    m_iPreviousMoveInitialPosition = -1;
+    m_iPreviousMoveTargetPosition = -1;
 
     for (int i = 0; i < 4; i++)
     {
@@ -315,6 +321,8 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
         putOrRemoveKingInCheck(colEnemy, true);
     }
 
+    m_iPreviousMoveInitialPosition = in_iStartPosition;
+    m_iPreviousMoveTargetPosition = in_iEndPosition;
     return true;
 }
 
@@ -1173,6 +1181,8 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
     if(movingPiece == nullptr) {
         return false;
     }
+
+    //m_iPreviousMove = {in_iPairPreviousMove.first, in_iPairPreviousMove.second};
 
     placePiece(in_iStartPosition, movingPiece);
     m_tabpiBoard[in_iEndPosition] = nullptr;

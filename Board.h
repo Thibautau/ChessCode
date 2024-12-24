@@ -25,6 +25,9 @@ private:
     int m_iWhiteKingPosition = 4;
     int m_ipositionEnPassant = -1;
 
+    int m_iPreviousMoveInitialPosition = -1; // FOR DEBUG
+    int m_iPreviousMoveTargetPosition = -1; // FOR DEBUG
+
     int m_itabIndexRockPrivilegeLostOnMove[4] = {-1, -1, -1, -1}; // Used for Zobrist
 
     uint64_t zobristHash;
@@ -693,6 +696,22 @@ public:
     void setZobristHash(uint64_t hash) { zobristHash = hash; }
     void listOfPossibleMoves(Color in_colPlayer, std::vector<std::pair<int, int>>& out_moves);
     void listOfPossibleMoves(Color in_colPlayer, std::pair<int, int> out_moves[128], int& out_moveCount);
+
+    int getPreviousMoveInitialPosition() const {
+        return m_iPreviousMoveInitialPosition;
+    }
+
+    void setPreviousMoveInitialPosition(int m_i_previous_move_initial_position) {
+        m_iPreviousMoveInitialPosition = m_i_previous_move_initial_position;
+    }
+
+    int getPreviousMoveTargetPosition() const {
+        return m_iPreviousMoveTargetPosition;
+    }
+
+    void setPreviousMoveTargetPosition(int m_i_previous_move_target_position) {
+        m_iPreviousMoveTargetPosition = m_i_previous_move_target_position;
+    }
 };
 
 #endif //BOARD_H

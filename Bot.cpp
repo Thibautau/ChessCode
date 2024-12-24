@@ -178,15 +178,23 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
 
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType));
-            std::string logMessage = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
-            m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+            //std::string logMessage = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n" + "| Previous Move : (" + std::to_string(iPreviousInitialPosition) + "-" + std::to_string(iPreviousTargetPosition) +")\n";
+            //m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
             if(! bCanMove)
             {
+                //board.displayBoard();
                 board.displayBoard();
-                std::string logMessage2 = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
+                std::cerr << "Error: The previous move was (" << board.getPreviousMoveInitialPosition() << "-" << board.getPreviousMoveTargetPosition() << ")" << std::endl;
+                std::cerr << "But the The acutal move is (" << move.first << "-" << move.second << ")" << std::endl;
+                std::string logMessage2 = "ERRORPlateau à la profondeur :\n" + board.getBoardAsString() + "\n";
                 m_logFile->logInfo(logMessage2 + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
-                std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in choisir_meilleur_coupV2." << std::endl;
+                //std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in choisir_meilleur_coupV2." << std::endl;
             }
+
+            int iPreviousInitialPosition = move.first;
+            int iPreviousTargetPosition = move.second;
+            board.setPreviousMoveInitialPosition(iPreviousInitialPosition);
+            board.setPreviousMoveTargetPosition(iPreviousTargetPosition);
 
             // Mise à jour du hash pour le coup
             calculateZobristHashForMove(board, move, m_color, promoType, promoType != '\0', zobristHash, capturedPiece);
@@ -196,6 +204,8 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
 
             // Annuler le coup
             board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos, itabCastlingRights, bisWhiteKingCheked, bisBlackKingCheked, iWhiteKingPosition, iBlackKingPosition);
+            board.setPreviousMoveInitialPosition(iPreviousInitialPosition);
+            board.setPreviousMoveTargetPosition(iPreviousTargetPosition);
             board.setZobristHash(originalHash);
 
             // Vérification de la table de transposition avant d'ajouter
@@ -302,6 +312,8 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             bool bisBlackKingCheked = board.isBlackKingCheck();
             int iWhiteKingPosition = board.getKingPosition(Color::WHITE);
             int iBlackKingPosition = board.getKingPosition(Color::BLACK);
+            int iPreviousInitialPosition = board.getPreviousMoveInitialPosition();
+            int iPreviousTargetPosition = board.getPreviousMoveTargetPosition();
 
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType));
@@ -323,6 +335,8 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
 
             // Annuler le coup
             board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos, itabCastlingRights, bisWhiteKingCheked, bisBlackKingCheked, iWhiteKingPosition, iBlackKingPosition);
+            board.setPreviousMoveInitialPosition(iPreviousInitialPosition);
+            board.setPreviousMoveTargetPosition(iPreviousTargetPosition);
             board.setZobristHash(originalHash);
 
             // Mise à jour des scores et alpha/beta
@@ -363,8 +377,8 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     Piece* piece_arrivee = capturedPiece;
 
     if(!piece_depart) {
-        board.displayBoard();
-        std::cerr << "Warning: No piece found at start square (" << move.second << "). Check board state." << std::endl;
+        //board.displayBoard();
+        std::cerr << "Warning: No piece found at start square (" << move.second << "). Check board state." << "(" << move.first << "-" << move.second << ")" << std::endl;
     }
 
     int itabCastlingRights[4];
