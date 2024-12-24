@@ -234,13 +234,12 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
         return false;
     }
 
-    //@TODO je comprend pas pourquoi tu les reset, donc je peux plus roque après un coup c'est ça?
-    /*{ // We reset those indexs because we want to update those values with this move
+    { // We reset those indexs because we want to update those values with this move
         m_itabIndexRockPrivilegeLostOnMove[0] = -1;
         m_itabIndexRockPrivilegeLostOnMove[1] = -1;
         m_itabIndexRockPrivilegeLostOnMove[2] = -1;
         m_itabIndexRockPrivilegeLostOnMove[3] = -1;
-    }*/
+    }
 
     bool wasEnPassant = false;
 
