@@ -1276,3 +1276,21 @@ TEST_F(BoardTest, undoMoveRoque)
     EXPECT_EQ(board.getPieceAt(55)->getTypePiece(), TypePieces::PAWN);
     EXPECT_EQ(board.getPieceAt(55)->getColor(), Color::BLACK);
 }
+
+TEST_F(BoardTest, TestTrouverBugRoque3)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rn1qkbnr/ppp2ppp/4p3/3p2B1/3P4/2N2N2/PP2PPPP/R2bKB1R w KQkq - 0 1", &board);
+
+    std::pair<int, int> possibleMoves[128];
+    int moveCount = 0;
+    board.listOfPossibleMoves(Color::WHITE, possibleMoves, moveCount);
+
+    EXPECT_EQ(moveCount, 35);
+    for(std::pair<int, int> move : possibleMoves)
+    {
+
+        EXPECT_NE(move, std::make_pair(4,2));
+    }
+
+}

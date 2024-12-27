@@ -397,5 +397,35 @@ TEST_F(TestBotAI, TestBugRock2)
     bool result = board.movePiece(iStart, iEnd, Color::BLACK);
 
     EXPECT_TRUE(result);
-
 }
+
+TEST_F(TestBotAI, TestTrouverBug)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rn1qkbnr/ppp2ppp/4p3/3p2B1/3P4/2N2N2/PPb1PPPP/R2QKB1R w KQkq - 0 1", &board);
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
+    bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    EXPECT_TRUE(result);
+}
+
+TEST_F(TestBotAI, TestTrouverBug2)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rn1qkbnr/ppp2ppp/4p3/3p2B1/3P4/2N2N2/PP2PPPP/R2bKB1R w KQkq - 0 1", &board);
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
+    bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    EXPECT_TRUE(result);
+}
+

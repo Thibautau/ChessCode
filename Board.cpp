@@ -906,11 +906,11 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                 if (pPieceToSeeMoves->isNextPositionValid(kingMoves[i], in_iPositionToSeeMoves, nextPosition)) {
                     if (m_tabpiBoard[nextPosition] == nullptr || m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
                         bool bValidMove = putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
-                        if(bValidMove && kingMoves[i] == 1) // To not repeat computation for the rock juste after
+                        if(bValidMove && kingMoves[i] == 1 && m_tabpiBoard[nextPosition] == nullptr) // To not repeat computation for the rock juste after
                         {
                             bLittleRockPossible = true;
                         }
-                        else if(bValidMove && kingMoves[i] == -1)
+                        else if(bValidMove && kingMoves[i] == -1 && m_tabpiBoard[nextPosition] == nullptr)
                         {
                             bBigRockPossible = true;
                         }

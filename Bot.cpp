@@ -43,7 +43,7 @@ void Bot::setPlayerColor(Color color) {
 
 void Bot::play(Board& board, int& start, int& end) {
     std::pair<int, int> meilleurCoup;
-    int profondeur_max = 6;
+    int profondeur_max = 4;
 
     choisir_meilleur_coupv2(board, profondeur_max, meilleurCoup);
 
@@ -176,10 +176,14 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             int iWhiteKingPosition = board.getKingPosition(Color::WHITE);
             int iBlackKingPosition = board.getKingPosition(Color::BLACK);
 
+            if(move.first == 10 && move.second == 3) {
+                int a = 2;
+            }
+
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType));
-            //std::string logMessage = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n" + "| Previous Move : (" + std::to_string(iPreviousInitialPosition) + "-" + std::to_string(iPreviousTargetPosition) +")\n";
-            //m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+            std::string logMessage = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
+            m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
             if(! bCanMove)
             {
                 //board.displayBoard();
@@ -200,10 +204,17 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             calculateZobristHashForMove(board, move, m_color, promoType, promoType != '\0', zobristHash, capturedPiece);
             board.setZobristHash(zobristHash);
 
+            if(move.first == 10 && move.second == 3) {
+                int a = 2;
+            }
             int score = alphaBetaWithMemory(board, profondeur_max-1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false, promotion);
 
             // Annuler le coup
-            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos, itabCastlingRights, bisWhiteKingCheked, bisBlackKingCheked, iWhiteKingPosition, iBlackKingPosition);
+            bool bCanUndo = board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos, itabCastlingRights, bisWhiteKingCheked, bisBlackKingCheked, iWhiteKingPosition, iBlackKingPosition);
+            if(! bCanUndo) {
+                board.displayBoard();
+                std::cerr << "Error: UNDOMOVE FAILED" << move.first << " " << move.second << "). in choisirMeilleurCoupV2." << std::endl;
+            }
             board.setPreviousMoveInitialPosition(iPreviousInitialPosition);
             board.setPreviousMoveTargetPosition(iPreviousTargetPosition);
             board.setZobristHash(originalHash);
@@ -315,6 +326,16 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             int iPreviousInitialPosition = board.getPreviousMoveInitialPosition();
             int iPreviousTargetPosition = board.getPreviousMoveTargetPosition();
 
+            if(move.first == 0 && move.second == 3) {
+                int a = 2;
+            }if(move.first == 4 && move.second == 3) {
+                int a = 2;
+            }if(move.first == 18 && move.second == 3) {
+                int a = 2;
+            }if(move.first == 4 && move.second == 2) {
+                int a = 2;
+            }
+
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType));
             std::string logMessage = "Plateau à la profondeur " + std::to_string(depth) + " :\n" + board.getBoardAsString() + "\n";
@@ -334,7 +355,10 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             int score = alphaBetaWithMemory(board, depth - 1, alpha, beta, !estMaximisant, bestPromotion);
 
             // Annuler le coup
-            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos, itabCastlingRights, bisWhiteKingCheked, bisBlackKingCheked, iWhiteKingPosition, iBlackKingPosition);
+            bool bCanUndo = board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos, itabCastlingRights, bisWhiteKingCheked, bisBlackKingCheked, iWhiteKingPosition, iBlackKingPosition);
+            if(! bCanUndo) {
+                std::cerr << "Error: UNDOMOVE FAILED" << move.first << " " << move.second << "). in alphaBetaWithMemory." << std::endl;
+            }
             board.setPreviousMoveInitialPosition(iPreviousInitialPosition);
             board.setPreviousMoveTargetPosition(iPreviousTargetPosition);
             board.setZobristHash(originalHash);
