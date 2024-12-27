@@ -1188,6 +1188,46 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
     m_tabpiBoard[in_iEndPosition] = nullptr;
     m_ipositionEnPassant = enPassantPos;
 
+    int iCaseDifference = in_iStartPosition - in_iEndPosition;
+    if(movingPiece->getTypePiece() == TypePieces::KING && std::abs(iCaseDifference) == 2) // Pour le roque
+    {
+        Piece* pRookToMove = nullptr;
+        int iInitialRookPosition = -1;
+        int iPositionToGetAndDeleteRook = -1;
+        if(movingPiece->getColor() == Color::WHITE && in_iStartPosition == 4)
+        {
+            if(iCaseDifference == 2)
+            {
+                iPositionToGetAndDeleteRook = 3;
+                iInitialRookPosition = 0;
+            }
+            if(iCaseDifference == -2)
+            {
+                iPositionToGetAndDeleteRook = 5;
+                iInitialRookPosition = 7;
+            }
+        }
+        if(movingPiece->getColor() == Color::BLACK && in_iStartPosition == 60)
+        {
+            if(iCaseDifference == 2)
+            {
+                iPositionToGetAndDeleteRook = 59;
+                iInitialRookPosition = 56;
+            }
+            if(iCaseDifference == -2)
+            {
+                iPositionToGetAndDeleteRook = 61;
+                iInitialRookPosition = 63;
+            }
+        }
+
+        if(iPositionToGetAndDeleteRook == -1) std::cerr << "ERROR UNDOMOVE" << std::endl;
+        pRookToMove = m_tabpiBoard[iPositionToGetAndDeleteRook];
+        m_tabpiBoard[iPositionToGetAndDeleteRook] = nullptr;
+        m_tabpiBoard[iInitialRookPosition] = pRookToMove;
+
+    }
+
     if(in_itabCastlingRights != nullptr)
     {
         m_bWhiteKingCanLittleRock = in_itabCastlingRights[0] == 0;

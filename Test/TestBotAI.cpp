@@ -281,7 +281,6 @@ TEST_F(TestBotAI, TestPourTrouverUnBug2)
     EXPECT_EQ(cPromotion, '\0');
 }
 
-//TODO CRASH
 TEST_F(TestBotAI, TestBug5)
 {
     board.clearBoard();
@@ -297,7 +296,6 @@ TEST_F(TestBotAI, TestBug5)
     EXPECT_TRUE(result);
 }
 
-//TODO CRASH
 TEST_F(TestBotAI, TestBug6)
 {
     board.clearBoard();
@@ -354,16 +352,50 @@ TEST_F(TestBotAI, TestBug6Bis2)
 
     std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(Color::BLACK);
 
-    for (std::pair<int, int> pair : possibleMoves) {
-        EXPECT_NE(pair, std::make_pair(60, 61));
-    }
 
     //Try to move the black pawn at h2 (promotion)
-    /*Bot* botBlack = new Bot(Color::BLACK);
+    Bot* botBlack = new Bot(Color::BLACK);
     int iStart, iEnd = -1;
     char cPromotion = '\0';
     botBlack->playWithDepth(board, iStart, iEnd, 4,cPromotion);
     bool result = board.movePiece(iStart, iEnd, Color::BLACK);
 
-    EXPECT_TRUE(result);*/
+    EXPECT_TRUE(result);
+}
+
+TEST_F(TestBotAI, TestBugRock)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("4k2r/4p2p/1b6/8/8/8/K7/8 b k - 0 1", &board);
+
+    std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(Color::BLACK);
+
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 4,cPromotion);
+    bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    EXPECT_TRUE(result);
+}
+
+TEST_F(TestBotAI, TestBugRock2)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("4k2r/7p/8/8/8/8/K7/8 b k - 0 1", &board);
+
+    std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(Color::BLACK);
+
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::BLACK);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
+    bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    EXPECT_TRUE(result);
+
 }

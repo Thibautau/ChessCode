@@ -1253,3 +1253,26 @@ TEST_F(BoardTest, PiecesEatsOnMultipleLines)
     EXPECT_EQ(pPieceFound, nullptr);
     EXPECT_EQ(iPositionPieceFound, -1);
 }
+
+TEST_F(BoardTest, undoMoveRoque)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("4k2r/7p/8/8/8/8/K7/8 b k - 0 1", &board);
+
+    board.movePiece("e8g8", Color::BLACK);
+
+    EXPECT_FALSE(board.kingCanLittleRock(Color::BLACK));
+
+    int itabRockRights[4] = {-1, -1, 2, -1};
+    board.undoMove(60, 62, nullptr, false, -1, itabRockRights, false, false, 8, 60);
+
+    EXPECT_EQ(board.kingCanLittleRock(Color::BLACK), true);
+    EXPECT_EQ(board.getPieceAt(60)->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt(60)->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt(8)->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt(8)->getColor(), Color::WHITE);
+    EXPECT_EQ(board.getPieceAt(63)->getTypePiece(), TypePieces::ROOK);
+    EXPECT_EQ(board.getPieceAt(63)->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt(55)->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt(55)->getColor(), Color::BLACK);
+}
