@@ -80,7 +80,7 @@ Par défaut, le jeu est jouable depuis la console. Cependant, pour le relier à 
 Le bot devrait désormais être opérationnel dans votre interface graphique.
 
 
-### Installation d'Ubuntu sur WSL2
+## Installation d'Ubuntu sur WSL2
 
 1. Installez WSL2 si ce n'est pas déjà fait :
    ```bash
@@ -126,12 +126,61 @@ Le bot devrait désormais être opérationnel dans votre interface graphique.
 3. Configurez CLion :
     - Allez dans **Settings > Build, Execution, Deployment > Toolchains**.
     - Créez une nouvelle Toolchain sous WSL (les informations devraient être remplies automatiquement).
-    - Configurez Valgrind dans **Settings > Build, Execution, Deployment > Dynamic Analysis Tools** :
-        - Chemin : `\\wsl$\Ubuntu\usr\bin\valgrind`
-        - Options :
-          ```bash
-          --leak-check=full --leak-resolution=med --track-origins=yes --vgdb=no
-          ```
+      - Configurez Valgrind dans **Settings > Build, Execution, Deployment > Dynamic Analysis Tools** :
+          - Chemin : 
+            ```
+            \\wsl$\Ubuntu\usr\bin\valgrind
+            ```
+          - Options :
+            ```bash
+            --leak-check=full --leak-resolution=med --track-origins=yes --vgdb=no
+            ```
+
+
+### Configuration de perf
+
+1. Installez les dépendances requises :
+   ```bash
+   sudo apt update
+   ```
+   ```bash
+   sudo apt install flex bison
+   ```
+   ```bash
+   sudo apt install libdwarf-dev libelf-dev libnuma-dev libunwind-dev \
+   libnewt-dev libdwarf++0 libelf++0 libdw-dev libbfb0-dev \
+   systemtap-sdt-dev libssl-dev libperl-dev python-dev-is-python3 \
+   binutils-dev libiberty-dev libzstd-dev libcap-dev libbabeltrace-dev
+   ```
+
+2. Clonez et compilez `perf` :
+   ```bash
+   git clone https://github.com/microsoft/WSL2-Linux-Kernel --depth 1
+   ```
+   ```bash
+   cd WSL2-Linux-Kernel/tools/perf
+   ```
+   ```bash
+   make -j8 # parallel build
+   ```
+   ```bash
+   sudo cp perf /usr/local/bin
+   ```
+
+3. En cas d'erreur de compilation :
+   ```bash
+   sudo apt install libpfm4-dev libtraceevent-dev pkg-config
+   ```
+
+### CLion Installation
+
+1. Allez dans **Settings > Build, Execution, Deployment > Dynamic Analysis Tools > Profiler**.
+2. Dans `perf executable`, configurez le chemin suivant :
+   ```
+   \wsl$\Ubuntu\usr\local\bin\perf
+   ```
+3. Laissez les autres paramètres par défaut.
+
 
 ## Disclaimer
 Le bot est toujours en cours de développement, et des fonctionnalités sont encore en phase de test. Suite à un récent merge de la branche UCI, la structure du code a été modifiée, ce qui peut entraîner certains bugs.
