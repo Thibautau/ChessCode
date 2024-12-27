@@ -136,6 +136,32 @@ void MainChessGame::setBoardFromFEN(const std::string& fen) {
     }
 }
 
+void MainChessGame::setBoardFromFENStatic(const std::string& fen, Board* in_pBoard) {
+    in_pBoard->setupFromFEN(fen);
+
+    std::istringstream fenStream(fen);
+    std::string boardPart, activeColor, castling, enPassant, halfMoveClock, fullMoveNumber;
+
+    // Divise les parties de la notation FEN
+    fenStream >> boardPart >> activeColor >> castling >> enPassant >> halfMoveClock >> fullMoveNumber;
+
+    // Vérifier et configurer le joueur actif
+    Color newActiveColor = (activeColor == "w") ? Color::WHITE : Color::BLACK;
+
+    // Configure les droits de roque
+    in_pBoard->setCastlingRightsForFenNotation(castling);
+
+    // Configure la position pour la prise en passant, si applicable
+    if (enPassant != "-") {
+        int enPassantPos = Board::convertToPosition(enPassant[0], enPassant[1]);
+        in_pBoard->setEnPassantPosition(enPassantPos);
+    }
+    else
+    {
+        in_pBoard->setEnPassantPosition(-1); // Valeur par défaut si aucune prise en passant n'est possible
+    }
+}
+
 std::string MainChessGame::findBestMoveForCurrentPlayer(int depth) {
     int start, end;
     char promotion='\0';

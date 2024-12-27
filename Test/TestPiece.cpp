@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "Board.h"
+#include "MainChessGame.h"
 
 class BoardTest : public ::testing::Test {
 protected:
@@ -820,7 +821,7 @@ TEST_F(BoardTest, UndoEnPassantMove) {
     EXPECT_EQ(board.getPieceAt("e5"), nullptr);
     EXPECT_EQ(board.getPieceAt("f5"), nullptr);
 
-    board.undoMove(36, 45, new Piece(TypePieces::PAWN, Color::BLACK), false, 37);
+    board.undoMove(36, 45, new Piece(TypePieces::PAWN, Color::BLACK), false, 45);
     EXPECT_EQ(board.getPieceAt("e5")->getTypePiece(), TypePieces::PAWN);
     EXPECT_EQ(board.getPieceAt("f5")->getTypePiece(), TypePieces::PAWN);
     EXPECT_EQ(board.getPieceAt("f6"), nullptr);
@@ -1217,4 +1218,79 @@ TEST_F(BoardTest, KingCanMoveButGameCrashed)
     EXPECT_FALSE(isCheck);
     EXPECT_FALSE(isGameOver);
     EXPECT_EQ(Color::NONE, colWinner);
+}
+
+// Test pour voir si le roi noir se change en dame (pas le droit)
+TEST_F(BoardTest, BugWithPromotion)
+{
+    board.clearBoard();
+    board.setupFromFEN("6k1/6pp/8/8/5p2/5P2/6PP/Q6K w - - 21 13");
+
+    bool result = board.movePiece("g2g3");
+    EXPECT_TRUE(result);
+    bool result2 = board.movePiece("f4g3", Color::BLACK);
+    EXPECT_TRUE(result2);
+    EXPECT_EQ(board.getPieceAt("f4"), nullptr);
+    EXPECT_EQ(board.getPieceAt("g4"), nullptr);
+    EXPECT_EQ(board.getPieceAt("g3")->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt("g3")->getColor(), Color::BLACK);
+}
+
+// Test pour voir si le roi noir se change en dame (pas le droit)
+TEST_F(BoardTest, PiecesEatsOnMultipleLines)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("1R3R2/6pp/8/k7/4q1PK/8/8/8 w - - 0 1", &board);
+
+    //bool result = board.movePiece("h4h5");
+    //EXPECT_TRUE(result);
+
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("1R3R2/p5pb/8/k7/4q1PK/8/8/8 w - - 0 1", &board); //Not the same board
+
+    int iPositionPieceFound = -1;
+    Piece* pPieceFound = board.findFirstPieceOnDirectionThatAttacksInitialPosition(55, -7, 1, iPositionPieceFound); //black bishop at h7 tries to move at g6
+    EXPECT_EQ(pPieceFound, nullptr);
+    EXPECT_EQ(iPositionPieceFound, -1);
+}
+
+TEST_F(BoardTest, undoMoveRoque)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("4k2r/7p/8/8/8/8/K7/8 b k - 0 1", &board);
+
+    board.movePiece("e8g8", Color::BLACK);
+
+    EXPECT_FALSE(board.kingCanLittleRock(Color::BLACK));
+
+    int itabRockRights[4] = {-1, -1, 2, -1};
+    board.undoMove(60, 62, nullptr, false, -1, itabRockRights, false, false, 8, 60);
+
+    EXPECT_EQ(board.kingCanLittleRock(Color::BLACK), true);
+    EXPECT_EQ(board.getPieceAt(60)->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt(60)->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt(8)->getTypePiece(), TypePieces::KING);
+    EXPECT_EQ(board.getPieceAt(8)->getColor(), Color::WHITE);
+    EXPECT_EQ(board.getPieceAt(63)->getTypePiece(), TypePieces::ROOK);
+    EXPECT_EQ(board.getPieceAt(63)->getColor(), Color::BLACK);
+    EXPECT_EQ(board.getPieceAt(55)->getTypePiece(), TypePieces::PAWN);
+    EXPECT_EQ(board.getPieceAt(55)->getColor(), Color::BLACK);
+}
+
+TEST_F(BoardTest, TestTrouverBugRoque3)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rn1qkbnr/ppp2ppp/4p3/3p2B1/3P4/2N2N2/PP2PPPP/R2bKB1R w KQkq - 0 1", &board);
+
+    std::pair<int, int> possibleMoves[128];
+    int moveCount = 0;
+    board.listOfPossibleMoves(Color::WHITE, possibleMoves, moveCount);
+
+    EXPECT_EQ(moveCount, 35);
+    for(std::pair<int, int> move : possibleMoves)
+    {
+
+        EXPECT_NE(move, std::make_pair(4,2));
+    }
+
 }

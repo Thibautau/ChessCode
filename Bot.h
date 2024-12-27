@@ -18,14 +18,12 @@ const int EXACT = 0;
 const int ALPHA_CUT = -1;
 const int BETA_CUT = 1;
 const int UPPERBOUND = 1;
-const int LOWERBOUND = 1;
+const int LOWERBOUND = -1;
 
 struct TranspositionTableEntry {
     int depth;
     int score;
     int bestMoveIndex;
-    int lowerBound;
-    int upperBound;
     int flag; // 0: Exact, -1: Alpha cut, 1: Beta cut
 };
 
@@ -35,6 +33,8 @@ private:
     std::unordered_map<uint64_t, TranspositionTableEntry> transpositionTable;
     //LogInFile* m_logFile;
     LogFile* m_logFile;
+    static constexpr char PROMOTION_TYPES[4] = {'q', 'n', 'b', 'r'};
+    static constexpr char NO_PROMOTION[1] = {'\0'};
 
 
 public:
@@ -126,6 +126,7 @@ public:
     void clearFile(const std::string& filename);
     int evaluateMoveWithMinimaxv2(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor, char& promotion);
     void choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<int, int>& meilleurCoup, char* bestPromotion=nullptr);
+    static void calculateZobristHashForMove(Board& board, const std::pair<int, int>& move, Color currentColor, char promotionForMove, bool isPromotion, uint64_t& zobristHash, Piece* capturedPiece=nullptr);
 };
 
 #endif //BOT_H

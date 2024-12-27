@@ -29,6 +29,9 @@ Board::Board()
 
     m_iBlackKingPosition = 60;
     m_iWhiteKingPosition = 4;
+
+    m_iPreviousMoveInitialPosition = -1;
+    m_iPreviousMoveTargetPosition = -1;
 }
 
 void Board::initializeBoard()
@@ -77,6 +80,14 @@ void Board::clearBoard()
 
     m_iBlackKingPosition = 60;
     m_iWhiteKingPosition = 4;
+
+    m_iPreviousMoveInitialPosition = -1;
+    m_iPreviousMoveTargetPosition = -1;
+
+    for (int i = 0; i < 4; i++)
+    {
+        m_itabIndexRockPrivilegeLostOnMove[i] = -1;
+    }
 }
 
 void Board::setupFromFEN(const std::string& fen) {
@@ -208,114 +219,111 @@ bool Board::movePiece(Color in_colPlayer, const std::string& move, Piece** piece
 bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer,Piece** piece, TypePieces promotionType, int* enPassantPos)
 {
     Piece* pPiece = getPieceAt(in_iStartPosition);
-    bool wasEnPassant = false;
+
     if(pPiece == nullptr || pPiece->getColor() != in_colPlayer) //If the player try to move a piece of another color, return false
     {
         return false;
     }
 
-    Color colPieceToMove = pPiece->getColor();
-    Color colEnemyPieceToMove = pPiece->getEnemyColor();
+    //Color colPieceToMove = pPiece->getColor();
+    //Color colEnemyPieceToMove = pPiece->getEnemyColor();
 
-    if (isMovementPossible(in_iStartPosition,in_iEndPosition))
+    Color colEnemy = pPiece->getEnemyColor();
+
+    if(enPassantPos) // Optional argument so we have to verify if it exists
     {
-        if(pPiece->getTypePiece() == TypePieces::PAWN) {
-            if(in_iEndPosition==m_ipositionEnPassant) {
-                int direction = (in_colPlayer == Color::WHITE) ? -1 : 1;
-                if(piece) {
-                    *piece = getPieceAt(m_ipositionEnPassant+direction*8);
-                }
-                placePiece(m_ipositionEnPassant+direction*8,nullptr);
-            }
-            if(abs(in_iEndPosition - in_iStartPosition) == 16) {
-                int direction = (in_colPlayer == Color::WHITE) ? 1 : -1;
-                m_ipositionEnPassant = in_iStartPosition + direction * 8;
-                if (enPassantPos) {
-                    *enPassantPos = in_iEndPosition;
-                }
-                wasEnPassant = true;
-            }
-            if(in_iEndPosition/8 == 0 || in_iEndPosition/8 == 7) {
-                promotePawn(in_colPlayer, &pPiece,promotionType);
-            }
-        }
-
-        if(pPiece->getTypePiece() == TypePieces::KING) // If the king rocked (move of length 2, we move the rook)
-        {
-            bool bKingWentRightForRock = in_iEndPosition - in_iStartPosition == 2;
-            bool bKingWentLeftForRock = in_iEndPosition - in_iStartPosition == -2;
-
-            if(in_colPlayer == Color::WHITE)
-            {
-                m_iWhiteKingPosition = in_iEndPosition;
-            }
-            else
-            {
-                m_iBlackKingPosition = in_iEndPosition;
-            }
-
-            Piece* pRookForRock = nullptr;
-            if(bKingWentRightForRock)
-            {
-                int iLastPositionOnTheRow = in_iStartPosition + (7 - in_iStartPosition%8);
-                pRookForRock = getPieceAt(iLastPositionOnTheRow);
-
-                if(pRookForRock != nullptr)
-                {
-                    //pRookForRock->setAlreadyMoved(true);
-                    bool bCouldPLacePiece = placePiece(in_iStartPosition + 1, pRookForRock);
-                    if(! bCouldPLacePiece)
-                    {
-                        return false;
-                    }
-                    m_tabpiBoard[iLastPositionOnTheRow] = nullptr; // La dernière case de la ligne
-                }
-            }
-            else if(bKingWentLeftForRock)
-            {
-                int iFirstPositionOnTheRow = in_iStartPosition - in_iStartPosition%8;
-                pRookForRock = getPieceAt(iFirstPositionOnTheRow);
-
-                if(pRookForRock != nullptr)
-                {
-                    //pRookForRock->setAlreadyMoved(true);
-                    bool bCouldPLacePiece = placePiece(in_iStartPosition - 1, pRookForRock);
-                    if(! bCouldPLacePiece)
-                    {
-                        return false;
-                    }
-                    m_tabpiBoard[iFirstPositionOnTheRow] = nullptr; // La première case de la ligne
-                }
-            }
-            removeRockPossibility(in_colPlayer, in_iStartPosition % 8);
-        }
-
-        if (pPiece->getTypePiece() == TypePieces::ROOK) {
-            removeRockPossibility(in_colPlayer, in_iStartPosition % 8);
-        }
-
-        if(!wasEnPassant && m_ipositionEnPassant !=-1) {
-            m_ipositionEnPassant = -1;
-        }
-
-        if(piece && !wasEnPassant) {
-            *piece = getPieceAt(in_iEndPosition);
-        }
-        placePiece(in_iEndPosition, pPiece);
-        m_tabpiBoard[in_iStartPosition] = nullptr;
-
-        // If we were able to move, it means that we are not in check anymore
-        putOrRemoveKingInCheck(colPieceToMove, false);
-
-        if(isKingAttackedAfterMove(colEnemyPieceToMove, colPieceToMove)) //Verify if the king has been put in check or not
-        {
-            putOrRemoveKingInCheck(colEnemyPieceToMove, true);
-        }
-
-        return true;
+        *enPassantPos = m_ipositionEnPassant;
     }
 
-    return false;
+    //If movement isn't possible we stop the move
+    if (!isMovementPossible(in_iStartPosition, in_iEndPosition)) {
+        return false;
+    }
+
+    { // We reset those indexs because we want to update those values with this move
+        m_itabIndexRockPrivilegeLostOnMove[0] = -1;
+        m_itabIndexRockPrivilegeLostOnMove[1] = -1;
+        m_itabIndexRockPrivilegeLostOnMove[2] = -1;
+        m_itabIndexRockPrivilegeLostOnMove[3] = -1;
+    }
+
+    bool wasEnPassant = false;
+
+    //Gestion des cas spécifique du pion
+    if(pPiece->getTypePiece() == TypePieces::PAWN) {
+
+        //Capture enPassant
+        if(in_iEndPosition==m_ipositionEnPassant) {
+            int direction = (in_colPlayer == Color::WHITE) ? -1 : 1;
+            if(piece) {
+                *piece = getPieceAt(m_ipositionEnPassant+direction*8);
+            }
+            placePiece(m_ipositionEnPassant+direction*8,nullptr);
+        }
+
+        // Set en passant position
+        if(abs(in_iEndPosition - in_iStartPosition) == 16) {
+            m_ipositionEnPassant = in_iStartPosition + ((in_colPlayer == Color::WHITE) ? 8 : -8);
+            if (enPassantPos) {*enPassantPos = m_ipositionEnPassant;}
+            wasEnPassant = true;
+        }
+
+        //Promotion du pion
+        if(in_iEndPosition/8 == 0 || in_iEndPosition/8 == 7) {
+            promotePawn(in_colPlayer, &pPiece,promotionType);
+        }
+    }
+
+    //Gestion cas spécifique du roi
+    if(pPiece->getTypePiece() == TypePieces::KING) // If the king rocked (move of length 2, we move the rook)
+    {
+        int delta = in_iEndPosition - in_iStartPosition;
+        bool bKingWentRightForRock = (delta == 2);
+        bool bKingWentLeftForRock = (delta == -2);
+
+        (in_colPlayer == Color::WHITE ? m_iWhiteKingPosition : m_iBlackKingPosition) = in_iEndPosition;
+
+        int rookStartPos = bKingWentRightForRock? in_iStartPosition + 7 - (in_iStartPosition % 8) : in_iStartPosition - (in_iStartPosition % 8);
+        int rookEndPos = bKingWentRightForRock? in_iStartPosition + 1 : in_iStartPosition - 1;
+
+        Piece* pRookForRock = nullptr;
+        pRookForRock = getPieceAt(rookStartPos);
+        if((bKingWentRightForRock || bKingWentLeftForRock) && pRookForRock != nullptr)
+        {
+            bool bCouldPLacePiece = placePiece(rookEndPos, pRookForRock);
+            if(! bCouldPLacePiece){
+                return false;
+            }
+            m_tabpiBoard[rookStartPos] = nullptr; // La dernière case de la ligne
+        }
+        removeRockPossibility(in_colPlayer, in_iStartPosition % 8);
+    }
+
+    //Gestion cas spécifique de la tour
+    if (pPiece->getTypePiece() == TypePieces::ROOK) {
+        removeRockPossibility(in_colPlayer, in_iStartPosition % 8);
+    }
+
+    if(!wasEnPassant && m_ipositionEnPassant !=-1) {
+        m_ipositionEnPassant = -1;
+    }
+
+    if(piece && !wasEnPassant && getPieceAt(in_iEndPosition) != nullptr) // getPieceAt(in_iEndPosition) != nullptr because we don't want to get here when we are doing enPassant (eating)
+    {
+        *piece = getPieceAt(in_iEndPosition);
+    }
+    placePiece(in_iEndPosition, pPiece);
+    m_tabpiBoard[in_iStartPosition] = nullptr;
+
+    // If we were able to move, it means that we are not in check anymore
+    putOrRemoveKingInCheck(pPiece->getColor(), false);
+    if (isKingAttackedAfterMove(colEnemy, in_colPlayer)) {
+        putOrRemoveKingInCheck(colEnemy, true);
+    }
+
+    m_iPreviousMoveInitialPosition = in_iStartPosition;
+    m_iPreviousMoveTargetPosition = in_iEndPosition;
+    return true;
 }
 
 //************************************************************************************//
@@ -333,6 +341,7 @@ bool Board::isBlackKingCheck() const
     return m_isBlackKingChecked;
 }
 
+//@TODO Enlever le tableau dynamique vector et le remplacer par autre chose?
 bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition)
 {
     if(! isValidPosition(in_iStartPosition) || ! isValidPosition(in_iTargetPosition))
@@ -354,17 +363,14 @@ bool Board::isMovementPossible(int in_iStartPosition, int in_iTargetPosition)
     std::vector<int> itabValidPositions;
     possibleMovesForPiece(in_iStartPosition, itabValidPositions);
 
-    for(int iIndiceValidPosition = 0; iIndiceValidPosition < itabValidPositions.size(); iIndiceValidPosition++)
-    {
-        if(itabValidPositions[iIndiceValidPosition] == in_iTargetPosition)
-        {
-            return true;
-        }
+    if (std::ranges::find(itabValidPositions.begin(), itabValidPositions.end(), in_iTargetPosition) != itabValidPositions.end()) {
+        return true;
     }
 
     return false;
 }
 
+//@TODO Il y a une consition impossible, why????
 bool Board::isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer) {
     m_isWhiteKingChecked = true;
     if(in_colPlayer == Color::WHITE) {
@@ -384,6 +390,7 @@ bool Board::isCheckmated(int in_iStartRow, int in_iStartCol, Color in_colPlayer)
     return true;
 }
 
+//@TODO Voir pour virer les vector et mettre des tableaux statiques
 bool Board::isKingAttackedAfterMove(Color in_kingColor, Color in_attackerColor) const
 {
     int iKingPosition = getKingPosition(in_kingColor);
@@ -398,16 +405,17 @@ bool Board::isKingAttackedAfterMove(Color in_kingColor, Color in_attackerColor) 
 
 bool Board::isKingInCheck(Color in_kingColor) const
 {
-    if(in_kingColor == Color::WHITE)
-    {
-        return m_isWhiteKingChecked;
-    }
-    return m_isBlackKingChecked;
+    return in_kingColor == Color::WHITE ? m_isWhiteKingChecked : m_isBlackKingChecked;
 }
 
+//@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 void Board::putOrRemoveKingInCheck(Color in_kingColor, bool in_bPutKingInCheck)
 {
-    switch (in_kingColor) {
+    if (in_kingColor == Color::WHITE || in_kingColor == Color::BLACK) {
+        bool& kingCheck = (in_kingColor == Color::WHITE) ? m_isWhiteKingChecked : m_isBlackKingChecked;
+        kingCheck = in_bPutKingInCheck;
+    }
+    /*switch (in_kingColor) {
         case Color::WHITE:
             m_isWhiteKingChecked = in_bPutKingInCheck;
         break;
@@ -416,25 +424,37 @@ void Board::putOrRemoveKingInCheck(Color in_kingColor, bool in_bPutKingInCheck)
         break;
         default:
             return;
-    }
+    }*/
 }
 
+//@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 bool Board::isPromotionMove(int start, int end, Color color) {
     Piece* piece = getPieceAt(start);
-    if (piece && piece->getTypePiece() == TypePieces::PAWN) {
+    return piece && piece->getTypePiece() == TypePieces::PAWN && ((color == Color::WHITE && end / 8 == 7) || (color == Color::BLACK && end / 8 == 0));
+    /*if (piece && piece->getTypePiece() == TypePieces::PAWN) {
         int endRow = end / 8;
         if ((color == Color::WHITE && endRow == 7) || (color == Color::BLACK && endRow == 0)) {
             return true;
         }
     }
-    return false;
+    return false;*/
 }
 
+//@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 // DO not check if the cases are attacked
 bool Board::doesKingCanRock(Color in_colKing, int in_iDirectionForRock) const
 {
-    int iKingPosition;
-    switch(in_colKing)
+    //int iKingPosition;
+
+
+    if ((in_colKing == Color::WHITE && m_isWhiteKingChecked) || (in_colKing == Color::BLACK && m_isBlackKingChecked) || (in_colKing==Color::NONE))  {
+        return false;
+    }
+
+    int iKingPosition = (in_colKing == Color::WHITE) ? m_iWhiteKingPosition : m_iBlackKingPosition;
+
+
+    /*switch(in_colKing)
     {
         case Color::WHITE:
             if(m_isWhiteKingChecked)
@@ -452,7 +472,7 @@ bool Board::doesKingCanRock(Color in_colKing, int in_iDirectionForRock) const
         break;
         default:
             return false;
-    }
+    }*/
 
     int iPositionPieceFound = -1;
     Piece* pPieceFound = findFirstPieceOnDirection(iKingPosition, in_iDirectionForRock, 7, iPositionPieceFound);
@@ -463,6 +483,12 @@ bool Board::doesKingCanRock(Color in_colKing, int in_iDirectionForRock) const
 
     if(pPieceFound->getTypePiece() == TypePieces::ROOK && iPositionPieceFound != -1)
     {
+        if ((in_colKing == Color::WHITE && ((iPositionPieceFound == 7 && m_bWhiteKingCanLittleRock) || iPositionPieceFound == 0 && m_bWhiteKingCanBigRock)) ||
+            (in_colKing == Color::BLACK && ((iPositionPieceFound == 56 && m_bBlackKingCanLittleRock) || iPositionPieceFound == 63 && m_bBlackKingCanBigRock)))  {
+            return true;
+        }
+        return false;
+
         switch(in_colKing)
         {
             case Color::WHITE:
@@ -492,9 +518,11 @@ bool Board::doesKingCanRock(Color in_colKing, int in_iDirectionForRock) const
     return false;
 }
 
+//@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 bool Board::kingCanLittleRock(Color in_kingColor) const
 {
-    switch (in_kingColor)
+    return (in_kingColor==Color::WHITE) ? m_bWhiteKingCanLittleRock : m_bBlackKingCanLittleRock;
+    /*switch (in_kingColor)
     {
         case Color::WHITE:
             return m_bWhiteKingCanLittleRock;
@@ -502,12 +530,14 @@ bool Board::kingCanLittleRock(Color in_kingColor) const
             return m_bBlackKingCanLittleRock;
         default:
             return false;
-    }
+    }*/
 }
 
+//@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 bool Board::kingCanBigRock(Color in_kingColor) const
 {
-    switch (in_kingColor)
+    return (in_kingColor==Color::WHITE) ? m_bWhiteKingCanBigRock : m_bBlackKingCanBigRock;
+    /*switch (in_kingColor)
     {
         case Color::WHITE:
             return m_bWhiteKingCanBigRock;
@@ -515,13 +545,14 @@ bool Board::kingCanBigRock(Color in_kingColor) const
             return m_bBlackKingCanBigRock;
         default:
             return false;
-    }
+    }*/
 }
 
 //************************************************************************************//
 
 //************************* Attack and Threat Detection Functions ********************//
 
+//@TODO Je suis sûr on peux gérer la boucle plus simplement
 bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound) const
 {
     if(! isValidPosition(in_iPosition))
@@ -550,6 +581,7 @@ bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, 
     return false;
 }
 
+//@TODO Les vecteurs sont surements un problème
 bool Board::isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
 {
     if(! isValidPosition(in_iPosition))
@@ -561,12 +593,11 @@ bool Board::isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vect
     findFirstPiecesOnEachBishopMovementsThatAttacksInitialPosition(in_iPosition, in_vectPositionPieceFound);
     findFirstPiecesOnEachRookMovementsThatAttacksInitialPosition(in_iPosition, in_vectPositionPieceFound);
 
-    if(in_vectPositionPieceFound.empty()) {
-        return false;
-    }
-    return true;
+    return !in_vectPositionPieceFound.empty();
 }
 
+
+//@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 Piece* Board::findFirstPieceOnDirectionThatAttacksInitialPosition(int in_iPosition, int in_iDirection, int in_iNbOfRepetition, int& in_iPositionPieceFound) const {
 
     if(! isValidPosition(in_iPosition) || in_iNbOfRepetition <= 0)
@@ -576,37 +607,42 @@ Piece* Board::findFirstPieceOnDirectionThatAttacksInitialPosition(int in_iPositi
 
     Piece* pPieceFound = findFirstPieceOnDirection(in_iPosition, in_iDirection, in_iNbOfRepetition, in_iPositionPieceFound);
 
-    if(pPieceFound != nullptr && in_iPositionPieceFound != -1)
-    {
-        if(pPieceFound->doesPieceMoveInDirection(- in_iDirection)) // We want to see if the piece can attack our initial position
-        {
-            int iPositionDifference = std::abs(in_iPosition - in_iPositionPieceFound);
-            if(pPieceFound->getTypePiece() == TypePieces::PAWN) // Un pion qui peut avancer n'est pas un pion qui peut attaquer
-            {
-                if(iPositionDifference == 7 || iPositionDifference == 9)
-                {
-                    return pPieceFound;
-                }
-                in_iPositionPieceFound = -1;
-                return nullptr;
-            }
-            if(pPieceFound->getTypePiece() == TypePieces::KING) // Un pion qui peut avancer n'est pas un pion qui peut attaquer
-            {
-                if(iPositionDifference == 1 || iPositionDifference == 7 || iPositionDifference == 8 || iPositionDifference == 9) // Comme c'est la valeur absolue, il n'y a que les 4 valeurs positives à vérifier
-                {
-                    return pPieceFound;
-                }
-                in_iPositionPieceFound = -1;
-                return nullptr;
-            }
-
-            return pPieceFound;
-        }
-
+    if(pPieceFound == nullptr || in_iPositionPieceFound == -1 || !pPieceFound->doesPieceMoveInDirection(-in_iDirection)) {
+        in_iPositionPieceFound = -1;
+        return nullptr;
     }
 
-    in_iPositionPieceFound = -1;
-    return nullptr;
+    int iPositionDifferenceAbsolute = std::abs(in_iPosition - in_iPositionPieceFound);
+    int iPositionDifference = in_iPositionPieceFound - in_iPosition;
+
+    if (pPieceFound->getTypePiece() == TypePieces::PAWN) {
+        if (iPositionDifferenceAbsolute == 7 || iPositionDifferenceAbsolute == 9) {
+            return pPieceFound;
+        }
+        in_iPositionPieceFound = -1;
+        return nullptr;
+    }
+
+    if (pPieceFound->getTypePiece() == TypePieces::KING) {
+        if(in_iPosition%8 == 7 && (iPositionDifference == -7 || iPositionDifference == 9)) // SI on est sur la colonne à droite, le roi ne peut pas aller en diagonale à droite (dépassement)
+        {
+            in_iPositionPieceFound = -1;
+            return nullptr;
+        }
+        if (in_iPosition%8 == 0 && (iPositionDifference == 7 || iPositionDifference == -9)) // SI on est sur la colonne à droite, le roi ne peut pas aller en diagonale à gauche (dépassement)
+        {
+            in_iPositionPieceFound = -1;
+            return nullptr;
+        }
+
+        if (iPositionDifferenceAbsolute == 1 || iPositionDifferenceAbsolute == 7 || iPositionDifferenceAbsolute == 8 || iPositionDifferenceAbsolute == 9) {
+            return pPieceFound;
+        }
+        in_iPositionPieceFound = -1;
+        return nullptr;
+    }
+
+    return pPieceFound;
 }
 
 Piece* Board::findFirstPieceOnDirection(int in_iPosition,int in_iDirection, int in_iNbOfRepetition, int& in_iPositionPieceFound) const {
@@ -870,11 +906,11 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                 if (pPieceToSeeMoves->isNextPositionValid(kingMoves[i], in_iPositionToSeeMoves, nextPosition)) {
                     if (m_tabpiBoard[nextPosition] == nullptr || m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
                         bool bValidMove = putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
-                        if(bValidMove && kingMoves[i] == 1) // To not repeat computation for the rock juste after
+                        if(bValidMove && kingMoves[i] == 1 && m_tabpiBoard[nextPosition] == nullptr) // To not repeat computation for the rock juste after
                         {
                             bLittleRockPossible = true;
                         }
-                        else if(bValidMove && kingMoves[i] == -1)
+                        else if(bValidMove && kingMoves[i] == -1 && m_tabpiBoard[nextPosition] == nullptr)
                         {
                             bBigRockPossible = true;
                         }
@@ -1106,21 +1142,113 @@ std::vector<std::pair<int, int>> Board::listOfPossibleMoves(Color in_colPlayer) 
     return possibleMoves;
 }
 
-bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion,int enPassantPos) {
+void Board::listOfPossibleMoves(Color in_colPlayer, std::vector<std::pair<int, int>>& out_moves) {
+    // Efface les anciennes valeurs du vecteur fourni
+    out_moves.clear();
+
+    for (int iPosition = 0; iPosition < 64; ++iPosition) {
+        Piece* pPiece = getPieceAt(iPosition);
+        if (pPiece != nullptr && pPiece->getColor() == in_colPlayer) {
+            std::vector<int> validMoves;
+            possibleMovesForPiece(iPosition, validMoves);
+            for (int targetPos : validMoves) {
+                out_moves.emplace_back(iPosition, targetPos);
+            }
+        }
+    }
+}
+
+void Board::listOfPossibleMoves(Color in_colPlayer, std::pair<int, int> out_moves[128], int& out_moveCount) {
+    out_moveCount = 0;
+
+    for (int iPosition = 0; iPosition < 128; ++iPosition) {
+        Piece* pPiece = getPieceAt(iPosition);
+        if (pPiece != nullptr && pPiece->getColor() == in_colPlayer) {
+            std::vector<int> validMoves;
+            possibleMovesForPiece(iPosition, validMoves);
+            for (int targetPos : validMoves) {
+                if (out_moveCount < 128) {
+                    out_moves[out_moveCount++] = std::make_pair(iPosition, targetPos);
+                }
+            }
+        }
+    }
+}
+
+
+bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion,int enPassantPos, int in_itabCastlingRights[4], bool in_bIsWhiteKingChecked, bool in_bIsBlackKingChecked, int in_iWhiteKingPosition, int in_iBlackKingPosition) {
     Piece* movingPiece = getPieceAt(in_iEndPosition);
     if(movingPiece == nullptr) {
         return false;
     }
 
+    //m_iPreviousMove = {in_iPairPreviousMove.first, in_iPairPreviousMove.second};
+
     placePiece(in_iStartPosition, movingPiece);
     m_tabpiBoard[in_iEndPosition] = nullptr;
+    m_ipositionEnPassant = enPassantPos;
+
+    int iCaseDifference = in_iStartPosition - in_iEndPosition;
+    if(movingPiece->getTypePiece() == TypePieces::KING && std::abs(iCaseDifference) == 2) // Pour le roque
+    {
+        Piece* pRookToMove = nullptr;
+        int iInitialRookPosition = -1;
+        int iPositionToGetAndDeleteRook = -1;
+        if(movingPiece->getColor() == Color::WHITE && in_iStartPosition == 4)
+        {
+            if(iCaseDifference == 2)
+            {
+                iPositionToGetAndDeleteRook = 3;
+                iInitialRookPosition = 0;
+            }
+            if(iCaseDifference == -2)
+            {
+                iPositionToGetAndDeleteRook = 5;
+                iInitialRookPosition = 7;
+            }
+        }
+        if(movingPiece->getColor() == Color::BLACK && in_iStartPosition == 60)
+        {
+            if(iCaseDifference == 2)
+            {
+                iPositionToGetAndDeleteRook = 59;
+                iInitialRookPosition = 56;
+            }
+            if(iCaseDifference == -2)
+            {
+                iPositionToGetAndDeleteRook = 61;
+                iInitialRookPosition = 63;
+            }
+        }
+
+        if(iPositionToGetAndDeleteRook == -1) std::cerr << "ERROR UNDOMOVE" << std::endl;
+        pRookToMove = m_tabpiBoard[iPositionToGetAndDeleteRook];
+        m_tabpiBoard[iPositionToGetAndDeleteRook] = nullptr;
+        m_tabpiBoard[iInitialRookPosition] = pRookToMove;
+
+    }
+
+    if(in_itabCastlingRights != nullptr)
+    {
+        m_bWhiteKingCanLittleRock = in_itabCastlingRights[0] == 0;
+        m_bWhiteKingCanBigRock = in_itabCastlingRights[1] == 1;
+        m_bBlackKingCanLittleRock = in_itabCastlingRights[2] == 2;
+        m_bBlackKingCanBigRock = in_itabCastlingRights[3] == 3;
+    }
+
+    m_isWhiteKingChecked = in_bIsWhiteKingChecked;
+    m_isBlackKingChecked = in_bIsBlackKingChecked;
+    m_iWhiteKingPosition = in_iWhiteKingPosition;
+    m_iBlackKingPosition = in_iBlackKingPosition;
+
 
     if(promotion) {
         movingPiece->setTypePiece(TypePieces::PAWN);
     }
 
-    if (enPassantPos!=-1) {
-        placePiece(enPassantPos, capturedPiece);
+    if (enPassantPos!=-1 && in_iEndPosition == enPassantPos && movingPiece->getTypePiece() == TypePieces::PAWN) {
+        int iMovePiece = movingPiece->getColor() == Color::WHITE ? enPassantPos - 8 : enPassantPos + 8;
+        placePiece(iMovePiece, capturedPiece);
     }
     else if(capturedPiece) {
         placePiece(in_iEndPosition, capturedPiece);
@@ -1848,7 +1976,7 @@ int Board::evaluateKingSafety(Color color) const {
 
 int Board::getPieceValue(TypePieces type) {
     switch (type) {
-        case TypePieces::PAWN:   return 100;
+        case TypePieces::PAWN:   return 90;
         case TypePieces::KNIGHT: return 320;
         case TypePieces::BISHOP: return 330;
         case TypePieces::ROOK:   return 500;
@@ -1906,24 +2034,56 @@ void Board::promotePawn(Color in_colPlayer, Piece** ppPiece, TypePieces promotio
 void Board::removeRockPossibility(Color in_color, int i_columnRook) {
     if (in_color == Color::WHITE) {
         if (i_columnRook == 0) {
+            if(m_bWhiteKingCanBigRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[1] = 1;
+            }
             m_bWhiteKingCanBigRock = false;
         }
         else if (i_columnRook == 7) {
+            if(m_bWhiteKingCanLittleRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[0] = 0;
+            }
             m_bWhiteKingCanLittleRock = false;
         }
         else {
+            if(m_bWhiteKingCanLittleRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[0] = 0;
+            }
+            if(m_bWhiteKingCanBigRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[1] = 1;
+            }
             m_bWhiteKingCanBigRock = false;
             m_bWhiteKingCanLittleRock = false;
         }
     }
     else {
         if (i_columnRook == 0) {
+            if(m_bBlackKingCanBigRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[3] = 3;
+            }
             m_bBlackKingCanBigRock = false;
         }
         else if (i_columnRook == 7) {
+            if(m_bBlackKingCanLittleRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[2] = 2;
+            }
             m_bBlackKingCanLittleRock = false;
         }
         else {
+            if(m_bBlackKingCanBigRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[3] = 3;
+            }
+            if(m_bBlackKingCanLittleRock) // We update only if it is going from true to false
+            {
+                m_itabIndexRockPrivilegeLostOnMove[2] = 2;
+            }
             m_bBlackKingCanBigRock = false;
             m_bBlackKingCanLittleRock = false;
         }
@@ -1998,6 +2158,34 @@ std::vector<int> Board::getCastlingStateAsVector() const
         castling[3] = 3;
     }
     return castling;
+}
+
+void Board::getCastlingStateAsTableau(int out_itabCastlingRights[4]) const
+{
+    if(m_bWhiteKingCanLittleRock)
+    {
+        out_itabCastlingRights[0] = 0;
+    }
+    if(m_bWhiteKingCanBigRock)
+    {
+        out_itabCastlingRights[1] = 1;
+    }
+    if(m_bBlackKingCanLittleRock)
+    {
+        out_itabCastlingRights[2] = 2;
+    }
+    if(m_bBlackKingCanBigRock)
+    {
+        out_itabCastlingRights[3] = 3;
+    }
+}
+
+void Board::getCastlingRightsLostByMoving(int out_itabCastlingRightsLost[4]) const
+{
+    out_itabCastlingRightsLost[0] = m_itabIndexRockPrivilegeLostOnMove[0];
+    out_itabCastlingRightsLost[1] = m_itabIndexRockPrivilegeLostOnMove[1];
+    out_itabCastlingRightsLost[2] = m_itabIndexRockPrivilegeLostOnMove[2];
+    out_itabCastlingRightsLost[3] = m_itabIndexRockPrivilegeLostOnMove[3];
 }
 
 int Board::getEnPassantState() const

@@ -13,7 +13,6 @@
 class Board {
 private:
     Piece* m_tabpiBoard[64]{};
-    bool m_isGameOver = false;
     bool m_isWhiteKingChecked = false;
     bool m_isBlackKingChecked = false;
 
@@ -25,6 +24,11 @@ private:
     int m_iBlackKingPosition = 60;
     int m_iWhiteKingPosition = 4;
     int m_ipositionEnPassant = -1;
+
+    int m_iPreviousMoveInitialPosition = -1; // FOR DEBUG
+    int m_iPreviousMoveTargetPosition = -1; // FOR DEBUG
+
+    int m_itabIndexRockPrivilegeLostOnMove[4] = {-1, -1, -1, -1}; // Used for Zobrist
 
     uint64_t zobristHash;
 
@@ -463,7 +467,7 @@ public:
     *                     la valeur par défaut de -1 sera utilisée.
     * @return `true` si le mouvement a été annulé avec succès, `false` en cas d'erreur.
     */
-    bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion=false,int enPassantPos=-1);
+    bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion=false,int enPassantPos=-1, int in_itabCastlingRights[4] = nullptr, bool in_bIsWhiteKingChecked = false, bool in_bIsBlackKingChecked = false, int in_iWhiteKingPosition = -1, int in_iBlackKingPosition = -1);
 
     //Evaluation and Heuristic Functions
     /**
@@ -609,6 +613,8 @@ public:
      */
     std::vector<int> getCastlingStateAsVector() const;
 
+    void getCastlingStateAsTableau(int out_itabCastlingRights[4]) const;
+
     /**
      * Les indices retournés vont de 0 à 15.    0-7 : EnPassant noir en lisant de gauche à droite ||    8-15 : EnPassant blanc en lisant de gauche à droite
      * @return L'indice de la valeur en passant dans le tableau Zobrits
@@ -684,9 +690,28 @@ public:
     * et les pièces blanches en minuscule. Les cases vides sont représentées par un point (".").
     */
     void displayBoard() const;
+    void getCastlingRightsLostByMoving(int out_itabCastlingRightsLost[4]) const;
     std::string getBoardAsString() const;
     uint64_t getZobristHash() const { return zobristHash; }
     void setZobristHash(uint64_t hash) { zobristHash = hash; }
+    void listOfPossibleMoves(Color in_colPlayer, std::vector<std::pair<int, int>>& out_moves);
+    void listOfPossibleMoves(Color in_colPlayer, std::pair<int, int> out_moves[128], int& out_moveCount);
+
+    int getPreviousMoveInitialPosition() const {
+        return m_iPreviousMoveInitialPosition;
+    }
+
+    void setPreviousMoveInitialPosition(int m_i_previous_move_initial_position) {
+        m_iPreviousMoveInitialPosition = m_i_previous_move_initial_position;
+    }
+
+    int getPreviousMoveTargetPosition() const {
+        return m_iPreviousMoveTargetPosition;
+    }
+
+    void setPreviousMoveTargetPosition(int m_i_previous_move_target_position) {
+        m_iPreviousMoveTargetPosition = m_i_previous_move_target_position;
+    }
 };
 
 #endif //BOARD_H
