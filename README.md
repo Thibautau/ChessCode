@@ -7,6 +7,7 @@ ChessCode est un moteur d'échecs écrit en C++ qui permet de jouer contre un bo
 - **CMake** (version 3.29 ou supérieure) : Utilisé pour la configuration du projet.
 - **Compilateur C++** (supportant C++20 minimum) : Le code utilise des fonctionnalités de C++20, assurez-vous que votre compilateur prend en charge cette version.
 - **GoogleTest** : Utilisé pour les tests unitaires (normalement intégré au fichier de config cmake du projet)
+- **WSL2 (pour les tests de perf)** (Windows Subsystem for Linux 2) pour les utilisateurs Windows qui souhaitent utiliser Linux sous Windows.
 
 ## Compilation
 
@@ -77,6 +78,60 @@ Par défaut, le jeu est jouable depuis la console. Cependant, pour le relier à 
    ![Configuration du GUI pour UCI](doc/NewCheesEngine.png)
 
 Le bot devrait désormais être opérationnel dans votre interface graphique.
+
+
+### Installation d'Ubuntu sur WSL2
+
+1. Installez WSL2 si ce n'est pas déjà fait :
+   ```bash
+   wsl --install
+   ```
+
+2. Lancez Ubuntu depuis le menu Démarrer ou avec cette commande :
+   ```bash
+   wsl
+   ```
+
+3. Installez les outils requis sous Ubuntu :
+    - Mettez à jour les dépôts :
+      ```bash
+      sudo apt update
+      ```
+    - Installez Valgrind :
+      ```bash
+      sudo apt install valgrind
+      ```
+    - Installez CMake si ce n'est pas fait :
+      ```bash
+      sudo apt install cmake
+      cmake --version
+      ```
+    - Vérifiez l'installation de Valgrind :
+      ```bash
+      valgrind --version
+      ```
+
+### Configuration d'un serveur GDB pour le débogage
+
+1. Téléchargez et exécutez le script de configuration :
+   ```bash
+   wget https://raw.githubusercontent.com/JetBrains/clion-wsl/master/ubuntu_setup_env.sh && bash ubuntu_setup_env.sh
+   ```
+
+2. Connectez-vous via SSH :
+   ```bash
+   ssh user@localhost -p 2222
+   ```
+
+3. Configurez CLion :
+    - Allez dans **Settings > Build, Execution, Deployment > Toolchains**.
+    - Créez une nouvelle Toolchain sous WSL (les informations devraient être remplies automatiquement).
+    - Configurez Valgrind dans **Settings > Build, Execution, Deployment > Dynamic Analysis Tools** :
+        - Chemin : `\\wsl$\Ubuntu\usr\bin\valgrind`
+        - Options :
+          ```bash
+          --leak-check=full --leak-resolution=med --track-origins=yes --vgdb=no
+          ```
 
 ## Disclaimer
 Le bot est toujours en cours de développement, et des fonctionnalités sont encore en phase de test. Suite à un récent merge de la branche UCI, la structure du code a été modifiée, ce qui peut entraîner certains bugs.

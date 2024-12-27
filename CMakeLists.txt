@@ -1,7 +1,12 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.28)
 project(ChessCode)
 
 set(CMAKE_CXX_STANDARD 20)
+
+set(CMAKE_BUILD_TYPE Debug)
+
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 
 
 include_directories(.)  # Inclure le répertoire courant
