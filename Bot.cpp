@@ -125,7 +125,6 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
     std::pair<int, int> previousBestMove = { -1, -1 };
 
     // Initialisation de Zobrist et du hash de la position
-    Zobrist::initZobrist();
     board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
 
     // Variables pour récupérer les stats et informations diverses
@@ -421,14 +420,34 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     }
 
     // XOR the start and end of the moved piece
-    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()) - 1, move.first);//Remove the piece moving
-    zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()) - 1, move.second);//Place the piece moving
-
-    // If the move is a promotion
-    if (isPromotion) {
+    if(! isPromotion)
+    {
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()) - 1, move.first);//Remove the piece moving
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()) - 1, move.second);//Place the piece moving
+    }
+    else
+    {
+        // The type of the piece is pawn because it is a promotion
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::PAWN, piece_depart->getColor())-1, move.first); // Remove the pawn
         TypePieces promotedType = Piece::charToPieceType(promotionForMove);
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor())-1, move.second); // Remove the pawn
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(promotedType, piece_depart->getColor())-1, move.second); // Add the promoted piece
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(promotedType, piece_depart->getColor())-1, move.second); // add the promote piece
+    }
+
+    int iPositionDifferenceAbsolute = std::abs(move.first - move.second);
+    int iPositionDifference = move.second - move.first;
+
+    if (piece_depart->getTypePiece() == TypePieces::KING && iPositionDifferenceAbsolute == 2)
+    {
+        if(move.second%8 == 6) // Roque à droite (petit)
+        {
+            zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::ROOK, piece_depart->getColor())-1, move.second + 1); // Remove the rook
+            zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::ROOK, piece_depart->getColor())-1, move.second - 1); // Add the rook
+        }
+        else if(move.second%8 == 2) // Roque à droite (petit)
+        {
+            zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::ROOK, piece_depart->getColor())-1, move.second - 2); // Remove the rook
+            zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::ROOK, piece_depart->getColor())-1, move.second + 1); // Add the rook
+        }
     }
 
     // XOR the castling rights

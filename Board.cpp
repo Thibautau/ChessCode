@@ -2194,16 +2194,7 @@ int Board::getEnPassantState() const
     {
         return -1;
     }
-    else if (m_ipositionEnPassant >= 40 && m_ipositionEnPassant <= 47) // 3 ème ligne en partant du haut pour les noirs (6)
-    {
-        return std::abs(40 - m_ipositionEnPassant); // Indices allant de 0 à 7
-    }
-    else if (m_ipositionEnPassant >= 16 && m_ipositionEnPassant <= 23) // 3 ème ligne en partant du bas pour les blancs (3)
-    {
-        return 8 + std::abs(16 - m_ipositionEnPassant); // Indices allant de 8 à 15
-    }
-
-    return -1;
+    return m_ipositionEnPassant % 8; // On ne retourne que la colonne
 }
 
 int Board::convertToPosition(char col, char row) {
