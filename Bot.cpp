@@ -30,7 +30,7 @@ int Bot::uniqueNodeIterated = 0;
 
 Bot::Bot(Color color) : m_color(color)
 {
-    m_logFile = new LogFile("Bot_Evaluation_Log.txt", true);
+    m_logFile = new LogFile("Bot_Evaluation_Log.txt", false);
 }
 
 Color Bot::getPlayerColor() const {

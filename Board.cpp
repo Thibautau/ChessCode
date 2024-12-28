@@ -2132,6 +2132,9 @@ std::vector<int> Board::getBoardStateAsVector() const {
         if (m_tabpiBoard[i] != nullptr) {
             boardState[i] = getIndexByPiece(m_tabpiBoard[i]->getTypePiece(), m_tabpiBoard[i]->getColor());
         }
+        else {
+            boardState[i] = -1;
+        }
     }
     return boardState;
 }

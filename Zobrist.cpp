@@ -85,10 +85,7 @@ std::vector<std::vector<uint64_t>> Zobrist::zobristTable =
 /**
  * Variable qui stocke la valeur de hachage pour le tour des noirs.
  */
-uint64_t Zobrist::zobristBlackTurn =
-{
-    0xF8D626AAAF278509
-};
+uint64_t Zobrist::zobristBlackTurn = 0xF8D626AAAF278509;
 
 //NEW
 // Table pour les droits de roque (4 valeurs possibles)

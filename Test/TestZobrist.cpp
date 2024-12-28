@@ -307,3 +307,14 @@ TEST_F(TestZobrist, RockQueenSide) {
 
     EXPECT_EQ(hash1, hash1_end);
 }
+
+TEST_F(TestZobrist, TestFromPolyGlot)
+{
+    //http://hgm.nubati.net/book_format.html
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", &board);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+
+
+    EXPECT_EQ(hash1, 0x463b96181691fc9c);
+}
