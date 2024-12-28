@@ -7,18 +7,20 @@
 
 #include <vector>
 #include <cstdint>
+#include "Board.h"
 
 
 class Zobrist {
 private:
-    static std::vector<std::vector<uint64_t>> zobristTable;
+    static uint64_t zobristTable[781];
 
 public:
     static uint64_t zobristBlackTurn;
     static uint64_t zobristCastlingRights[4];
     static uint64_t zobristEnPassant[8];
     static uint64_t getPieceHash(int pieceIndex, int squareIndex);
-    static uint64_t computeZobristHash(const std::vector<int>& in_boardVector, bool in_bIsBlackTurn, const std::vector<int>& in_vectCastlingRights, int in_iIndexZobristEnPassant);
+    static uint64_t computeZobristHash(const std::vector<int>& in_boardVector, bool in_bIsWhiteTurn, const std::vector<int>& in_vectCastlingRights, int in_iIndexZobristEnPassant, bool in_bPawnNextToEnPassant = false);
+    static uint64_t computeZobristHash(bool in_bIsWhiteTurn, Board& in_board);
 
 };
 

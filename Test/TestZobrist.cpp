@@ -34,8 +34,8 @@ TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay)
     board2.clearBoard();
     MainChessGame::setBoardFromFENStatic("7k/8/8/8/8/8/8/K7 w - - 21 13", &board);
     MainChessGame::setBoardFromFENStatic("7k/8/8/8/8/8/8/K7 b - - 21 13", &board2);
-    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
-    board2.setZobristHash(Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board2.getCastlingStateAsVector(), board2.getEnPassantState()));
+    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.getEnPassantState()));
+    board2.setZobristHash(Zobrist::computeZobristHash(board2.getBoardStateAsVector(), false, board2.getCastlingStateAsVector(), board2.getEnPassantState()));
 
 
     uint64_t initBoardHash = board.getZobristHash();
@@ -49,8 +49,8 @@ TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay)
     bool board2MoveResult = board2.movePiece("h8h7", Color::BLACK);
     bool board2MoveResult2 = board2.movePiece("a1b2");
 
-    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
-    board2.setZobristHash(Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board2.getCastlingStateAsVector(), board2.getEnPassantState()));
+    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.getEnPassantState()));
+    board2.setZobristHash(Zobrist::computeZobristHash(board2.getBoardStateAsVector(), false, board2.getCastlingStateAsVector(), board2.getEnPassantState()));
     uint64_t intermediaireBoardHash = board.getZobristHash();
     uint64_t intermediaireBoard2Hash = board2.getZobristHash();
 
@@ -88,19 +88,19 @@ TEST_F(TestZobrist, test)
 {
     board.clearBoard();
     MainChessGame::setBoardFromFENStatic("7k/8/8/8/8/8/8/K7 w - - 21 13", &board);
-    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
+    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.getEnPassantState()));
     uint64_t initBoardHash = board.getZobristHash();
 
     uint64_t BoardHashComputedByBot = initBoardHash;
     bool boardMoveResult = board.movePiece("a1b2");
-    Bot::calculateZobristHashForMove(board, {0, 9}, Color::WHITE, '\0', false, BoardHashComputedByBot);
+    Bot::calculateZobristHashForMove(board, {0, 9}, Color::WHITE, '\0', true, BoardHashComputedByBot);
 
     board2.clearBoard();
     MainChessGame::setBoardFromFENStatic("7k/8/8/8/8/8/1K6/8 b - - 21 13", &board2);
-    board2.setZobristHash(Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.getEnPassantState()));
+    board2.setZobristHash(Zobrist::computeZobristHash(board2.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
     uint64_t BoardHash = board2.getZobristHash();
 
-    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.getEnPassantState()));
+    board.setZobristHash(Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantState()));
     uint64_t intermediaireBoardHash = board.getZobristHash();
 
     EXPECT_EQ(BoardHashComputedByBot, intermediaireBoardHash);
@@ -116,23 +116,23 @@ TEST_F(TestZobrist, test)
 
 TEST_F(TestZobrist, initialisation)
 {
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
-    uint64_t hash2 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
+    uint64_t hash2 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
     EXPECT_EQ(hash1, hash2);
 }
 
 TEST_F(TestZobrist, movement)
 {
     board.movePiece("b2b3");
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
-    uint64_t hash2 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
+    uint64_t hash2 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
     EXPECT_EQ(hash1, hash2);
 }
 
 TEST_F(TestZobrist, movement2)
 {
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
-    uint64_t hash2 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
+    uint64_t hash2 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
     board.movePiece("b2b3");
     board2.movePiece("b2b3");
     Bot::calculateZobristHashForMove(board, {9,17}, Color::WHITE, '\0', false, hash1);
@@ -142,15 +142,15 @@ TEST_F(TestZobrist, movement2)
 
 TEST_F(TestZobrist, TwoBoard)
 {
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
-    uint64_t hash2 = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
+    uint64_t hash2 = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
     EXPECT_EQ(hash1, hash2);
 }
 
 TEST_F(TestZobrist, TwoBoardTestCalculating)
 {
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
-    uint64_t hash2 = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
+    uint64_t hash2 = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
     board.movePiece("b2b3");
     board2.movePiece("b2b3");
     Bot::calculateZobristHashForMove(board, {9,17}, Color::WHITE, '\0', false, hash1);
@@ -160,8 +160,8 @@ TEST_F(TestZobrist, TwoBoardTestCalculating)
 
 TEST_F(TestZobrist, TwoBoardTestCalculating2)
 {
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
-    uint64_t hash2 = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
+    uint64_t hash2 = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
 
     uint64_t hash1_base = hash1;
     uint64_t hash2_base = hash2;
@@ -187,8 +187,8 @@ TEST_F(TestZobrist, TwoBoardTestCalculating2)
 TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay4) {
     board.clearBoard();
     MainChessGame::setBoardFromFENStatic("7k/8/8/8/8/8/8/K7 w - - 21 13", &board);
-    uint64_t hash1_base = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1_base = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
 
     board.movePiece("a1b2");
     Bot::calculateZobristHashForMove(board, {0,9}, Color::WHITE, '\0', false, hash1);
@@ -202,9 +202,9 @@ TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay5) {
 
     board.clearBoard();
     MainChessGame::setBoardFromFENStatic("6kq/8/8/8/8/8/8/QK6 w - - 21 13", &board);
-    uint64_t hash1_base = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1_base = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
 
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
 
     board.movePiece("a1b2");
     Bot::calculateZobristHashForMove(board, {0,9}, Color::WHITE, '\0', false, hash1);
@@ -219,9 +219,9 @@ TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay6) {
 
     board.clearBoard();
     MainChessGame::setBoardFromFENStatic("6kq/8/8/8/8/8/8/QK6 w - - 21 13", &board);
-    uint64_t hash1_base = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1_base = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
 
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
 
     board.movePiece("b1c1");
     Bot::calculateZobristHashForMove(board, {1,2}, Color::WHITE, '\0', false, hash1);
@@ -235,14 +235,14 @@ TEST_F(TestZobrist, TestHashDifferentForSamePositionButNotSamePersonToPlay7) {
 
     board.clearBoard();
     MainChessGame::setBoardFromFENStatic("6kq/8/8/8/8/8/8/QK6 w - - 21 13", &board);
-    uint64_t hash1_base = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1_base = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
 
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
 
     board.movePiece("a1b2");
     board.movePiece("b2a1");
 
-    uint64_t hash2 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash2 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
 
     EXPECT_EQ(hash1, hash2);
     EXPECT_EQ(hash1, hash1_base);
@@ -253,12 +253,12 @@ TEST_F(TestZobrist, Capture) {
     MainChessGame::setBoardFromFENStatic("6kq/8/8/8/8/7Q/8/K7 b - - 21 13", &board);
     MainChessGame::setBoardFromFENStatic("6k1/8/8/8/8/7q/8/K7 w - - 21 13", &board2);
 
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
     Piece* pCapturedPiece = board.getPieceAt("h3");
 
     board.movePiece("h8h3", Color::BLACK);
     Bot::calculateZobristHashForMove(board, {63,23}, Color::WHITE, '\0', false, hash1, pCapturedPiece);
-    uint64_t hash1_end = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), false, board2.getCastlingStateAsVector(), -1);
+    uint64_t hash1_end = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board2.getCastlingStateAsVector(), -1);
 
     EXPECT_EQ(hash1, hash1_end);
 }
@@ -269,11 +269,11 @@ TEST_F(TestZobrist, Promotion) {
     MainChessGame::setBoardFromFENStatic("6k1/8/8/8/8/8/1p6/K7 b - - 21 13", &board);
     MainChessGame::setBoardFromFENStatic("6k1/8/8/8/8/8/8/Kq6 w - - 21 13", &board2);
 
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
     board.movePiece(9,1, Color::BLACK, nullptr, TypePieces::QUEEN, nullptr);
 
     Bot::calculateZobristHashForMove(board, {9,1}, Color::WHITE, 'q', true, hash1);
-    uint64_t hash1_end = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), false, board2.getCastlingStateAsVector(), -1);
+    uint64_t hash1_end = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board2.getCastlingStateAsVector(), -1);
 
     EXPECT_EQ(hash1, hash1_end);
 }
@@ -284,11 +284,11 @@ TEST_F(TestZobrist, Rock) {
     MainChessGame::setBoardFromFENStatic("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1", &board);
     MainChessGame::setBoardFromFENStatic("r3k2r/8/8/8/8/8/8/R4RK1 b kq - 0 1", &board2);
 
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
     board.movePiece(4,6);
 
     Bot::calculateZobristHashForMove(board, {4,6}, Color::WHITE, '\0', false, hash1);
-    uint64_t hash1_end = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board2.getCastlingStateAsVector(), -1);
+    uint64_t hash1_end = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), false, board2.getCastlingStateAsVector(), -1);
 
     EXPECT_EQ(hash1, hash1_end);
 }
@@ -299,22 +299,118 @@ TEST_F(TestZobrist, RockQueenSide) {
     MainChessGame::setBoardFromFENStatic("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1", &board);
     MainChessGame::setBoardFromFENStatic("r3k2r/8/8/8/8/8/8/2KR3R b kq - 0 1", &board2);
 
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
     board.movePiece(4,2);
 
     Bot::calculateZobristHashForMove(board, {4,2}, Color::WHITE, '\0', false, hash1);
-    uint64_t hash1_end = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1_end = Zobrist::computeZobristHash(board2.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
 
     EXPECT_EQ(hash1, hash1_end);
 }
 
-TEST_F(TestZobrist, TestFromPolyGlot)
+
+
+
+
+
+
+
+
+TEST_F(TestZobrist, TestFromPolyGlot1)
 {
     //http://hgm.nubati.net/book_format.html
     board.clearBoard();
     MainChessGame::setBoardFromFENStatic("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", &board);
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
 
 
     EXPECT_EQ(hash1, 0x463b96181691fc9c);
+}
+
+TEST_F(TestZobrist, TestFromPolyGlot2)
+{
+    //http://hgm.nubati.net/book_format.html
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", &board);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.convertToPosition('e', '3'));
+
+
+    EXPECT_EQ(hash1, 0x823c9b50fd114196);
+}
+
+TEST_F(TestZobrist, TestFromPolyGlot3)
+{
+    //http://hgm.nubati.net/book_format.html
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2", &board);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.convertToPosition('d', '6'));
+
+
+    EXPECT_EQ(hash1, 0x0756b94461c50fb0);
+}
+
+TEST_F(TestZobrist, TestFromPolyGlot4)
+{
+    //http://hgm.nubati.net/book_format.html
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 2", &board);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+
+
+    EXPECT_EQ(hash1, 0x662fafb965db29d4);
+}
+
+TEST_F(TestZobrist, TestFromPolyGlot5)
+{
+    //http://hgm.nubati.net/book_format.html
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3", &board);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.convertToPosition('f', '6'));
+
+
+    EXPECT_EQ(hash1, 0x22a48b5a8e47ff78);
+}
+
+TEST_F(TestZobrist, TestFromPolyGlot6)
+{
+    //http://hgm.nubati.net/book_format.html
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPPKPPP/RNBQ1BNR b kq - 0 3", &board);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+
+
+    EXPECT_EQ(hash1, 0x652a607ca3f242c1);
+}
+
+TEST_F(TestZobrist, TestFromPolyGlot7)
+{
+    //http://hgm.nubati.net/book_format.html
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rnbq1bnr/ppp1pkpp/8/3pPp2/8/8/PPPPKPPP/RNBQ1BNR w - - 0 4", &board);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), -1);
+
+
+    EXPECT_EQ(hash1, 0x00fdd303c946bdd9);
+}
+
+TEST_F(TestZobrist, TestFromPolyGlot8)
+{
+    //http://hgm.nubati.net/book_format.html
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rnbqkbnr/p1pppppp/8/8/PpP4P/8/1P1PPPP1/RNBQKBNR b KQkq c3 0 3", &board);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.convertToPosition('c', '3'));
+
+
+    EXPECT_EQ(hash1, 0x3c8123ea7b067637);
+}
+
+TEST_F(TestZobrist, TestFromPolyGlot9)
+{
+    //http://hgm.nubati.net/book_format.html
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rnbqkbnr/p1pppppp/8/8/P6P/R1p5/1P1PPPP1/1NBQKBNR b Kkq - 0 4", &board);
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), -1);
+
+
+    EXPECT_EQ(hash1, 0x5c3f9b829b279560);
 }
