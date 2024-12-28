@@ -118,12 +118,35 @@ Le bot devrait désormais être opérationnel dans votre interface graphique.
    wget https://raw.githubusercontent.com/JetBrains/clion-wsl/master/ubuntu_setup_env.sh && bash ubuntu_setup_env.sh
    ```
 
-2. Connectez-vous via SSH :
+2. Installez et configurez le serveur SSH :
+   ```bash
+   sudo apt update && sudo apt install openssh-server
+   ```
+
+3. Relancer le serveur :
+   ```bash
+   sudo systemctl restart ssh
+   ```
+
+4. Connectez-vous via SSH :
    ```bash
    ssh user@localhost -p 2222
    ```
+   
+5. En cas de problème de connection, faites ceci:
+   ```bash
+   sudo nano /etc/ssh/sshd_config
+   ```
+   Et mettre dedans:
+   ```
+   Include /etc/ssh/sshd_config.d/*.conf
+   
+   Port 2222
+   
+   ListenAddress 127.0.0.1
+   ```
 
-3. Configurez CLion :
+6. Configurez CLion :
     - Allez dans **Settings > Build, Execution, Deployment > Toolchains**.
     - Créez une nouvelle Toolchain sous WSL (les informations devraient être remplies automatiquement).
       - Configurez Valgrind dans **Settings > Build, Execution, Deployment > Dynamic Analysis Tools** :
@@ -135,6 +158,7 @@ Le bot devrait désormais être opérationnel dans votre interface graphique.
             ```bash
             --leak-check=full --leak-resolution=med --track-origins=yes --vgdb=no
             ```
+      - Dans  **Settings > Build, Execution, Deployment > Cmake** changez la toolchain pour WSL
 
 
 ### Configuration de perf
