@@ -2112,27 +2112,25 @@ void Board::setEnPassantPosition(int enPassantPos)
 int Board::getIndexByPiece(TypePieces type, Color color) const{
     int value;
     switch (type) {
-        case TypePieces::PAWN:   value = 1; break;
-        case TypePieces::ROOK:   value = 2; break;
-        case TypePieces::KNIGHT: value = 3; break;
+        case TypePieces::PAWN :   value = 0; break;
+        case TypePieces::ROOK:   value = 6; break;
+        case TypePieces::KNIGHT: value = 2; break;
         case TypePieces::BISHOP: value = 4; break;
-        case TypePieces::QUEEN:  value = 5; break;
-        case TypePieces::KING:   value = 6; break;
-        default:                 value = 0; break;
+        case TypePieces::QUEEN:  value = 8; break;
+        case TypePieces::KING:   value = 10; break;
+        default:                 value = -1; break;
     }
-    if(color==Color::BLACK) {
-        return value+6;
+    if(color==Color::WHITE) {
+        return value+1;
     }
     return value;
 }
 
 std::vector<int> Board::getBoardStateAsVector() const {
-    std::vector<int> boardState(64, 0);
+    std::vector<int> boardState(64, -1);
     for (int i = 0; i < 64; ++i) {
         if (m_tabpiBoard[i] != nullptr) {
             boardState[i] = getIndexByPiece(m_tabpiBoard[i]->getTypePiece(), m_tabpiBoard[i]->getColor());
-        } else {
-            boardState[i] = 0;
         }
     }
     return boardState;

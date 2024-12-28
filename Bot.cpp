@@ -416,21 +416,21 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
 
     // In case of capture
     if (piece_arrivee) {
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_arrivee->getTypePiece(), piece_arrivee->getColor())-1, move.second);//Remove the piece captured
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_arrivee->getTypePiece(), piece_arrivee->getColor()), move.second);//Remove the piece captured
     }
 
     // XOR the start and end of the moved piece
     if(! isPromotion)
     {
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()) - 1, move.first);//Remove the piece moving
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()) - 1, move.second);//Place the piece moving
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()), move.first);//Remove the piece moving
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(piece_depart->getTypePiece(), piece_depart->getColor()), move.second);//Place the piece moving
     }
     else
     {
         // The type of the piece is pawn because it is a promotion
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::PAWN, piece_depart->getColor())-1, move.first); // Remove the pawn
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::PAWN, piece_depart->getColor()), move.first); // Remove the pawn
         TypePieces promotedType = Piece::charToPieceType(promotionForMove);
-        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(promotedType, piece_depart->getColor())-1, move.second); // add the promote piece
+        zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(promotedType, piece_depart->getColor()), move.second); // add the promote piece
     }
 
     int iPositionDifferenceAbsolute = std::abs(move.first - move.second);
@@ -440,13 +440,13 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     {
         if(move.second%8 == 6) // Roque à droite (petit)
         {
-            zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::ROOK, piece_depart->getColor())-1, move.second + 1); // Remove the rook
-            zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::ROOK, piece_depart->getColor())-1, move.second - 1); // Add the rook
+            zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::ROOK, piece_depart->getColor()), move.second + 1); // Remove the rook
+            zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::ROOK, piece_depart->getColor()), move.second - 1); // Add the rook
         }
         else if(move.second%8 == 2) // Roque à droite (petit)
         {
-            zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::ROOK, piece_depart->getColor())-1, move.second - 2); // Remove the rook
-            zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::ROOK, piece_depart->getColor())-1, move.second + 1); // Add the rook
+            zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::ROOK, piece_depart->getColor()), move.second - 2); // Remove the rook
+            zobristHash ^= Zobrist::getPieceHash(board.getIndexByPiece(TypePieces::ROOK, piece_depart->getColor()), move.second + 1); // Add the rook
         }
     }
 

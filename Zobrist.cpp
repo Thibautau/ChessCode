@@ -123,8 +123,8 @@ uint64_t Zobrist::computeZobristHash(const std::vector<int>& in_boardVectorIndex
 
     for (int i = 0; i < 64; ++i) {
         int iIndexZobristPiece = in_boardVectorIndexInZobristTable[i];
-        if (iIndexZobristPiece != 0) {
-            hashedBoard ^= zobristTable[i][iIndexZobristPiece - 1];
+        if (iIndexZobristPiece != -1) {
+            hashedBoard ^= zobristTable[i][iIndexZobristPiece];
         }
     }
 

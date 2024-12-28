@@ -585,11 +585,11 @@ public:
     void setEnPassantPosition(int pos);
     /**
     * Récupère un index associé à une pièce donnée, en fonction de son type et de sa couleur.
-    * La couleur noire ajoute 6 au résultat pour différencier les pièces blanches et noires.
+    * La couleur blanche ajoute 1 au résultat pour différencier les pièces blanches et noires.
     *
     * @param type Le type de la pièce (Pion, Tour, Cavalier, Fou, Reine, Roi).
     * @param color La couleur de la pièce (Blanc ou Noir).
-    * @return L'index correspondant à la pièce donnée, avec les valeurs de 1 à 6 pour les pièces blanches et de 7 à 12 pour les pièces noires.
+    * @return L'index correspondant à la pièce donnée, avec les valeurs de 0 à 11.
     */
     int getIndexByPiece(TypePieces type, Color color) const;
     /**
