@@ -237,7 +237,7 @@ uint64_t Zobrist::zobristEnPassant[8] =
 
 uint64_t Zobrist::computeZobristHash(bool in_bIsWhiteTurn, Board& in_board)
 {
-    return Zobrist::computeZobristHash(in_board.getBoardStateAsVector(), in_bIsWhiteTurn, in_board.getCastlingStateAsVector(), in_board.getEnPassantState());
+    return Zobrist::computeZobristHash(in_board.getBoardStateAsVector(), in_bIsWhiteTurn, in_board.getCastlingStateAsVector(), in_board.getEnPassantState(), in_board.isThereEnemyPawnNextToEnPassantPawn());
 }
 
 /**
@@ -251,7 +251,7 @@ uint64_t Zobrist::computeZobristHash(bool in_bIsWhiteTurn, Board& in_board)
  * @param in_iIndexZobristEnPassant La case de prise en passant (de 0 à 15) ou -1 si pas de prise en passant.
  * @return La valeur de hachage Zobrist de l'état actuel de l'échiquier.
  */
-uint64_t Zobrist::computeZobristHash(const std::vector<int>& in_boardVectorIndexInZobristTable, bool in_bIsWhiteTurn, const std::vector<int>& in_vectIndexCastlingRights, int in_iIndexZobristEnPassant, bool in_bPawnNextToEnPassant) {
+uint64_t Zobrist::computeZobristHash(const std::vector<int>& in_boardVectorIndexInZobristTable, bool in_bIsWhiteTurn, const std::vector<int>& in_vectIndexCastlingRights, int in_iIndexZobristEnPassant, bool in_bEnemyPawnNextToEnPassant) {
     uint64_t hashedBoard = 0;
 
     for (int i = 0; i < 64; ++i) {
@@ -271,7 +271,7 @@ uint64_t Zobrist::computeZobristHash(const std::vector<int>& in_boardVectorIndex
     }
 
     // Ajouter la clé pour la prise en passant si applicable
-    if (in_iIndexZobristEnPassant != -1) {
+    if (in_iIndexZobristEnPassant != -1 && in_bEnemyPawnNextToEnPassant) {
         hashedBoard ^= zobristTable[772 + in_iIndexZobristEnPassant];
     }
 
@@ -288,4 +288,26 @@ uint64_t Zobrist::getPieceHash(int pieceIndex, int squareIndex) {
     }
     return zobristTable[(pieceIndex * 64) + squareIndex];
     //return zobristTable[squareIndex][pieceIndex];
+}
+
+uint64_t Zobrist::getHashForWhiteTurn()
+{
+    return zobristTable[780];
+}
+
+uint64_t Zobrist::getHashForCastlingRight(int in_iIndexForCastling)
+{
+    if(in_iIndexForCastling == -1 || in_iIndexForCastling >= 4) {
+        throw std::out_of_range("The index for the castlingRights (getHashForCastlingRight) cant be less or equal to -1 or greater or equal than 4");
+    }
+
+    return zobristTable[768 + in_iIndexForCastling];
+}
+uint64_t Zobrist::getHashForEnPassant(int in_iColumnForEnPassant)
+{
+    if(in_iColumnForEnPassant <= -1 || in_iColumnForEnPassant >= 8) {
+        throw std::out_of_range("The index for the enPassant (getHashForEnPassant) cant be less or equal to -1 or greater or equal than 8");
+    }
+
+    return zobristTable[772 + in_iColumnForEnPassant];
 }

@@ -697,6 +697,12 @@ public:
     void listOfPossibleMoves(Color in_colPlayer, std::vector<std::pair<int, int>>& out_moves);
     void listOfPossibleMoves(Color in_colPlayer, std::pair<int, int> out_moves[128], int& out_moveCount);
 
+    /**
+     * 
+     * @return true s'il y a un pion enemie à côté du pion qui a fait l'enPassant (Si les blancs font e2 e4, ça va regarder en d4 et f4 s'il y a un pion noir)
+     */
+    bool isThereEnemyPawnNextToEnPassantPawn();
+
     int getPreviousMoveInitialPosition() const {
         return m_iPreviousMoveInitialPosition;
     }

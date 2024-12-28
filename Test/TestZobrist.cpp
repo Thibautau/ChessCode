@@ -332,7 +332,7 @@ TEST_F(TestZobrist, TestFromPolyGlot2)
     //http://hgm.nubati.net/book_format.html
     board.clearBoard();
     MainChessGame::setBoardFromFENStatic("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", &board);
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.convertToPosition('e', '3'));
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantPosition(), board.isThereEnemyPawnNextToEnPassantPawn());
 
 
     EXPECT_EQ(hash1, 0x823c9b50fd114196);
@@ -343,7 +343,7 @@ TEST_F(TestZobrist, TestFromPolyGlot3)
     //http://hgm.nubati.net/book_format.html
     board.clearBoard();
     MainChessGame::setBoardFromFENStatic("rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2", &board);
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.convertToPosition('d', '6'));
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.getEnPassantPosition(), board.isThereEnemyPawnNextToEnPassantPawn());
 
 
     EXPECT_EQ(hash1, 0x0756b94461c50fb0);
@@ -365,7 +365,8 @@ TEST_F(TestZobrist, TestFromPolyGlot5)
     //http://hgm.nubati.net/book_format.html
     board.clearBoard();
     MainChessGame::setBoardFromFENStatic("rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3", &board);
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.convertToPosition('f', '6'));
+    uint64_t hash1 = Zobrist::computeZobristHash(true, board);
+    //uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), true, board.getCastlingStateAsVector(), board.getEnPassantPosition());
 
 
     EXPECT_EQ(hash1, 0x22a48b5a8e47ff78);
@@ -398,7 +399,7 @@ TEST_F(TestZobrist, TestFromPolyGlot8)
     //http://hgm.nubati.net/book_format.html
     board.clearBoard();
     MainChessGame::setBoardFromFENStatic("rnbqkbnr/p1pppppp/8/8/PpP4P/8/1P1PPPP1/RNBQKBNR b KQkq c3 0 3", &board);
-    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.convertToPosition('c', '3'));
+    uint64_t hash1 = Zobrist::computeZobristHash(board.getBoardStateAsVector(), false, board.getCastlingStateAsVector(), board.getEnPassantPosition(), board.isThereEnemyPawnNextToEnPassantPawn());
 
 
     EXPECT_EQ(hash1, 0x3c8123ea7b067637);

@@ -1257,6 +1257,41 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
     return true;
 }
 
+bool Board::isThereEnemyPawnNextToEnPassantPawn()
+{
+    if(m_ipositionEnPassant == -1)
+    {
+        return false;
+    }
+
+    int iEnPassantLigne = m_ipositionEnPassant / 8;
+    int iEnPassantColonne = m_ipositionEnPassant % 8;
+    if(iEnPassantLigne == 2)
+    {
+        //iEnPassantColonne != 0 pour regarder sur la bonne ligne (sinon décalage)
+        if(iEnPassantColonne != 0 && m_tabpiBoard[m_ipositionEnPassant + 7] != nullptr && m_tabpiBoard[m_ipositionEnPassant + 7]->getColor() == Color::BLACK && m_tabpiBoard[m_ipositionEnPassant + 7]->getTypePiece() == TypePieces::PAWN)
+        {
+            return true;
+        }
+        if(iEnPassantColonne != 7 && m_tabpiBoard[m_ipositionEnPassant + 9] != nullptr && m_tabpiBoard[m_ipositionEnPassant + 9]->getColor() == Color::BLACK && m_tabpiBoard[m_ipositionEnPassant + 9]->getTypePiece() == TypePieces::PAWN)
+        {
+            return true;
+        }
+    }
+    else if (iEnPassantLigne == 5) {
+        if(iEnPassantColonne != 7 && m_tabpiBoard[m_ipositionEnPassant - 7] != nullptr && m_tabpiBoard[m_ipositionEnPassant - 7]->getColor() == Color::WHITE && m_tabpiBoard[m_ipositionEnPassant - 7]->getTypePiece() == TypePieces::PAWN)
+        {
+            return true;
+        }
+        if(iEnPassantColonne != 0 && m_tabpiBoard[m_ipositionEnPassant - 9] != nullptr && m_tabpiBoard[m_ipositionEnPassant - 9]->getColor() == Color::WHITE && m_tabpiBoard[m_ipositionEnPassant - 9]->getTypePiece() == TypePieces::PAWN)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 //************************************************************************************//
 
 //************************* Evaluation and Heuristic Functions ***********************//

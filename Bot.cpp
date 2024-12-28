@@ -411,7 +411,7 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     // If it's at the black to play
     //if (currentColor != Color::BLACK) {
     //if (currentColor == Color::BLACK) {
-        zobristHash ^= Zobrist::zobristBlackTurn;
+        zobristHash ^= Zobrist::getHashForWhiteTurn();
     //}
 
     // In case of capture
@@ -454,13 +454,13 @@ void Bot::calculateZobristHashForMove(Board& board, const std::pair<int, int>& m
     for (int castlingRight : itabCastlingRights) {
         if(castlingRight != -1)
         {
-            zobristHash ^= Zobrist::zobristCastlingRights[castlingRight];
+            zobristHash ^= Zobrist::getHashForCastlingRight(castlingRight);
         }
     }
 
     // XOR en passant square
     if (enPassantState != -1) {
-        zobristHash ^= Zobrist::zobristEnPassant[enPassantState];
+        zobristHash ^= Zobrist::getHashForEnPassant(enPassantState);
     }
 }
 
