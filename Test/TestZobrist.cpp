@@ -93,7 +93,7 @@ TEST_F(TestZobrist, test)
 
     uint64_t BoardHashComputedByBot = initBoardHash;
     bool boardMoveResult = board.movePiece("a1b2");
-    Bot::calculateZobristHashForMove(board, {0, 9}, Color::WHITE, '\0', true, BoardHashComputedByBot);
+    Bot::calculateZobristHashForMove(board, {0, 9}, Color::WHITE, '\0', false, BoardHashComputedByBot);
 
     board2.clearBoard();
     MainChessGame::setBoardFromFENStatic("7k/8/8/8/8/8/1K6/8 b - - 21 13", &board2);
