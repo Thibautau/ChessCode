@@ -1,5 +1,5 @@
 //
-// Created by Laurent on 29/11/2024.
+// Created by Thibaut on 29/11/2024.
 //
 
 #include "TestZobrist.h"

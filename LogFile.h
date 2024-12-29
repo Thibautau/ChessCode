@@ -1,5 +1,5 @@
 //
-// Created by Laurent on 26/11/2024.
+// Created by Thibaut on 26/11/2024.
 //
 
 #ifndef LOGINFILE_H

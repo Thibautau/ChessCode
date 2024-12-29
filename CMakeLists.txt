@@ -55,24 +55,28 @@ add_executable(ChessCode
         UCI/UCI.h
         LogFile.cpp
         LogFile.h
+        OpeningBook/OpeningBook.cpp
+        OpeningBook/OpeningBook.h
+        OpeningBook/ReadOpeningBook.cpp
+        OpeningBook/ReadOpeningBook.h
 )
 
 # Créer l'exécutable pour les tests
-add_executable(runTests Test/Test.cpp
+add_executable(runTests
         Test/Test.h
-        Test/Test.h
-        Test/Test.cpp
-        Test/Test.cpp
         Test/Test.cpp
         Test/TestBoard.cpp
         Test/TestBoard.h
-        Test/TestBoard.cpp
         Test/TestPiece.cpp
         Test/TestPlayer.cpp
         Test/TestUCI.cpp
         Test/TestBot.cpp
         LogFile.cpp
         LogFile.h
+        Test/TestOpeningBook.cpp
+        Test/TestOpeningBook.h
+        OpeningBook/ReadOpeningBook.cpp
+        OpeningBook/OpeningBook.cpp
 )
 
 # Créer l'exécutable pour les perf
