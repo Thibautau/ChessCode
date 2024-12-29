@@ -11,19 +11,23 @@
 #include <vector>
 
 
-struct Entry;
+struct ZobristKeyData;
 
 class OpeningBook {
 
 private:
-    std::map<uint64_t, Entry> m_book;
+    //For each zobrist key, associates an array of ZobristKeyData (moves + nbOfUses by the creator of the book)
+    std::map<uint64_t, std::vector<ZobristKeyData>> m_openingBook;
 
 public:
     OpeningBook();
     ~OpeningBook();
 
-    void getBookData(const std::string &in_sFilePath);
+    void clear();
 
+    bool getBookData(const std::string &in_sFilePath);
+
+    bool getBestMoveForHash(std::string &out_sBestMove, uint64_t in_uiZobristKey) const;
 };
 
 
