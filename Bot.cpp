@@ -31,6 +31,12 @@ int Bot::uniqueNodeIterated = 0;
 Bot::Bot(Color color) : m_color(color)
 {
     m_logFile = new LogFile("Bot_Evaluation_Log.txt", false);
+    m_openingBook = new OpeningBook();
+    m_openingBook->getBookData("../OpeningBook/Books/Player1.bin");
+    m_openingBook->getBookData("../OpeningBook/Books/Player2.bin");
+    m_openingBook->getBookData("../OpeningBook/Books/Player3.bin");
+    m_openingBook->getBookData("../OpeningBook/Books/Player4.bin");
+    m_openingBook->getBookData("../OpeningBook/Books/baron30.bin");
 }
 
 Color Bot::getPlayerColor() const {
@@ -45,6 +51,17 @@ void Bot::play(Board& board, int& start, int& end) {
     std::pair<int, int> meilleurCoup;
     int profondeur_max = 4;
 
+    uint64_t boardHash = Zobrist::computeZobristHash(m_color == Color::WHITE, board);
+    std::string sBestmove;
+    bool bIsThereBestMoveInOpeningBook = m_openingBook->getBestMoveForHash(sBestmove, boardHash);
+    if(bIsThereBestMoveInOpeningBook && ! sBestmove.empty())
+    {
+        start = Board::convertToPosition(sBestmove[0], sBestmove[1]);
+        end = Board::convertToPosition(sBestmove[2], sBestmove[3]);
+
+        return;
+    }
+
     choisir_meilleur_coupv2(board, profondeur_max, meilleurCoup);
 
     //m_logFile->clear();
@@ -55,6 +72,21 @@ void Bot::play(Board& board, int& start, int& end) {
 
 void Bot::playWithDepth(Board& board, int& start, int& end, int depth, char& promotion) {
     std::pair<int, int> meilleurCoup;
+    uint64_t boardHash = Zobrist::computeZobristHash(m_color == Color::WHITE, board);
+    std::string sBestmove;
+    bool bIsThereBestMoveInOpeningBook = m_openingBook->getBestMoveForHash(sBestmove, boardHash);
+    if(bIsThereBestMoveInOpeningBook && ! sBestmove.empty())
+    {
+        start = Board::convertToPosition(sBestmove[0], sBestmove[1]);
+        end = Board::convertToPosition(sBestmove[2], sBestmove[3]);
+
+        if(sBestmove.length() == 5) //promootion
+        {
+            promotion = sBestmove[4];
+        }
+        return;
+    }
+
     choisir_meilleur_coupv2(board, depth, meilleurCoup,&promotion);
 
     //m_logFile->clear();

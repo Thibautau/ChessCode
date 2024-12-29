@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <cstdint>
 #include "LogFile.h"
-
+#include "OpeningBook/OpeningBook.h"
 
 
 const int EXACT = 0;
@@ -35,6 +35,7 @@ private:
     LogFile* m_logFile;
     static constexpr char PROMOTION_TYPES[4] = {'q', 'n', 'b', 'r'};
     static constexpr char NO_PROMOTION[1] = {'\0'};
+    OpeningBook* m_openingBook;
 
 
 public:
