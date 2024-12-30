@@ -8,7 +8,6 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 
-
 include_directories(.)  # Inclure le répertoire courant
 
 # Inclure GoogleTest via FetchContent
@@ -102,6 +101,10 @@ add_executable(runTestZobrist
         Board.h
         Bot.cpp
         Bot.h
+        OpeningBook/OpeningBook.cpp
+        OpeningBook/OpeningBook.h
+        OpeningBook/ReadOpeningBook.cpp
+        OpeningBook/ReadOpeningBook.h
         Piece.cpp
         Piece.h
         LogFile.cpp
