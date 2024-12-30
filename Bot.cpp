@@ -411,7 +411,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
 
     // Cas de base : profondeur 0
     if (depth == 0) {
-        int evaluation = Quiescence(board, depth, alpha, beta, estMaximisant, bestPromotion);
+        int evaluation = board.evaluateTest(m_color);
         transpositionTable[zobristHash] = {depth, evaluation, EXACT};
         return evaluation;
     }
@@ -420,7 +420,15 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
     std::pair<int, int> possibleMoves[128];
     int moveCount = 0;
-    board.listOfPossibleMoves(currentColor, possibleMoves, moveCount);
+
+    //@TODO Le 6 est pas à mettre en brut
+    if(depth > m_max_depth_Quiescence-6) {
+        board.listOfPossibleMoves(currentColor, possibleMoves, moveCount);
+    }
+    else {
+        board.getAllPiecesEatableByAColor(m_color, possibleMoves, moveCount);
+    }
+
 
     // Tri des coups en fonction de leur évaluation
     std::ranges::stable_sort(possibleMoves, possibleMoves + moveCount, std::greater<>{}, [&](const std::pair<int, int>& move) {

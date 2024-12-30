@@ -36,6 +36,7 @@ private:
     static constexpr char PROMOTION_TYPES[4] = {'q', 'n', 'b', 'r'};
     static constexpr char NO_PROMOTION[1] = {'\0'};
     OpeningBook* m_openingBook;
+    int m_max_depth_Quiescence = 8;
 
 
 public:
