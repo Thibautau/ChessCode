@@ -1,8 +1,12 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.28)
 project(ChessCode)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(CMAKE_BUILD_TYPE Debug)
+
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 
 include_directories(.)  # Inclure le répertoire courant
 
@@ -50,24 +54,28 @@ add_executable(ChessCode
         UCI/UCI.h
         LogFile.cpp
         LogFile.h
+        OpeningBook/OpeningBook.cpp
+        OpeningBook/OpeningBook.h
+        OpeningBook/ReadOpeningBook.cpp
+        OpeningBook/ReadOpeningBook.h
 )
 
 # Créer l'exécutable pour les tests
-add_executable(runTests Test/Test.cpp
+add_executable(runTests
         Test/Test.h
-        Test/Test.h
-        Test/Test.cpp
-        Test/Test.cpp
         Test/Test.cpp
         Test/TestBoard.cpp
         Test/TestBoard.h
-        Test/TestBoard.cpp
         Test/TestPiece.cpp
         Test/TestPlayer.cpp
         Test/TestUCI.cpp
         Test/TestBot.cpp
         LogFile.cpp
         LogFile.h
+        Test/TestOpeningBook.cpp
+        Test/TestOpeningBook.h
+        OpeningBook/ReadOpeningBook.cpp
+        OpeningBook/OpeningBook.cpp
 )
 
 # Créer l'exécutable pour les perf
@@ -93,6 +101,10 @@ add_executable(runTestZobrist
         Board.h
         Bot.cpp
         Bot.h
+        OpeningBook/OpeningBook.cpp
+        OpeningBook/OpeningBook.h
+        OpeningBook/ReadOpeningBook.cpp
+        OpeningBook/ReadOpeningBook.h
         Piece.cpp
         Piece.h
         LogFile.cpp

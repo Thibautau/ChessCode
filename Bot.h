@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <cstdint>
 #include "LogFile.h"
-
+#include "OpeningBook/OpeningBook.h"
 
 
 const int EXACT = 0;
@@ -35,6 +35,11 @@ private:
     LogFile* m_logFile;
     static constexpr char PROMOTION_TYPES[4] = {'q', 'n', 'b', 'r'};
     static constexpr char NO_PROMOTION[1] = {'\0'};
+    OpeningBook* m_openingBook;
+    int m_max_depth_Quiescence = 6;
+    int m_max_depth = 4;
+    int m_diff_between_depth = 2;
+
 
 
 public:
@@ -118,6 +123,7 @@ public:
     *
     * @return Le score du coup évalué.
     */
+    int Quiescence(Board &board, int depth, int alpha, int beta, bool estMaximisant,char &bestPromotion);
     int evaluateMoveWithMinimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor,char& promotion);
     int alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool estMaximisant, char &bestPromotion);
     int alphaBetaWithMemoryv2(Board& board, int depth, int alpha, int beta, bool estMaximisant, char &bestPromotion);

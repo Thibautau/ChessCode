@@ -235,6 +235,10 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
         *enPassantPos = m_ipositionEnPassant;
     }
 
+    if(in_iStartPosition == 30 && in_iEndPosition == 58) {
+        int a = 2;
+    }
+
     //If movement isn't possible we stop the move
     if (!isMovementPossible(in_iStartPosition, in_iEndPosition)) {
         return false;
@@ -595,6 +599,35 @@ bool Board::isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vect
 
     return !in_vectPositionPieceFound.empty();
 }
+
+void Board::getAllPiecesEatableByAColor(Color in_playerColor, std::pair<int, int> out_tabMovesToEatPieces[112], int& out_moveCount)
+{
+    out_moveCount = 0;
+    Color enemyColor = Piece::getEnemyColor(in_playerColor);
+
+    int iPositionPawnNextToEnPassant[2] = {-1, -1};
+    getEnemyPawnNextToEnPassantPawn(iPositionPawnNextToEnPassant);
+
+    for (int iPosition = 0; iPosition < 64; ++iPosition) {
+        Piece* pPiece = getPieceAt(iPosition);
+        if (pPiece != nullptr && pPiece->getColor() == in_playerColor) {
+            std::vector<int> validMoves;
+            possibleMovesForPiece(iPosition, validMoves);
+            for (int targetPos : validMoves)
+            {
+                Piece* pPieceToEat = getPieceAt(targetPos);
+                if(pPiece->getTypePiece() == TypePieces::PAWN && ((iPositionPawnNextToEnPassant[0] == iPosition || iPositionPawnNextToEnPassant[1] == iPosition) && targetPos == m_ipositionEnPassant))
+                {
+                    out_tabMovesToEatPieces[out_moveCount++] = std::make_pair(iPosition, targetPos);
+                }
+                else if (out_moveCount < 128 && pPieceToEat != nullptr && pPieceToEat->getColor() == enemyColor) {
+                    out_tabMovesToEatPieces[out_moveCount++] = std::make_pair(iPosition, targetPos);
+                }
+            }
+        }
+    }
+}
+
 
 
 //@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
@@ -1161,7 +1194,7 @@ void Board::listOfPossibleMoves(Color in_colPlayer, std::vector<std::pair<int, i
 void Board::listOfPossibleMoves(Color in_colPlayer, std::pair<int, int> out_moves[128], int& out_moveCount) {
     out_moveCount = 0;
 
-    for (int iPosition = 0; iPosition < 128; ++iPosition) {
+    for (int iPosition = 0; iPosition < 64; ++iPosition) {
         Piece* pPiece = getPieceAt(iPosition);
         if (pPiece != nullptr && pPiece->getColor() == in_colPlayer) {
             std::vector<int> validMoves;
@@ -1255,6 +1288,52 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
     }
 
     return true;
+}
+
+bool Board::isThereEnemyPawnNextToEnPassantPawn() const
+{
+    int iPositionPawnNextToEnPassant[2] = {-1, -1};
+    getEnemyPawnNextToEnPassantPawn(iPositionPawnNextToEnPassant);
+    return iPositionPawnNextToEnPassant[0] != -1 || iPositionPawnNextToEnPassant[1] != -1;
+}
+
+void Board::getEnemyPawnNextToEnPassantPawn(int out_iPositionPawnNextToEnPassant[2]) const
+{
+    if(m_ipositionEnPassant == -1)
+    {
+        out_iPositionPawnNextToEnPassant[0] = -1;
+        out_iPositionPawnNextToEnPassant[1] = -1;
+        return;
+    }
+
+    int iEnPassantLigne = m_ipositionEnPassant / 8;
+    int iEnPassantColonne = m_ipositionEnPassant % 8;
+    if(iEnPassantLigne == 2)
+    {
+        //iEnPassantColonne != 0 pour regarder sur la bonne ligne (sinon décalage)
+        if(iEnPassantColonne != 0 && m_tabpiBoard[m_ipositionEnPassant + 7] != nullptr && m_tabpiBoard[m_ipositionEnPassant + 7]->getColor() == Color::BLACK && m_tabpiBoard[m_ipositionEnPassant + 7]->getTypePiece() == TypePieces::PAWN)
+        {
+            out_iPositionPawnNextToEnPassant[0] = m_ipositionEnPassant + 7;
+        }
+        if(iEnPassantColonne != 7 && m_tabpiBoard[m_ipositionEnPassant + 9] != nullptr && m_tabpiBoard[m_ipositionEnPassant + 9]->getColor() == Color::BLACK && m_tabpiBoard[m_ipositionEnPassant + 9]->getTypePiece() == TypePieces::PAWN)
+        {
+            out_iPositionPawnNextToEnPassant[1] = m_ipositionEnPassant + 9;
+        }
+    }
+    else if (iEnPassantLigne == 5) {
+        if(iEnPassantColonne != 7 && m_tabpiBoard[m_ipositionEnPassant - 7] != nullptr && m_tabpiBoard[m_ipositionEnPassant - 7]->getColor() == Color::WHITE && m_tabpiBoard[m_ipositionEnPassant - 7]->getTypePiece() == TypePieces::PAWN)
+        {
+            out_iPositionPawnNextToEnPassant[0] = m_ipositionEnPassant - 7;
+        }
+        if(iEnPassantColonne != 0 && m_tabpiBoard[m_ipositionEnPassant - 9] != nullptr && m_tabpiBoard[m_ipositionEnPassant - 9]->getColor() == Color::WHITE && m_tabpiBoard[m_ipositionEnPassant - 9]->getTypePiece() == TypePieces::PAWN)
+        {
+            out_iPositionPawnNextToEnPassant[1] = m_ipositionEnPassant - 9;
+        }
+    }
+    else {
+        out_iPositionPawnNextToEnPassant[0] = -1;
+        out_iPositionPawnNextToEnPassant[1] = -1;
+    }
 }
 
 //************************************************************************************//
@@ -2112,27 +2191,28 @@ void Board::setEnPassantPosition(int enPassantPos)
 int Board::getIndexByPiece(TypePieces type, Color color) const{
     int value;
     switch (type) {
-        case TypePieces::PAWN:   value = 1; break;
-        case TypePieces::ROOK:   value = 2; break;
-        case TypePieces::KNIGHT: value = 3; break;
+        case TypePieces::PAWN :   value = 0; break;
+        case TypePieces::ROOK:   value = 6; break;
+        case TypePieces::KNIGHT: value = 2; break;
         case TypePieces::BISHOP: value = 4; break;
-        case TypePieces::QUEEN:  value = 5; break;
-        case TypePieces::KING:   value = 6; break;
-        default:                 value = 0; break;
+        case TypePieces::QUEEN:  value = 8; break;
+        case TypePieces::KING:   value = 10; break;
+        default:                 value = -1; break;
     }
-    if(color==Color::BLACK) {
-        return value+6;
+    if(color==Color::WHITE) {
+        return value+1;
     }
     return value;
 }
 
 std::vector<int> Board::getBoardStateAsVector() const {
-    std::vector<int> boardState(64, 0);
+    std::vector<int> boardState(64, -1);
     for (int i = 0; i < 64; ++i) {
         if (m_tabpiBoard[i] != nullptr) {
             boardState[i] = getIndexByPiece(m_tabpiBoard[i]->getTypePiece(), m_tabpiBoard[i]->getColor());
-        } else {
-            boardState[i] = 0;
+        }
+        else {
+            boardState[i] = -1;
         }
     }
     return boardState;
@@ -2194,16 +2274,7 @@ int Board::getEnPassantState() const
     {
         return -1;
     }
-    else if (m_ipositionEnPassant >= 40 && m_ipositionEnPassant <= 47) // 3 ème ligne en partant du haut pour les noirs (6)
-    {
-        return std::abs(40 - m_ipositionEnPassant); // Indices allant de 0 à 7
-    }
-    else if (m_ipositionEnPassant >= 16 && m_ipositionEnPassant <= 23) // 3 ème ligne en partant du bas pour les blancs (3)
-    {
-        return 8 + std::abs(16 - m_ipositionEnPassant); // Indices allant de 8 à 15
-    }
-
-    return -1;
+    return m_ipositionEnPassant % 8; // On ne retourne que la colonne
 }
 
 int Board::convertToPosition(char col, char row) {
