@@ -36,7 +36,7 @@ Bot::Bot(Color color) : m_color(color)
     m_openingBook->getBookData("../OpeningBook/Books/Player2.bin");
     m_openingBook->getBookData("../OpeningBook/Books/Player3.bin");
     m_openingBook->getBookData("../OpeningBook/Books/Player4.bin");
-    m_openingBook->getBookData("../OpeningBook/Books/baron30.bin");
+    //m_openingBook->getBookData("../OpeningBook/Books/baron30.bin");
 }
 
 Color Bot::getPlayerColor() const {
@@ -147,6 +147,87 @@ void Bot::clearFile(const std::string& filename) {
     }
     // Si le fichier est ouvert en mode 'trunc', il est automatiquement vidé.
     file.close();
+}
+
+
+
+int Bot::Quiescence(Board& board, int depth, int alpha, int beta, bool estMaximisant) {
+    int standPat = board.evaluateTest(m_color);
+    int bestScore = standPat;
+    if(standPat >= beta){ return standPat;}
+    if(standPat < beta){ alpha = standPat;}
+
+    //Faut récup les listes des coups qui mangent
+    std::pair<int, int> list_move[112];
+    int moveCount = 0;
+
+    board.getAllPiecesEatableByAColor(m_color, list_move, moveCount);
+
+    Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
+    Piece* capturedPiece = nullptr;
+
+    for (int i = 0; i < moveCount; ++i) {
+            const std::pair<int, int>& move = list_move[i];
+
+            // Jouer le coup
+            uint64_t zobristHash = board.getZobristHash();
+            uint64_t originalHash = board.getZobristHash();
+
+            //Etat actuel du plateau
+            int enPassantPos = board.getEnPassantPosition();
+            int itabCastlingRights[4] = { -1, -1, -1, -1 };
+            board.getCastlingStateAsTableau(itabCastlingRights);
+            bool bisWhiteKingCheked = board.isWhiteKingCheck();
+            bool bisBlackKingCheked = board.isBlackKingCheck();
+            int iWhiteKingPosition = board.getKingPosition(Color::WHITE);
+            int iBlackKingPosition = board.getKingPosition(Color::BLACK);
+
+
+            board.movePiece(move.first, move.second, currentColor, &capturedPiece);
+
+            int iPreviousInitialPosition = move.first;
+            int iPreviousTargetPosition = move.second;
+            board.setPreviousMoveInitialPosition(iPreviousInitialPosition);
+            board.setPreviousMoveTargetPosition(iPreviousTargetPosition);
+
+            // Mise à jour du hash pour le coup
+            calculateZobristHashForMove(board, move, currentColor, '\0', false, zobristHash, capturedPiece);
+            board.setZobristHash(zobristHash);
+
+            // Appel récursif
+            int score = Quiescence(board, depth - 1, alpha, beta, !estMaximisant);
+
+            // Annuler le coup
+            bool bCanUndo = board.undoMove(move.first, move.second, capturedPiece, false, enPassantPos, itabCastlingRights, bisWhiteKingCheked, bisBlackKingCheked, iWhiteKingPosition, iBlackKingPosition);
+
+            board.setPreviousMoveInitialPosition(iPreviousInitialPosition);
+            board.setPreviousMoveTargetPosition(iPreviousTargetPosition);
+            board.setZobristHash(originalHash);
+
+            // Mise à jour des scores et alpha/beta
+            if (estMaximisant) {
+                if (score > bestScore) {
+                    bestScore = score;
+                }
+                alpha = std::max(alpha, score);
+                if (alpha >= beta) {
+                    transpositionTable[zobristHash] = {depth, bestScore, LOWERBOUND};
+                    return bestScore;
+                }
+            }
+            else {
+                if (score < bestScore) {
+                    bestScore = score;
+                }
+                beta = std::min(beta, score);
+                if (beta <= alpha) {
+                    transpositionTable[zobristHash] = {depth, bestScore, UPPERBOUND};
+                    return bestScore;
+                }
+            }
+    }
+
+    return bestScore;
 }
 
 void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<int, int>& meilleurCoup, char* bestPromotion) {
@@ -303,6 +384,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     if (depth == 0) {
         int evaluation = board.evaluateTest(m_color);
         transpositionTable[zobristHash] = {depth, evaluation, EXACT};
+        Quiescence(board, depth, alpha, beta, estMaximisant);
         return evaluation;
     }
 
