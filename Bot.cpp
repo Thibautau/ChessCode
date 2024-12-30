@@ -49,6 +49,7 @@ void Bot::setPlayerColor(Color color) {
 void Bot::play(Board& board, int& start, int& end) {
     std::pair<int, int> meilleurCoup;
     int profondeur_max = 4;
+    m_max_depth = profondeur_max;
 
     uint64_t boardHash = Zobrist::computeZobristHash(m_color == Color::WHITE, board);
     std::string sBestmove;
@@ -60,8 +61,9 @@ void Bot::play(Board& board, int& start, int& end) {
 
         return;
     }
+    m_max_depth_Quiescence = m_max_depth+m_diff_between_depth;
 
-    choisir_meilleur_coupv2(board, profondeur_max, meilleurCoup);
+    choisir_meilleur_coupv2(board, m_max_depth_Quiescence, meilleurCoup);
 
     //m_logFile->clear();
     m_logFile->close();
@@ -86,7 +88,10 @@ void Bot::playWithDepth(Board& board, int& start, int& end, int depth, char& pro
         return;
     }
 
-    choisir_meilleur_coupv2(board, depth, meilleurCoup,&promotion);
+    m_max_depth = depth;
+    m_max_depth_Quiescence = m_max_depth+m_diff_between_depth;
+
+    choisir_meilleur_coupv2(board, m_max_depth_Quiescence, meilleurCoup,&promotion);
 
     //m_logFile->clear();
     m_logFile->close();
@@ -442,7 +447,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     int moveCount = 0;
 
     //@TODO Le 6 est pas à mettre en brut
-    if(depth > m_max_depth_Quiescence-6) {
+    if(depth > m_max_depth_Quiescence-m_max_depth) {
         board.listOfPossibleMoves(currentColor, possibleMoves, moveCount);
     }
     else {
