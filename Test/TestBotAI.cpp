@@ -12,6 +12,8 @@
 #include "Zobrist.cpp"
 #include "LogFile.cpp"
 #include "Piece.cpp"
+#include "OpeningBook/OpeningBook.cpp"
+#include "OpeningBook/ReadOpeningBook.cpp"
 
 
 class TestBotAI : public ::testing::Test {
@@ -425,6 +427,21 @@ TEST_F(TestBotAI, TestTrouverBug2)
     char cPromotion = '\0';
     botBlack->playWithDepth(board, iStart, iEnd, 2,cPromotion);
     bool result = board.movePiece(iStart, iEnd, Color::BLACK);
+
+    EXPECT_TRUE(result);
+}
+
+TEST_F(TestBotAI, TestTrouverBug3)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rnbq1rk1/ppp1ppbp/3p1np1/8/3PPP2/2NB4/PPP3PP/R1BQK1NR w KQ - 0 1", &board);
+
+    //Try to move the black pawn at h2 (promotion)
+    Bot* botBlack = new Bot(Color::WHITE);
+    int iStart, iEnd = -1;
+    char cPromotion = '\0';
+    botBlack->playWithDepth(board, iStart, iEnd, 1,cPromotion);
+    bool result = board.movePiece(iStart, iEnd, Color::WHITE);
 
     EXPECT_TRUE(result);
 }

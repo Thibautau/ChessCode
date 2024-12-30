@@ -235,6 +235,10 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
         *enPassantPos = m_ipositionEnPassant;
     }
 
+    if(in_iStartPosition == 30 && in_iEndPosition == 58) {
+        int a = 2;
+    }
+
     //If movement isn't possible we stop the move
     if (!isMovementPossible(in_iStartPosition, in_iEndPosition)) {
         return false;

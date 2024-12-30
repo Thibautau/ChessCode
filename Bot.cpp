@@ -450,7 +450,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
         board.listOfPossibleMoves(currentColor, possibleMoves, moveCount);
     }
     else {
-        board.getAllPiecesEatableByAColor(m_color, possibleMoves, moveCount);
+        board.getAllPiecesEatableByAColor(currentColor, possibleMoves, moveCount);
     }
 
 
@@ -499,7 +499,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             int iPreviousInitialPosition = board.getPreviousMoveInitialPosition();
             int iPreviousTargetPosition = board.getPreviousMoveTargetPosition();
 
-            if(move.first == 0 && move.second == 3) {
+            if(move.first == 30 && move.second == 58) {
                 int a = 2;
             }if(move.first == 4 && move.second == 3) {
                 int a = 2;
