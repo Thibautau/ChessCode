@@ -119,7 +119,7 @@ public:
     *
     * @return Le score du coup évalué.
     */
-    int Quiescence(Board &board, int depth, int alpha, int beta, bool estMaximisant);
+    int Quiescence(Board &board, int depth, int alpha, int beta, bool estMaximisant,char &bestPromotion);
     int evaluateMoveWithMinimax(Board& board, int profondeur, bool estMaximisant, int alpha, int beta, const std::pair<int, int>& move, Color currentColor,char& promotion);
     int alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool estMaximisant, char &bestPromotion);
     int alphaBetaWithMemoryv2(Board& board, int depth, int alpha, int beta, bool estMaximisant, char &bestPromotion);
