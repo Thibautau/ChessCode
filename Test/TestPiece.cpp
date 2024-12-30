@@ -1292,5 +1292,43 @@ TEST_F(BoardTest, TestTrouverBugRoque3)
 
         EXPECT_NE(move, std::make_pair(4,2));
     }
+}
 
+TEST_F(BoardTest, getAllPiecesEatableByAColor)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rk6/1Q1K4/8/8/8/8/8/8 w - - 0 1", &board);
+
+    std::pair<int, int> possibleMoves[112];
+    int moveCount = 0;
+    board.getAllPiecesEatableByAColor(Color::WHITE, possibleMoves, moveCount);
+
+    EXPECT_EQ(possibleMoves[0].second, 56);
+    EXPECT_EQ(moveCount, 1);
+}
+
+TEST_F(BoardTest, getAllPiecesEatableByAColorEnPassant)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("k7/8/8/6Pp/8/8/8/k7 w - h6 0 1", &board);
+
+    std::pair<int, int> possibleMoves[112];
+    int moveCount = 0;
+    board.getAllPiecesEatableByAColor(Color::WHITE, possibleMoves, moveCount);
+
+    EXPECT_EQ(possibleMoves[0].second, 47);
+    EXPECT_EQ(moveCount, 1);
+}
+
+TEST_F(BoardTest, getAllPiecesEatableByAColorEnPassant2)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("k7/8/5p2/6Pp/8/8/8/k7 w - h6 0 1", &board);
+
+    std::pair<int, int> possibleMoves[112];
+    int moveCount = 0;
+    board.getAllPiecesEatableByAColor(Color::WHITE, possibleMoves, moveCount);
+
+    EXPECT_TRUE(((possibleMoves[0].second == 47) || (possibleMoves[0].second == 45)) && (( possibleMoves[1].second == 47) || (possibleMoves[1].second == 45)));
+    EXPECT_EQ(moveCount, 2);
 }

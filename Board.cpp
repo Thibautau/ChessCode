@@ -596,6 +596,35 @@ bool Board::isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vect
     return !in_vectPositionPieceFound.empty();
 }
 
+void Board::getAllPiecesEatableByAColor(Color in_playerColor, std::pair<int, int> out_tabMovesToEatPieces[112], int& out_moveCount)
+{
+    out_moveCount = 0;
+    Color enemyColor = Piece::getEnemyColor(in_playerColor);
+
+    int iPositionPawnNextToEnPassant[2] = {-1, -1};
+    getEnemyPawnNextToEnPassantPawn(iPositionPawnNextToEnPassant);
+
+    for (int iPosition = 0; iPosition < 64; ++iPosition) {
+        Piece* pPiece = getPieceAt(iPosition);
+        if (pPiece != nullptr && pPiece->getColor() == in_playerColor) {
+            std::vector<int> validMoves;
+            possibleMovesForPiece(iPosition, validMoves);
+            for (int targetPos : validMoves)
+            {
+                Piece* pPieceToEat = getPieceAt(targetPos);
+                if(pPiece->getTypePiece() == TypePieces::PAWN && ((iPositionPawnNextToEnPassant[0] == iPosition || iPositionPawnNextToEnPassant[1] == iPosition) && targetPos == m_ipositionEnPassant))
+                {
+                    out_tabMovesToEatPieces[out_moveCount++] = std::make_pair(iPosition, targetPos);
+                }
+                else if (out_moveCount < 128 && pPieceToEat != nullptr && pPieceToEat->getColor() == enemyColor) {
+                    out_tabMovesToEatPieces[out_moveCount++] = std::make_pair(iPosition, targetPos);
+                }
+            }
+        }
+    }
+}
+
+
 
 //@TODO Proposition de refactor, à valider sinon reprendre l'ancien code
 Piece* Board::findFirstPieceOnDirectionThatAttacksInitialPosition(int in_iPosition, int in_iDirection, int in_iNbOfRepetition, int& in_iPositionPieceFound) const {
@@ -1161,7 +1190,7 @@ void Board::listOfPossibleMoves(Color in_colPlayer, std::vector<std::pair<int, i
 void Board::listOfPossibleMoves(Color in_colPlayer, std::pair<int, int> out_moves[128], int& out_moveCount) {
     out_moveCount = 0;
 
-    for (int iPosition = 0; iPosition < 128; ++iPosition) {
+    for (int iPosition = 0; iPosition < 64; ++iPosition) {
         Piece* pPiece = getPieceAt(iPosition);
         if (pPiece != nullptr && pPiece->getColor() == in_colPlayer) {
             std::vector<int> validMoves;
@@ -1257,11 +1286,20 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
     return true;
 }
 
-bool Board::isThereEnemyPawnNextToEnPassantPawn()
+bool Board::isThereEnemyPawnNextToEnPassantPawn() const
+{
+    int iPositionPawnNextToEnPassant[2] = {-1, -1};
+    getEnemyPawnNextToEnPassantPawn(iPositionPawnNextToEnPassant);
+    return iPositionPawnNextToEnPassant[0] != -1 || iPositionPawnNextToEnPassant[1] != -1;
+}
+
+void Board::getEnemyPawnNextToEnPassantPawn(int out_iPositionPawnNextToEnPassant[2]) const
 {
     if(m_ipositionEnPassant == -1)
     {
-        return false;
+        out_iPositionPawnNextToEnPassant[0] = -1;
+        out_iPositionPawnNextToEnPassant[1] = -1;
+        return;
     }
 
     int iEnPassantLigne = m_ipositionEnPassant / 8;
@@ -1271,25 +1309,27 @@ bool Board::isThereEnemyPawnNextToEnPassantPawn()
         //iEnPassantColonne != 0 pour regarder sur la bonne ligne (sinon décalage)
         if(iEnPassantColonne != 0 && m_tabpiBoard[m_ipositionEnPassant + 7] != nullptr && m_tabpiBoard[m_ipositionEnPassant + 7]->getColor() == Color::BLACK && m_tabpiBoard[m_ipositionEnPassant + 7]->getTypePiece() == TypePieces::PAWN)
         {
-            return true;
+            out_iPositionPawnNextToEnPassant[0] = m_ipositionEnPassant + 7;
         }
         if(iEnPassantColonne != 7 && m_tabpiBoard[m_ipositionEnPassant + 9] != nullptr && m_tabpiBoard[m_ipositionEnPassant + 9]->getColor() == Color::BLACK && m_tabpiBoard[m_ipositionEnPassant + 9]->getTypePiece() == TypePieces::PAWN)
         {
-            return true;
+            out_iPositionPawnNextToEnPassant[1] = m_ipositionEnPassant + 9;
         }
     }
     else if (iEnPassantLigne == 5) {
         if(iEnPassantColonne != 7 && m_tabpiBoard[m_ipositionEnPassant - 7] != nullptr && m_tabpiBoard[m_ipositionEnPassant - 7]->getColor() == Color::WHITE && m_tabpiBoard[m_ipositionEnPassant - 7]->getTypePiece() == TypePieces::PAWN)
         {
-            return true;
+            out_iPositionPawnNextToEnPassant[0] = m_ipositionEnPassant - 7;
         }
         if(iEnPassantColonne != 0 && m_tabpiBoard[m_ipositionEnPassant - 9] != nullptr && m_tabpiBoard[m_ipositionEnPassant - 9]->getColor() == Color::WHITE && m_tabpiBoard[m_ipositionEnPassant - 9]->getTypePiece() == TypePieces::PAWN)
         {
-            return true;
+            out_iPositionPawnNextToEnPassant[1] = m_ipositionEnPassant - 9;
         }
     }
-
-    return false;
+    else {
+        out_iPositionPawnNextToEnPassant[0] = -1;
+        out_iPositionPawnNextToEnPassant[1] = -1;
+    }
 }
 
 //************************************************************************************//

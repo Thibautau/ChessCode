@@ -36,7 +36,6 @@ Bot::Bot(Color color) : m_color(color)
     m_openingBook->getBookData("../OpeningBook/Books/Player2.bin");
     m_openingBook->getBookData("../OpeningBook/Books/Player3.bin");
     m_openingBook->getBookData("../OpeningBook/Books/Player4.bin");
-    //m_openingBook->getBookData("../OpeningBook/Books/baron30.bin");
 }
 
 Color Bot::getPlayerColor() const {
