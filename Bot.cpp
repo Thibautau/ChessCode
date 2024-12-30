@@ -446,8 +446,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     std::pair<int, int> possibleMoves[128];
     int moveCount = 0;
 
-    //@TODO Le 6 est pas à mettre en brut
-    if(depth > m_max_depth_Quiescence-m_max_depth) {
+    if(depth > m_diff_between_depth) {
         board.listOfPossibleMoves(currentColor, possibleMoves, moveCount);
     }
     else {
