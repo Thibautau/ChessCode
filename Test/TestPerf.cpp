@@ -11,6 +11,8 @@
 #include "PlayerHuman.cpp"
 #include "Zobrist.cpp"
 #include "Piece.cpp"
+#include "OpeningBook/OpeningBook.cpp"
+#include "OpeningBook/ReadOpeningBook.cpp"
 
 #include <iostream>
 #include <chrono>
@@ -29,11 +31,11 @@ void testPerformance(MainChessGame& game, const std::string fen, int profondeur_
     game.setBoardFromFEN(fen);
     Board *board = game.getBoard();
 
-    Bot bot(Color::WHITE);
+    Bot* bot = new Bot(Color::WHITE);
     std::pair<int, int> meilleurCoup;
 
     auto start = std::chrono::high_resolution_clock::now();
-    bot.choisir_meilleur_coupv2(*board, profondeur_max, meilleurCoup);
+    bot->choisir_meilleur_coupv2(*board, profondeur_max, meilleurCoup);
     auto end = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::milli> duration = end - start;
@@ -42,6 +44,9 @@ void testPerformance(MainChessGame& game, const std::string fen, int profondeur_
     std::cout << "Node: " << Bot::nodeCount << " \n";
     std::cout << "Temps pris: " << duration.count() << " ms\n";
     std::cout << "Noeuds evalues par seconde: " << (Bot::nodeCount / (duration.count() / 1000)) << "\n \n";
+
+    delete bot;
+    bot = nullptr;
 }
 
 /**
@@ -52,13 +57,14 @@ int main() {
 
     // Test Early Game
     //testPerformance(*game, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 6);
+    testPerformance(*game, "rnbqkbnr/pppp1ppp/8/4p3/4P3/5Q2/PPPP1PPP/RNB1KBNR w KQkq - 0 1", 1);
 
     // Test Mid Game
     //testPerformance(*game, "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 0 4", 4);
 
     // Test Late Game
     //testPerformance(*game, "8/8/4k3/2Q2P2/4K3/4p3/8/8 w - - 0 1", 4);
-    testPerformance(*game, "6k1/5ppp/8/8/8/8/5PPP/6QK w - - 0 1", 6);
+    ////testPerformance(*game, "6k1/5ppp/8/8/8/8/5PPP/6QK w - - 0 1", 6);
     //testPerformance(*game, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1", 6);
 
     return 0;

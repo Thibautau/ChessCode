@@ -30,7 +30,7 @@ int Bot::uniqueNodeIterated = 0;
 
 Bot::Bot(Color color) : m_color(color)
 {
-    m_logFile = new LogFile("Bot_Evaluation_Log.txt", false);
+    m_logFile = new LogFile("Bot_Evaluation_Log.txt", true);
     m_openingBook = new OpeningBook();
     m_openingBook->getBookData("../OpeningBook/Books/Player1.bin");
     m_openingBook->getBookData("../OpeningBook/Books/Player2.bin");
@@ -176,6 +176,14 @@ int Bot::Quiescence(Board& board, int depth, int alpha, int beta, bool estMaximi
     int moveCount = 0;
     board.getAllPiecesEatableByAColor(m_color, list_move, moveCount);
 
+    for(std::pair<int, int> move : list_move)
+    {
+        if(move == std::make_pair(53, 31))
+        {
+            int a = 2;
+        }
+    }
+
     // Couleur actuelle
     Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
 
@@ -213,18 +221,30 @@ int Bot::Quiescence(Board& board, int depth, int alpha, int beta, bool estMaximi
             char promoType = promotionTypes[i];
 
             // Jouer le coup
-            board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType));
+            bool bCouldMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType));
+            if(! bCouldMove)
+            {
+                std::cerr << "ERROR IN QUIESCENCE, illegal move :(" << std::to_string(move.first) << "-" << std::to_string(move.second) << ")\n" << board.getBoardAsString() << std::endl;
+                std::string logMessage2 = "ERROR IN QUIESCENCE, illegal move :\n" + board.getBoardAsString() + "\n";
+                m_logFile->logInfo(logMessage2 + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+            }
 
             // Calcul du score (Négamax)
-            int score = -Quiescence(board, depth - 1, -beta, -alpha, !estMaximisant, bestPromotion);
+            int score = -Quiescence(board, depth - 1, -alpha, -beta, !estMaximisant, bestPromotion);
 
             // Mise à jour du hash pour le coup
             calculateZobristHashForMove(board, move, m_color, promoType, promoType != '\0', zobristHash, capturedPiece);
             board.setZobristHash(zobristHash);
 
             // Annuler le coup
-            board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos, itabCastlingRights, bisWhiteKingCheked, bisBlackKingCheked, iWhiteKingPosition, iBlackKingPosition);
+            bool bCouldUndo = board.undoMove(move.first, move.second, capturedPiece, promoType != '\0', enPassantPos, itabCastlingRights, bisWhiteKingCheked, bisBlackKingCheked, iWhiteKingPosition, iBlackKingPosition);
             board.setZobristHash(originalHash);
+            if(! bCouldUndo)
+            {
+                std::cerr << "ERROR IN QUIESCENCE, Undomove :(" << std::to_string(move.first) << "-" << std::to_string(move.second) << ")\n" << board.getBoardAsString() << std::endl;
+                std::string logMessage2 = "ERROR IN QUIESCENCE, undoMove :\n" + board.getBoardAsString() + "\n";
+                m_logFile->logInfo(logMessage2 + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+            }
 
             // Mise à jour des scores et alpha/beta
             if (estMaximisant) {
