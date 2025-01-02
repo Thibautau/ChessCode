@@ -56,8 +56,8 @@ int main() {
     MainChessGame *game = new MainChessGame(GameMode::JVB);
 
     // Test Early Game
-    //testPerformance(*game, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 6);
-    testPerformance(*game, "rnbqkbnr/pppp1ppp/8/4p3/4P3/5Q2/PPPP1PPP/RNB1KBNR w KQkq - 0 1", 1);
+    testPerformance(*game, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 6);
+    //testPerformance(*game, "rnbqkbnr/pppp1ppp/8/4p3/4P3/5Q2/PPPP1PPP/RNB1KBNR w KQkq - 0 1", 1);
 
     // Test Mid Game
     //testPerformance(*game, "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 0 4", 4);
@@ -66,6 +66,9 @@ int main() {
     //testPerformance(*game, "8/8/4k3/2Q2P2/4K3/4p3/8/8 w - - 0 1", 4);
     ////testPerformance(*game, "6k1/5ppp/8/8/8/8/5PPP/6QK w - - 0 1", 6);
     //testPerformance(*game, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1", 6);
+
+    delete game;
+    game = nullptr;
 
     return 0;
 }

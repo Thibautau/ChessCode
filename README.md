@@ -6,38 +6,36 @@ ChessCode est un moteur d'échecs écrit en C++ qui permet de jouer contre un bo
 
 - **CMake** (version 3.29 ou supérieure) : Utilisé pour la configuration du projet.
 - **Compilateur C++** (supportant C++20 minimum) : Le code utilise des fonctionnalités de C++20, assurez-vous que votre compilateur prend en charge cette version.
-- **GoogleTest** : Utilisé pour les tests unitaires (normalement intégré au fichier de config cmake du projet)
-- **WSL2 (pour les tests de perf)** (Windows Subsystem for Linux 2) pour les utilisateurs Windows qui souhaitent utiliser Linux sous Windows.
 
-## Compilation
-
-### Étapes pour compiler le projet
+## Étapes pour compiler le projet
 
 1. Clonez le dépôt :
    ```bash
    git clone https://github.com/Thibautau/ChessCode.git
    cd ChessCode
    ```
+   
+2. Créer le build en allant dans CMakeLists.txt et executez le pour préparer le projet
 
-2. Créez un répertoire de construction (build) :
-   ```bash
-   mkdir build
-   cd build
-   ```
+![img_2.png](img_2.png)
 
-3. Exécutez CMake pour configurer le projet :
-   ```bash
-   cmake ..
-   ```
-
-4. Enregistrez et Compilez le projet :
-   ```bash
-   cmake --build .
-   ```
+   Sinon, vous pouvez le faire en ligne de commande comme suit :Créez un répertoire de construction (build) :
+      ```bash
+      mkdir build
+      cd build
+      ```
+   Exécutez CMake pour configurer le projet :
+      ```bash
+      cmake ..
+      ```
+   Enregistrez et Compilez le projet :
+      ```bash
+      cmake --build .
+      ```
 
 ### Exécution
 
-Une fois le projet compilé, vous pouvez exécuter le programme principal ou les tests :
+Une fois le projet compilé, vous pouvez exécuter le programme principal ou les tests ou un GUI:
 
 - **Exécuter le jeu d'échecs** :
   ```bash
@@ -54,33 +52,48 @@ Une fois le projet compilé, vous pouvez exécuter le programme principal ou les
   ./runPerf
   ```
 
-## Configuration pour UCI (Universal Chess Interface)
 
-Par défaut, le jeu est jouable depuis la console. Cependant, pour le relier à un logiciel d'interface graphique (GUI) utilisant le protocole UCI, vous devez suivre les étapes suivantes :
+## Mettre en place un profiler et un analyseur de fuites mémoires
 
-1. Dans le fichier `main.cpp`, décommentez la ligne suivante :
-   ```cpp
-   /*UCI* uci = new UCI();
-   uci->uciCommunication();*/
-   ```
-   et commentez la ligne suivante :
-   ```cpp
-   game->playTurn();
-   ```
+### Si vous êtes sur Ubuntu (100% FONCTIONNEL)
 
-2. Compilez le programme :
-   ```bash
-   cmake --build .
-   ```
+1. Analyseur de mémoire ([Valgrind](https://www.jetbrains.com/help/clion/memory-profiling-with-valgrind.html)) :
+   - Allez à la racine :
+     ```bash
+     cd
+     ```
+     - Mettez à jour les dépôts :
+     ```bash
+     sudo apt update
+     ```
+   - Installez Valgrind :
+     ```bash
+     sudo apt install valgrind
+     ```
+     
+Et c'est fait, vous n'avez plus qu'à lancer le code avec valgrind
 
-3. Une fois la compilation terminée, renseignez l'exécutable ChessCode du programme dans votre logiciel GUI, en vous assurant que le protocole UCI est bien activé pour l'échange de données.
-
-   ![Configuration du GUI pour UCI](doc/NewCheesEngine.png)
-
-Le bot devrait désormais être opérationnel dans votre interface graphique.
+![img.png](img.png)
 
 
-## Installation d'Ubuntu sur WSL2
+2. Profiler ([Perf](https://www.jetbrains.com/help/clion/cpu-profiler.html#export-import-profiler-results)) :
+   - Mettez-vous à jour :
+        ```bash
+        sudo apt-get install
+        ```
+     - Donner des droits d'accès (Attention, cela affecte tout l'OS. Allez voir la [doc](https://www.jetbrains.com/help/clion/cpu-profiler.html#export-import-profiler-results) pour gérer vous même si ça ne vous convient pas) :
+        ```bash
+        sudo sh -c 'echo 1 >/proc/sys/kernel/perf_event_paranoid'
+        sudo sh -c 'echo 0 >/proc/sys/kernel/kptr_restrict'
+        ```
+
+Tout est bon, il ne reste plus qu'à lancer le programme avec le profiler
+
+![img_1.png](img_1.png)
+
+### Si vous êtes sur Windows (NE FONCTIONNE PAS POUR LE MOMENT !!!!)
+
+#### Installation d'Ubuntu sur WSL2
 
 1. Installez WSL2 si ce n'est pas déjà fait :
    ```bash
@@ -111,7 +124,7 @@ Le bot devrait désormais être opérationnel dans votre interface graphique.
       valgrind --version
       ```
 
-### Configuration d'un serveur GDB pour le débogage
+#### Configuration d'un serveur GDB pour le débogage
 
 1. Téléchargez et exécutez le script de configuration :
    ```bash
@@ -161,7 +174,7 @@ Le bot devrait désormais être opérationnel dans votre interface graphique.
       - Dans  **Settings > Build, Execution, Deployment > Cmake** changez la toolchain pour WSL
 
 
-### Configuration de perf
+#### Configuration de perf
 
 1. Installez les dépendances requises :
    ```bash
@@ -196,7 +209,7 @@ Le bot devrait désormais être opérationnel dans votre interface graphique.
    sudo apt install libpfm4-dev libtraceevent-dev pkg-config
    ```
 
-### CLion Installation
+#### CLion Installation
 
 1. Allez dans **Settings > Build, Execution, Deployment > Dynamic Analysis Tools > Profiler**.
 2. Dans `perf executable`, configurez le chemin suivant :
@@ -207,6 +220,6 @@ Le bot devrait désormais être opérationnel dans votre interface graphique.
 
 
 ## Disclaimer
-Le bot est toujours en cours de développement, et des fonctionnalités sont encore en phase de test. Suite à un récent merge de la branche UCI, la structure du code a été modifiée, ce qui peut entraîner certains bugs.
+Le bot est toujours en cours de développement, et des fonctionnalités sont encore en phase de test.
 
-L'implémentation UCI n'est pas encore complète et peut causer des plantages dans certains GUI. En cas de plantage, il est recommandé de relancer l'application GUI. Si une partie reste bloquée lors du lancement d'un nouveau jeu, redémarrez simplement l’interface graphique.
+Bon jeu à vous!
