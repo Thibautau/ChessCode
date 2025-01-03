@@ -12,6 +12,7 @@
 #include <fstream>
 
 #include "MainChessGame.h"
+#include "UCI/UCI.h"
 
 //@TODO Vérification de l'implémentation des table de transposition (docs sur le discord)
 //@TODO Ajout des opération XOR pour le changement des hash avec Zobrist plutôt que tout recalculer (docs sur le discord)
@@ -30,7 +31,7 @@ int Bot::uniqueNodeIterated = 0;
 
 Bot::Bot(Color color) : m_color(color)
 {
-    m_logFile = new LogFile("Bot_Evaluation_Log.txt", true);
+    m_logFile = new LogFile("Bot_Evaluation_Log.txt", false);
     m_openingBook = new OpeningBook();
     m_openingBook->getBookData("../OpeningBook/Books/Player1.bin");
     m_openingBook->getBookData("../OpeningBook/Books/Player2.bin");
@@ -435,7 +436,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     }
 
     // Cas de base : profondeur 0
-    if (depth == 0) {
+    if (depth == 0 || UCI::needToStopSearch()) {
         int evaluation = board.evaluateTest(m_color);
         transpositionTable[zobristHash] = {depth, evaluation, EXACT};
         return evaluation;

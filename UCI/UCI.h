@@ -19,7 +19,7 @@ private:
     bool m_debugMode;
     //Boolean indiquant si l'IA a arrêté ou non le calcul de son prochain coup.
     //Est initialisé à false puis devient true une fois la commande stop est rentrée
-    std::atomic<bool> m_stop;
+    static std::atomic<bool> m_stop;
     //Thread chargé de rechercher le meilleur coup pour l'IA.
     std::thread m_searchThread;
 
@@ -117,6 +117,8 @@ public:
     * selon le résultat.
     */
     void inputRegister(const std::string &in_sInput);
+
+    static bool needToStopSearch();
 };
 
 
