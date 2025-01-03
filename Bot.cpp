@@ -31,7 +31,8 @@ int Bot::uniqueNodeIterated = 0;
 
 Bot::Bot(Color color) : m_color(color)
 {
-    m_logFile = new LogFile("Bot_Evaluation_Log.txt", false);
+    m_bWriteLog = false;
+    m_logFile = new LogFile("Bot_Evaluation_Log.txt", m_bWriteLog);
     m_openingBook = new OpeningBook();
     m_openingBook->getBookData("../OpeningBook/Books/Player1.bin");
     m_openingBook->getBookData("../OpeningBook/Books/Player2.bin");
@@ -349,8 +350,12 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
 
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType));
-            std::string logMessage = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
-            m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+#pragma region DEBUG
+            if (m_bWriteLog) {
+                std::string logMessage = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
+                m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+            }
+
             if(! bCanMove)
             {
                 //board.displayBoard();
@@ -361,6 +366,7 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
                 m_logFile->logInfo(logMessage2 + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
                 //std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in choisir_meilleur_coupV2." << std::endl;
             }
+#pragma endregion
 
             int iPreviousInitialPosition = move.first;
             int iPreviousTargetPosition = move.second;
@@ -512,8 +518,12 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
 
             // Jouer le coup
             bool bCanMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType));
-            std::string logMessage = "Plateau à la profondeur " + std::to_string(depth) + " :\n" + board.getBoardAsString() + "\n";
-            m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+#pragma region DEBUG
+            if (m_bWriteLog) {
+                std::string logMessage = "Plateau à la profondeur " + std::to_string(depth) + " :\n" + board.getBoardAsString() + "\n";
+                m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+            }
+
             if(! bCanMove)
             {
                 board.displayBoard();
@@ -521,6 +531,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
                 m_logFile->logInfo(logMessage2 + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
                 std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in alphaBetaWithMemory." << std::endl;
             }
+#pragma endregion
             // Mise à jour du hash pour le coup
             calculateZobristHashForMove(board, move, currentColor, promoType, promoType != '\0', zobristHash, capturedPiece);
             board.setZobristHash(zobristHash);
@@ -648,8 +659,11 @@ int Bot::evaluateMoveWithMinimaxv2(Board& board, int profondeur, bool estMaximis
     uint64_t originalHash = board.getZobristHash();
     uint64_t zobristHash = board.getZobristHash();  // Sauvegarder le hash original
 
-    std::string logMessage = "Plateau à la profondeur " + std::to_string(profondeur) + " :\n" + board.getBoardAsString() + "\n";
-    m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+    if (m_bWriteLog)
+    {
+        std::string logMessage = "Plateau à la profondeur " + std::to_string(profondeur) + " :\n" + board.getBoardAsString() + "\n";
+        m_logFile->logInfo(logMessage + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
+    }
 
     //Exécution du mouvement + récurssif
     board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promotionForMove), &enPassantPos);
@@ -751,12 +765,6 @@ int Bot::alphaBetaBasic(Board& board, int depth, int alpha, int beta, bool estMa
     if (depth == 0) {
         int evaluation = board.evaluateTest(m_color);
         return evaluation;
-    }
-
-    // Pour les logs
-    if (depth == 3) {
-        std::string logMessage = "Plateau à la profondeur " + std::to_string(depth) + " :\n" + board.getBoardAsString() + "\n";
-        m_logFile->logInfo(logMessage);
     }
 
     // Détermination de la couleur à maximiser ou minimiser
