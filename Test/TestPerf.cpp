@@ -11,6 +11,7 @@
 #include "PlayerHuman.cpp"
 #include "Zobrist.cpp"
 #include "Piece.cpp"
+#include "UCI/UCI.cpp"
 #include "OpeningBook/OpeningBook.cpp"
 #include "OpeningBook/ReadOpeningBook.cpp"
 

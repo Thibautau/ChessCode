@@ -33,13 +33,13 @@ private:
     std::unordered_map<uint64_t, TranspositionTableEntry> transpositionTable;
     //LogInFile* m_logFile;
     LogFile* m_logFile;
+    bool m_bWriteLog = false;
     static constexpr char PROMOTION_TYPES[4] = {'q', 'n', 'b', 'r'};
     static constexpr char NO_PROMOTION[1] = {'\0'};
     OpeningBook* m_openingBook;
     int m_max_depth_Quiescence = 6;
     int m_max_depth = 4;
     int m_diff_between_depth = 0;
-
 
 
 public:
