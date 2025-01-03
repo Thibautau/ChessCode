@@ -34,6 +34,18 @@ Board::Board()
     m_iPreviousMoveTargetPosition = -1;
 }
 
+Board::~Board()
+{
+    for(int iIndiceRow = 0; iIndiceRow < 64; iIndiceRow++ )
+    {
+        if (m_tabpiBoard[iIndiceRow] != nullptr)
+        {
+            delete m_tabpiBoard[iIndiceRow];
+            m_tabpiBoard[iIndiceRow] = nullptr;
+        }
+    }
+}
+
 void Board::initializeBoard()
 {
     for (int iTabPosition = 8; iTabPosition < 16; ++iTabPosition) {
@@ -64,7 +76,11 @@ void Board::clearBoard()
 {
     for(int iIndiceRow = 0; iIndiceRow < 64; iIndiceRow++ )
     {
-        m_tabpiBoard[iIndiceRow] = nullptr;
+        if (m_tabpiBoard[iIndiceRow] != nullptr)
+        {
+            delete m_tabpiBoard[iIndiceRow];
+            m_tabpiBoard[iIndiceRow] = nullptr;
+        }
     }
 
     m_isWhiteKingChecked = false;

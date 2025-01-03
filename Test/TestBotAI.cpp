@@ -25,6 +25,12 @@ protected:
     }
 };
 
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    std::cout << "Démarrage des tests..." << std::endl;
+    return RUN_ALL_TESTS();
+}
+
 // Test d'un crash qu'on a eu où le roi a le droit de bouger (TODO FONCTIONNE ?)
 TEST_F(TestBotAI, KingCanMoveButGameCrashed)
 {
