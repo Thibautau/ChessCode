@@ -9,6 +9,7 @@
 std::string UCI::m_engineName = "MonEngine v1";
 std::string UCI::m_engineCode = "";
 GameMode UCI::m_gameMode = GameMode::JVB;
+std::atomic<bool> UCI::m_stop = false;
 
 UCI::UCI()
 {
@@ -164,7 +165,7 @@ void UCI::inputGo(std::string &in_sInput) {
 
 void UCI::inputStop() {
     m_stop = true;
-    if(m_searchThread.joinable()) {
+    if (m_searchThread.joinable()) {
         m_searchThread.join();
     }
 }
@@ -226,6 +227,11 @@ void UCI::searchThread(int depth) {
         std::cout << "Search interrupted" << std::endl;
         std::cout << "bestmove " << bestMove << std::endl;
     }
+}
+
+bool UCI::needToStopSearch()
+{
+    return m_stop;
 }
 
 
