@@ -24,7 +24,7 @@ protected:
         bCouldRead = bCouldRead && openingBook->getBookData(repertoryPath + "Player2.bin");
         bCouldRead = bCouldRead && openingBook->getBookData(repertoryPath + "Player3.bin");
         bCouldRead = bCouldRead && openingBook->getBookData(repertoryPath + "Player4.bin");
-        bCouldRead = bCouldRead && openingBook->getBookData(repertoryPath + "Baron30.bin");
+        bCouldRead = bCouldRead && openingBook->getBookData(repertoryPath + "baron30.bin");
 
         ASSERT_TRUE(bCouldRead) << "Failed to initialize the opening book.";
     }
@@ -52,7 +52,7 @@ TEST_F(TestOpeningBook, readOpeningBook)
     bCouldRead = bCouldRead && openingBook->getBookData(repertoryPath + "Player2.bin");
     bCouldRead = bCouldRead && openingBook->getBookData(repertoryPath + "Player3.bin");
     bCouldRead = bCouldRead && openingBook->getBookData(repertoryPath + "Player4.bin");
-    bCouldRead = bCouldRead && openingBook->getBookData(repertoryPath + "Baron30.bin");
+    bCouldRead = bCouldRead && openingBook->getBookData(repertoryPath + "baron30.bin");
 
     EXPECT_TRUE(bCouldRead);
 }

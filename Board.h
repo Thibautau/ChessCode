@@ -174,6 +174,7 @@ public:
     * sont initialisées aux cases de départ standard (e1 pour le roi blanc et e8 pour le roi noir).
     */
     Board();
+    ~Board();
     /**
     * @brief Initialise le plateau avec la configuration standard des pièces.
     *

@@ -40,6 +40,15 @@ Bot::Bot(Color color) : m_color(color)
     m_openingBook->getBookData("../OpeningBook/Books/Player4.bin");
 }
 
+Bot::~Bot()
+{
+    delete m_openingBook;
+    m_openingBook = nullptr;
+
+    delete m_logFile;
+    m_logFile = nullptr;
+}
+
 Color Bot::getPlayerColor() const {
     return m_color;
 }

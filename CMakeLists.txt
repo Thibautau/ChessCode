@@ -92,6 +92,8 @@ add_executable(runTestBotAI
         Test/TestBotAI.h
         LogFile.h
         Type.h
+        UCI/UCI.h
+        UCI/UCI.cpp
 )
 
 add_executable(runTestZobrist
@@ -116,6 +118,8 @@ add_executable(runTestZobrist
         MainChessGame.h
         PlayerHuman.cpp
         Player.h
+        UCI/UCI.h
+        UCI/UCI.cpp
 )
 
 # Lier GoogleTest à l'exécutable de tests

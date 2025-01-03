@@ -47,6 +47,7 @@ public:
     //Si on a déjà parcouru un node alors on n'incrémente pas le compteur
     static int uniqueNodeIterated;
     Bot(Color color);
+    ~Bot();
     /**
     * Fonction qui fait jouer le bot en choisissant un mouvement sur l'échiquier.
     *

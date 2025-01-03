@@ -405,10 +405,6 @@ TEST_F(BoardTest, PromotePawnToQueen) {
 
     Piece* promotedPiece = board.getPieceAt(7, 1);
     EXPECT_EQ(promotedPiece->getTypePiece(), TypePieces::QUEEN);
-
-    // Nettoyez si nécessaire
-    delete pPiece;
-    delete promotedPiece;
 }
 
 
