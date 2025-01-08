@@ -22,6 +22,8 @@ private:
     static std::atomic<bool> m_stop;
     //Thread chargé de rechercher le meilleur coup pour l'IA.
     std::thread m_searchThread;
+    static int m_movetime;
+    static std::chrono::time_point<std::chrono::high_resolution_clock> m_startTime;
 
     /**
      * Méthode utilisant m_searchThread afin d'obtenir le meilleur coup
@@ -30,7 +32,7 @@ private:
      *
      * @param depth: la profondeur à laquelle le coup a été effectué.
      */
-    void searchThread(int depth);
+    void searchThread(int depth, int movetime);
 
 public:
     /**
@@ -108,7 +110,7 @@ public:
     * @param depth La profondeur maximale pour la recherche du coup. Si `-1`, utilise
     * une profondeur par défaut.
     */
-    std::string findBestMove(int depth);
+    std::string findBestMove(int depth, int movetime);
     /**
     * Gère la commande "register" pour enregistrer le moteur avec un nom ou un code.
     *
@@ -119,6 +121,8 @@ public:
     void inputRegister(const std::string &in_sInput);
 
     static bool needToStopSearch();
+
+    static bool timeIsUp();
 };
 
 

@@ -10,6 +10,8 @@ std::string UCI::m_engineName = "MonEngine v1";
 std::string UCI::m_engineCode = "";
 GameMode UCI::m_gameMode = GameMode::JVB;
 std::atomic<bool> UCI::m_stop = false;
+int UCI::m_movetime = -1;
+std::chrono::time_point<std::chrono::high_resolution_clock> UCI::m_startTime = std::chrono::high_resolution_clock::now();
 
 UCI::UCI()
 {
@@ -146,7 +148,9 @@ void UCI::inputPosition(std::string &in_sInput) const {
 }
 
 void UCI::inputGo(std::string &in_sInput) {
-    int depth = 4;
+    int depth = 8;
+    int movetime = 8000;
+    m_startTime = std::chrono::high_resolution_clock::now();
     std::istringstream iss(in_sInput);
     std::string token;
 
@@ -154,12 +158,18 @@ void UCI::inputGo(std::string &in_sInput) {
         if (token == "depth") {
             iss >> depth;
         }
+        else if(token == "movetime") {
+            iss >> movetime;
+        }
     }
     m_stop = false;
+    m_movetime = movetime;
     if(m_searchThread.joinable()) {
         m_searchThread.join();
     }
-    m_searchThread = std::thread(&UCI::searchThread, this, depth);
+    m_searchThread = std::thread([this, depth, movetime]() {
+        this->searchThread(depth, movetime);
+    });
 }
 
 
@@ -170,14 +180,19 @@ void UCI::inputStop() {
     }
 }
 
-std::string UCI::findBestMove(int depth) {
+std::string UCI::findBestMove(int depth, int movetime) {
     std::string bestMove;
+    std::cout << "Movetime:" << movetime << std::endl;
+    auto start_time = std::chrono::high_resolution_clock::now();
     for(int currentDepth = 1; currentDepth <= depth; ++currentDepth) {
-        if(m_stop) {
+        if(m_stop || timeIsUp()) {
             break;
         }
         bestMove = m_mainChessGame->findBestMoveForCurrentPlayer(currentDepth);
         std::cout << "best move at depth: " << currentDepth << std::endl;
+        auto time_passed = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now() - m_startTime).count();
+        std::cout << "[DEBUG] Current time passed: " << time_passed << " ms, movetime: " << movetime << " ms" << std::endl;
     }
     return bestMove;
 }
@@ -218,8 +233,8 @@ void UCI::inputRegister(const std::string &in_sInput) {
     }
 }
 
-void UCI::searchThread(int depth) {
-    std::string bestMove = findBestMove(depth);
+void UCI::searchThread(int depth, int movetime) {
+    std::string bestMove = findBestMove(depth, movetime);
     if(!m_stop) {
         std::cout << "bestmove " << bestMove << std::endl;
     }
@@ -234,4 +249,11 @@ bool UCI::needToStopSearch()
     return m_stop;
 }
 
-
+bool UCI::timeIsUp() {
+    if(m_movetime > 0) {
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        auto time_passed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - m_startTime).count();
+        return time_passed >= m_movetime;
+    }
+    return false;
+}

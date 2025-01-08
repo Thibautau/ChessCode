@@ -92,7 +92,7 @@ void Bot::playWithDepth(Board& board, int& start, int& end, int depth, char& pro
         start = Board::convertToPosition(sBestmove[0], sBestmove[1]);
         end = Board::convertToPosition(sBestmove[2], sBestmove[3]);
 
-        if(sBestmove.length() == 5) //promootion
+        if(sBestmove.length() == 5) //promotion
         {
             promotion = sBestmove[4];
         }
@@ -370,8 +370,8 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
                 //board.displayBoard();
                 board.displayBoard();
                 std::cerr << "Error: The previous move was (" << board.getPreviousMoveInitialPosition() << "-" << board.getPreviousMoveTargetPosition() << ")" << std::endl;
-                std::cerr << "But the The acutal move is (" << move.first << "-" << move.second << ")" << std::endl;
-                std::string logMessage2 = "ERRORPlateau à la profondeur :\n" + board.getBoardAsString() + "\n";
+                std::cerr << "But the actual move is (" << move.first << "-" << move.second << ")" << std::endl;
+                std::string logMessage2 = "ERROR Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
                 m_logFile->logInfo(logMessage2 + " Move:" + std::to_string(move.first) + "-" + std::to_string(move.second));
                 //std::cerr << "Error: Impossible move (" << move.first << " " << move.second << "). in choisir_meilleur_coupV2." << std::endl;
             }
@@ -451,7 +451,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     }
 
     // Cas de base : profondeur 0
-    if (depth == 0 || UCI::needToStopSearch()) {
+    if (depth == 0 || UCI::needToStopSearch() || UCI::timeIsUp()) {
         int evaluation = board.evaluateTest(m_color);
         transpositionTable[zobristHash] = {depth, evaluation, EXACT};
         return evaluation;
