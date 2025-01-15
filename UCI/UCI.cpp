@@ -12,12 +12,14 @@ GameMode UCI::m_gameMode = GameMode::JVB;
 std::atomic<bool> UCI::m_stop = false;
 int UCI::m_movetime = -1;
 std::chrono::time_point<std::chrono::high_resolution_clock> UCI::m_startTime = std::chrono::high_resolution_clock::now();
+bool UCI::m_bUseMovetime = false;
 
 UCI::UCI()
 {
     m_mainChessGame = new MainChessGame(m_gameMode);
     m_debugMode = false;
     m_stop = false;
+    m_bUseMovetime = false;
 }
 
 void UCI::uciCommunication()
@@ -148,7 +150,7 @@ void UCI::inputPosition(std::string &in_sInput) const {
 }
 
 void UCI::inputGo(std::string &in_sInput) {
-    int depth = 8;
+    int depth = 6;
     int movetime = 8000;
     m_startTime = std::chrono::high_resolution_clock::now();
     std::istringstream iss(in_sInput);
@@ -250,7 +252,7 @@ bool UCI::needToStopSearch()
 }
 
 bool UCI::timeIsUp() {
-    if(m_movetime > 0) {
+    if(m_movetime > 0 && m_bUseMovetime) {
         auto currentTime = std::chrono::high_resolution_clock::now();
         auto time_passed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - m_startTime).count();
         return time_passed >= m_movetime;

@@ -24,6 +24,7 @@ private:
     std::thread m_searchThread;
     static int m_movetime;
     static std::chrono::time_point<std::chrono::high_resolution_clock> m_startTime;
+    static bool m_bUseMovetime;
 
     /**
      * Méthode utilisant m_searchThread afin d'obtenir le meilleur coup
