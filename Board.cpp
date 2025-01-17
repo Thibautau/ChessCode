@@ -1141,6 +1141,92 @@ void Board::getAllPossibleMovementsForAPiece(int in_iPositionToFindMovement, std
     }
 }
 
+bool Board::arePositionsOnSameDiagonal(int in_iFirstPosition, int in_iSecondPosition, int& out_iDirectionDiagonale)
+{
+    int x1 = in_iFirstPosition % 8;        // Colonne de la première position
+    int y1 = in_iFirstPosition / 8;        // Ligne de la première position
+    int x2 = in_iSecondPosition % 8;        // Colonne de la deuxième position
+    int y2 = in_iSecondPosition / 8;        // Ligne de la deuxième position
+
+    // Vérification des critères pour les diagonales
+    if (abs(x1 - x2) == abs(y1 - y2))
+    {
+        out_iDirectionDiagonale = 9;
+        if (in_iFirstPosition > in_iSecondPosition) // Si on a par exemeple B1K, ça renoive -1
+        {
+            out_iDirectionDiagonale = -9;
+        }
+        return true;
+    }
+    else if ((x1 + y1) == (x2 + y2))
+    {
+        out_iDirectionDiagonale = 7;
+        if (in_iFirstPosition > in_iSecondPosition) // Si on a par exemeple B1K, ça renoive -1
+        {
+            out_iDirectionDiagonale = -7;
+        }
+        return true;
+    }
+    out_iDirectionDiagonale = -1;
+    return false;
+}
+
+bool Board::arePositionsOnSameLineOrColumn(int in_iFirstPosition, int in_iSecondPosition, int& out_iDirectionLine)
+{
+    int iColonne1 = in_iFirstPosition % 8;
+    int iLigne1 = in_iFirstPosition / 8;
+    int iColonne2 = in_iSecondPosition % 8;
+    int iLigne2 = in_iSecondPosition / 8;
+
+    if (iLigne1 == iLigne2)
+    {
+        out_iDirectionLine = 1;
+        if (in_iFirstPosition > in_iSecondPosition) // Si on a par exemeple B1K, ça renoive -1
+        {
+            out_iDirectionLine = -1;
+        }
+        return true;
+    }
+    else if (iColonne1 == iColonne2)
+    {
+        out_iDirectionLine = 8;
+        if (in_iFirstPosition > in_iSecondPosition) // Si on a par exemeple B1K, ça renoive -1
+        {
+            out_iDirectionLine = -8;
+        }
+        return true;
+    }
+    out_iDirectionLine = -2;
+    return false;
+}
+
+bool Board::doesPositionPutKingInCheck(int in_iPreviousPosition, int in_iPosition)
+{
+    //Prérequis: la pièce a déjà été joué
+    // Et la pièce qui bouge n'est pas un roi
+
+    Piece* pPiece = getPieceAt(in_iPosition);
+    if(pPiece == nullptr && pPiece->getTypePiece() == TypePieces::KING)
+        return false;
+
+    Color pieceColor = pPiece->getColor();
+    int iKingPosition = getKingPosition(pieceColor);
+
+    int iPreviousDirectionWithKing = -1;
+    arePositionsOnSameDiagonal(iKingPosition, in_iPreviousPosition, iPreviousDirectionWithKing);
+    if (in_iPreviousPosition == -1)
+    {
+        arePositionsOnSameLineOrColumn(iKingPosition, in_iPreviousPosition, iPreviousDirectionWithKing);
+    }
+
+    if (in_iPreviousPosition == -2) // Si on fait un mouvement qui n'est pas dans la direction du roi
+    {
+        return ! isKingInCheck(pieceColor); // Si le roi est en échec et que le mouvement n'interfère pas, alors
+    }
+
+    return true;
+}
+
 bool Board::putNextMoveIfValid(int in_iNextPosition, Piece* in_pPieceToMove, std::vector<int>& in_vectMoveToFill)
 {
     if(! isValidPosition(in_iNextPosition) || in_pPieceToMove == nullptr)

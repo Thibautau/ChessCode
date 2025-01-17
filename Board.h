@@ -440,6 +440,7 @@ public:
     * @param out_vectDirectionToFill Un vecteur qui sera rempli avec les directions possibles pour la pièce à partir de sa position.
     */
     void getAllPossibleMovementsForAPiece(int in_iPositionToFindMovement, std::vector<int>& out_vectDirectionToFill);
+
     /**
     * Vérifie et ajoute un mouvement valide à une liste de mouvements possibles.
     *
@@ -705,6 +706,10 @@ public:
      */
     bool isThereEnemyPawnNextToEnPassantPawn() const;
     void getEnemyPawnNextToEnPassantPawn(int out_iPositionPawnNextToEnPassant[2]) const;
+
+    static bool arePositionsOnSameDiagonal(int in_iFirstPosition, int in_iSecondPosition, int& out_iDirectionDiagonale);
+    static bool arePositionsOnSameLineOrColumn(int in_iFirstPosition, int in_iSecondPosition, int& out_iDirectionLine);
+    bool doesPositionPutKingInCheck(int in_iPreviousPosition, int in_iPosition);
 
     int getPreviousMoveInitialPosition() const {
         return m_iPreviousMoveInitialPosition;
