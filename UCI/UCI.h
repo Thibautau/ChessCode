@@ -22,8 +22,14 @@ private:
     static std::atomic<bool> m_stop;
     //Thread chargé de rechercher le meilleur coup pour l'IA.
     std::thread m_searchThread;
+    /**
+     * Attribut indiquand le temps que possède l'IA pour chercher un coup en ms (si le boolean
+     * m_UseMovetime est à true
+     */
     static int m_movetime;
+    // Indique la durée à laquelle la recherche de coup pour l'IA a commencé
     static std::chrono::time_point<std::chrono::high_resolution_clock> m_startTime;
+    // Boolean permettant d'autoriser la recherche de coup avec une limite de temps imparti pour l'IA
     static bool m_bUseMovetime;
 
     /**
@@ -123,6 +129,10 @@ public:
 
     static bool needToStopSearch();
 
+    /**
+     * Renvoie true si le temps imparti pour trouver un coup pour l'IA est écoulé
+     *
+     */
     static bool timeIsUp();
 };
 
