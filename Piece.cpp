@@ -471,7 +471,7 @@ bool Piece::isNextPositionNotOutOfBoard(int in_iDirection, int in_iInitialPositi
     }
 }
 
-bool Piece::doesPieceMoveInDirection(int in_iDirection)
+bool Piece::doesPieceMoveInDirection(int in_iDirection) //TODO Améliorer, à la place de parcourir un talbeau, faire des if/else
 {
     int iRepetition = 0;
     int iNbMovements = 0;

@@ -32,6 +32,11 @@ private:
 
     uint64_t zobristHash;
 
+    int m_iPositionThatAttacksWhiteKing[2] = {-1, -1};
+    int m_iPositionThatAttacksBlackKing[2] = {-1, -1};
+    int m_iDirectionThatAttacksWhiteKing[2] = {-2, -2};
+    int m_iDirectionThatAttacksBlackKing[2] = {-2, -2};
+
     const int MVV_LVA[7][7] = {
         { 0,  0,  0,  0,  0,  0, 0 },      // Victim K, Attacker K, Q, R, B, N, P, None
         { 50, 51, 52, 53, 54, 55, 0 },    // Victim Q, Attacker K, Q, R, B, N, P, None
@@ -362,17 +367,24 @@ public:
     * @param in_iPosition La position de la case à vérifier (index de la case sur l'échiquier).
     * @param in_colorToFindAttack La couleur des pièces qui doivent attaquer la case.
     * @param in_vectPositionPieceFound Un vecteur qui contient les positions des pièces trouvées qui attaquent la case.
+    * @param in_vectDirectionThatAttacks
+    * @param in_vectDirectionThatAttacks
+    * @param in_vectDirectionThatAttacks
     * @return true Si la case est attaquée par une pièce de la couleur spécifiée, false sinon.
     */
-    bool isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound) const;
+    bool isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int> &in_vectPositionPieceFound, std::vector<int> &
+                               in_vectDirectionThatAttacks) const;
     /**
     * Vérifie si une case est attaquée par n'importe quelle couleur.
     *
     * @param in_iPosition La position de la case à vérifier (index de la case sur l'échiquier).
     * @param in_vectPositionPieceFound Un vecteur qui contiendra les positions des pièces attaquantes trouvées.
+    * @param in_vectDirectionThatAttacks
+    * @param in_vectDirectionThatAttacks
+    * @param in_vectDirectionThatAttacks
     * @return true Si la case est attaquée par une pièce de n'importe quelle couleur, false sinon.
     */
-    bool isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
+    bool isCaseAttackedByAnyColor(int in_iPosition, std::vector<int> &in_vectPositionPieceFound, std::vector<int> &in_vectDirectionThatAttacks) const;
     /**
     * Trouve la première pièce dans une direction donnée qui attaque une case initiale.
     *
@@ -398,22 +410,31 @@ public:
     *
     * @param in_iPosition La position de la case à vérifier (index de la case sur l'échiquier).
     * @param in_vectPositionPieceFound Un vecteur qui contient les positions des pièces attaquantes trouvées.
+    * @param in_vectDirectionThatAttacks
+    * @param in_vectDirectionThatAttacks
+    * @param in_vectDirectionThatAttacks
     */
-    void findFirstPiecesOnEachRookMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
+    void findFirstPiecesOnEachRookMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int> &in_vectPositionPieceFound, std::vector<int> &in_vectDirectionThatAttacks) const;
     /**
     * Recherche les pièces attaquantes dans toutes les directions possibles pour un fou.
     *
     * @param in_iPosition La position de la case à vérifier (index de la case sur l'échiquier).
     * @param in_vectPositionPieceFound Un vecteur qui contient les positions des pièces attaquantes trouvées.
+    * @param in_vectDirectionThatAttacks
+    * @param in_vectDirectionThatAttacks
+    * @param in_vectDirectionThatAttacks
     */
-    void findFirstPiecesOnEachBishopMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
+    void findFirstPiecesOnEachBishopMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int> &in_vectPositionPieceFound, std::vector<int> &in_vectDirectionThatAttacks) const;
     /**
     * Recherche les pièces attaquantes pour un cavalier à partir d'une position donnée.
     *
     * @param in_iPosition La position de la case à vérifier (index de la case sur l'échiquier).
     * @param in_vectPositionPieceFound Un vecteur qui contient les positions des pièces attaquantes trouvées.
+    * @param in_vectDirectionThatAttacks
+    * @param in_vectDirectionThatAttacks
+    * @param in_vectDirectionThatAttacks
     */
-    void findFirstPiecesOnEachKnightMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const;
+    void findFirstPiecesOnEachKnightMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int> &in_vectPositionPieceFound, std::vector<int> &in_vectDirectionThatAttacks) const;
 
     //Piece Movement Options and Calculations
     /**
@@ -444,12 +465,15 @@ public:
     /**
     * Vérifie et ajoute un mouvement valide à une liste de mouvements possibles.
     *
+    * @param in_iPreviousPosition
+    * @param in_iPreviousPosition
+    * @param in_iPreviousPosition
     * @param in_iNextPosition La position vers laquelle la pièce est censée se déplacer.
     * @param in_pPieceToMove Un pointeur vers la pièce qui doit être déplacée.
     * @param in_vectMoveToFill Un vecteur qui sera rempli avec le mouvement valide si la position est valide.
     * @return `true` si le mouvement est valide et a été ajouté au vecteur, `false` sinon.
     */
-    bool putNextMoveIfValid(int in_iNextPosition, Piece* in_pPieceToMove, std::vector<int>& in_vectMoveToFill);
+    bool putNextMoveIfValid(int in_iPreviousPosition, int in_iNextPosition, Piece *in_pPieceToMove, std::vector<int> &in_vectMoveToFill);
     /**
     * Génère la liste de tous les mouvements possibles pour toutes les pièces d'une couleur donnée.
     *
@@ -707,9 +731,74 @@ public:
     bool isThereEnemyPawnNextToEnPassantPawn() const;
     void getEnemyPawnNextToEnPassantPawn(int out_iPositionPawnNextToEnPassant[2]) const;
 
+    /**
+     * 
+     * @param in_iFirstPosition
+     * @param in_iSecondPosition 
+     * @param out_iDirectionDiagonale -2 if positions not on same diagonal either 9/-9, -7/7. It is the direction from in_iFirstPosition to in_iSecondPosition
+     * @return true si aligné sur la même diagonale
+     */
     static bool arePositionsOnSameDiagonal(int in_iFirstPosition, int in_iSecondPosition, int& out_iDirectionDiagonale);
+
+    /**
+     *
+     * @param in_iFirstPosition
+     * @param in_iSecondPosition
+     * @param out_iDirectionLine -2 if positions not on same line/column either 1/-1, -8/8. It is the direction from in_iFirstPosition to in_iSecondPosition
+     * @return true si aligné sur la même ligne/colonne
+     */
     static bool arePositionsOnSameLineOrColumn(int in_iFirstPosition, int in_iSecondPosition, int& out_iDirectionLine);
-    bool doesPositionPutKingInCheck(int in_iPreviousPosition, int in_iPosition);
+
+    /**
+     * Prérequis: la pièce a déjà été joué
+     * @param in_iPreviousPosition Position avant que la pièce ne bouge
+     * @param in_iPosition  Position après que la pièce ait bougé
+     * @param out_itabPositionsThatPutsKingInCheck Tableau de position qui mettent le roi en échec pour le move donné
+     * @param in_bStopWhenKingCheckFirstTime True pour arrêter la recherche directement si le roi est mis en échec la première fois. Si False, n'arrête pas la recherche directement (même si on sait que c'est faux) pour voir si une autre pièce mets le roi en échec
+     * @return true si le mouvement de la pièce vérifie que son roi n'est pas en échec
+     */
+    bool doesPositionDoNotPutKingInCheck(int in_iPreviousPosition, int in_iPosition, int out_itabPositionsThatPutsKingInCheck[2], int out_itabDirectionsThatPutsKingInCheck[2], bool in_bStopWhenKingCheckFirstTime =true);
+
+    /**
+     * Prérequis: la pièce a déjà été joué
+     * @param in_iPreviousPosition Position avant que la pièce ne bouge
+     * @param in_iPosition  Position après que la pièce ait bougé
+     * @param out_itabPositionsThatPutsKingInCheck Tableau de position qui mettent le roi en échec pour le move donné
+     * @param in_bStopWhenKingCheckFirstTime True pour arrêter la recherche directement si le roi est mis en échec la première fois. Si False, n'arrête pas la recherche directement (même si on sait que c'est faux) pour voir si une autre pièce mets le roi en échec
+     * @return true si le mouvement de la pièce vérifie que le roi enemi n'est pas en échec
+     */
+    bool doesPositionDoNotPutEnemyKingInCheck(int in_iPreviousPosition, int in_iPosition, int out_itabPositionsThatPutsKingInCheck[2], int out_itabDirectionsThatPutsKingInCheck[2], bool in_bStopWhenKingCheckFirstTime = true);
+
+    bool doesPositionCutKingInCheck(int in_iPosition, int &out_iPositionThatPutsKingInCheck,
+                                    int &out_iDirectionThatPutsKingInCheck);
+
+    bool doesDirectionAttackKingIfAlign(int in_iKingPosition, int in_iPosition, int& out_iPositionThatPutsKingInCheck, int& out_iDirectionThatPutsKingInCheck);
+
+    /**
+     * 
+     * @param in_kingColor Couleur du roi pour lequel on veut vérifier s'il est attaqué dans m_iPositionThatAttacksWhiteKing
+     * @param in_iAttackingPosition La position pour laquelle on veut savoir si elle attaque le roi
+     * @return true si la position attaque le roi
+     */
+    bool isPositionAttackingKing(Color in_kingColor, int in_iAttackingPosition) const;
+
+    void getPositionAttackingKing(Color in_kingColor, int &in_iFirstAttackingPosition, int &in_iSecondAttackingPosition, int &in_iFirstAttackingDirection, int &in_iSecondAttackingDirection) const;
+
+    /**
+     *
+     * @param in_kingColor Couleur du roi pour lequel on veut vérifier s'il est attaqué dans m_iPositionThatAttacksWhiteKing
+     * @param in_iAttackingPosition La position pour laquelle on veut savoir si elle attaque le roi
+     * @return true si la position attaque le roi et uniquement celle-ci (pas 2 pièces qui mettent le roi en échec en même temps)
+     */
+    bool isOnlyThisPositionAttackingKing(Color in_kingColor, int in_iAttackingPosition) const;
+
+    /**
+     * 
+     * @param in_colPlayer Couleur du roi pour lequel on met à jour m_iPositionThatAttacksWhiteKing
+     * @param in_iAttackingPosition Tableau de coordonné d'attaques. S'il n'y en a pas, remplir avec {-1, -1}
+     * @param in_iAttackingDirection Tableau de directions d'attaques. S'il n'y en a pas, remplir avec {-2, -2}
+     */
+    void setPositionThatAttacksKing(Color in_colPlayer, const int in_iAttackingPosition[2], const int in_iAttackingDirection[2]);
 
     int getPreviousMoveInitialPosition() const {
         return m_iPreviousMoveInitialPosition;

@@ -1328,3 +1328,126 @@ TEST_F(BoardTest, getAllPiecesEatableByAColorEnPassant2)
     EXPECT_TRUE(((possibleMoves[0].second == 47) || (possibleMoves[0].second == 45)) && (( possibleMoves[1].second == 47) || (possibleMoves[1].second == 45)));
     EXPECT_EQ(moveCount, 2);
 }
+
+TEST_F(BoardTest, TestarePositionsOnSameDiagonalLineOrColumn)
+{
+    int iDirection = -2;
+
+    //DIAGONAL
+    bool bOnSameDiagonal = Board::arePositionsOnSameDiagonal(0, 63, iDirection); // a1 - h8 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, 9);
+
+    bOnSameDiagonal = Board::arePositionsOnSameDiagonal(63, 0, iDirection); // h8 - a1 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, -9);
+
+    bOnSameDiagonal = Board::arePositionsOnSameDiagonal(63, 1, iDirection); // h8 - a2 False
+    EXPECT_FALSE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, -2);
+
+    bOnSameDiagonal = Board::arePositionsOnSameDiagonal(56, 7, iDirection); // a8 - h1 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, -7);
+
+    bOnSameDiagonal = Board::arePositionsOnSameDiagonal(7, 56, iDirection); // h1 - a8 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, 7);
+
+    bOnSameDiagonal = Board::arePositionsOnSameDiagonal(57, 50, iDirection); // b8 - c7 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, -7);
+
+    bOnSameDiagonal = Board::arePositionsOnSameDiagonal(50, 57, iDirection); // c7 - b8 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, 7);
+
+    bOnSameDiagonal = Board::arePositionsOnSameDiagonal(23, 14, iDirection); // h3 - g2 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, -9);
+
+    bOnSameDiagonal = Board::arePositionsOnSameDiagonal(14, 23, iDirection); // h3 - g2 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, 9);
+
+
+
+
+
+    //LINE/COLUMN
+    bOnSameDiagonal = Board::arePositionsOnSameLineOrColumn(56, 0, iDirection); // a8 - a1 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, -8);
+
+    bOnSameDiagonal = Board::arePositionsOnSameLineOrColumn(0, 56, iDirection); // a1 - a8 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, 8);
+
+    bOnSameDiagonal = Board::arePositionsOnSameLineOrColumn(0, 1, iDirection); // a1 - a2 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, 1);
+
+    bOnSameDiagonal = Board::arePositionsOnSameLineOrColumn(1, 0, iDirection); // a2 - a1 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, -1);
+
+    bOnSameDiagonal = Board::arePositionsOnSameLineOrColumn(0, 7, iDirection); // a1 - a8 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, 1);
+
+    bOnSameDiagonal = Board::arePositionsOnSameLineOrColumn(7, 0, iDirection); // a8 - a1 True
+    EXPECT_TRUE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, -1);
+
+    bOnSameDiagonal = Board::arePositionsOnSameLineOrColumn(56, 1, iDirection); // a8 - b1 False
+    EXPECT_FALSE(bOnSameDiagonal);
+    EXPECT_EQ(iDirection, -2);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

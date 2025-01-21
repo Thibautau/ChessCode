@@ -156,10 +156,23 @@ void Board::setupFromFEN(const std::string& fen) {
         }
     }
 
-    std::vector<int> uselessVector;
-    m_isWhiteKingChecked = isCaseAttackedByColor(m_iWhiteKingPosition, Color::BLACK, uselessVector);
-    uselessVector.clear();
-    m_isBlackKingChecked = isCaseAttackedByColor(m_iBlackKingPosition, Color::WHITE, uselessVector);
+    std::vector<int> in_vectPositionThatAttacks;
+    std::vector<int> in_vectDirectionThatAttacks;
+    m_isWhiteKingChecked = isCaseAttackedByColor(m_iWhiteKingPosition, Color::BLACK, in_vectPositionThatAttacks, in_vectDirectionThatAttacks);
+    for(int iIndiceRow = 0; iIndiceRow < 2 && iIndiceRow < in_vectPositionThatAttacks.size(); iIndiceRow++)
+    {
+        m_iPositionThatAttacksWhiteKing[iIndiceRow] = in_vectPositionThatAttacks[iIndiceRow];
+        m_iDirectionThatAttacksWhiteKing[iIndiceRow] = in_vectDirectionThatAttacks[iIndiceRow];
+    }
+
+    in_vectPositionThatAttacks.clear();
+    in_vectDirectionThatAttacks.clear();
+    m_isBlackKingChecked = isCaseAttackedByColor(m_iBlackKingPosition, Color::WHITE, in_vectPositionThatAttacks, in_vectDirectionThatAttacks);
+    for(int iIndiceRow = 0; iIndiceRow < 2 && iIndiceRow < in_vectPositionThatAttacks.size(); iIndiceRow++)
+    {
+        m_iPositionThatAttacksBlackKing[iIndiceRow] = in_vectPositionThatAttacks[iIndiceRow];
+        m_iDirectionThatAttacksBlackKing[iIndiceRow] = in_vectDirectionThatAttacks[iIndiceRow];
+    }
 }
 
 void Board::setCastlingRightsForFenNotation(const std::string& castling)
@@ -336,13 +349,23 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
     m_tabpiBoard[in_iStartPosition] = nullptr;
 
     // If we were able to move, it means that we are not in check anymore
+    int itabAttackingPosition[2] = {-1, -1};
+    int itabAttackingDirection[2] = {-2, -2};
+    setPositionThatAttacksKing(pPiece->getColor(), itabAttackingPosition, itabAttackingDirection);
+
+    bool isEnemyKingNotInCheck = doesPositionDoNotPutEnemyKingInCheck(in_iStartPosition, in_iEndPosition, itabAttackingPosition, itabAttackingDirection, false);
+    setPositionThatAttacksKing(colEnemy, itabAttackingPosition, itabAttackingDirection);
+    bool isKingNotInCheck = doesPositionDoNotPutKingInCheck(in_iStartPosition, in_iEndPosition, itabAttackingPosition, itabAttackingDirection, true);
     putOrRemoveKingInCheck(pPiece->getColor(), false);
-    if (isKingAttackedAfterMove(colEnemy, in_colPlayer)) {
+    //if (isKingAttackedAfterMove(colEnemy, in_colPlayer))
+    if (! isEnemyKingNotInCheck)
+    {
         putOrRemoveKingInCheck(colEnemy, true);
     }
 
     m_iPreviousMoveInitialPosition = in_iStartPosition;
     m_iPreviousMoveTargetPosition = in_iEndPosition;
+
     return true;
 }
 
@@ -350,6 +373,24 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
 
 
 //************************** Checking and Validation Functions **********************//
+
+void Board::setPositionThatAttacksKing(Color in_colPlayer, const int in_iAttackingPosition[2], const int in_iAttackingDirection[2])
+{
+    if(in_colPlayer == Color::WHITE)
+    {
+        m_iPositionThatAttacksWhiteKing[0] = in_iAttackingPosition[0];
+        m_iPositionThatAttacksWhiteKing[1] = in_iAttackingPosition[1];
+        m_iDirectionThatAttacksWhiteKing[0] = in_iAttackingDirection[0];
+        m_iDirectionThatAttacksWhiteKing[1] = in_iAttackingDirection[1];
+    }
+    else
+    {
+        m_iPositionThatAttacksBlackKing[0] = in_iAttackingPosition[0];
+        m_iPositionThatAttacksBlackKing[1] = in_iAttackingPosition[1];
+        m_iDirectionThatAttacksBlackKing[0] = in_iAttackingDirection[0];
+        m_iDirectionThatAttacksBlackKing[1] = in_iAttackingDirection[1];
+    }
+}
 
 bool Board::isWhiteKingCheck() const
 {
@@ -416,7 +457,8 @@ bool Board::isKingAttackedAfterMove(Color in_kingColor, Color in_attackerColor) 
     int iKingPosition = getKingPosition(in_kingColor);
 
     std::vector<int> vectAttackingPieces;
-    if(isCaseAttackedByColor(iKingPosition, in_attackerColor, vectAttackingPieces))
+    std::vector<int> in_vectDirectionThatAttacks;
+    if(isCaseAttackedByColor(iKingPosition, in_attackerColor, vectAttackingPieces, in_vectDirectionThatAttacks))
     {
         return true;
     }
@@ -573,14 +615,14 @@ bool Board::kingCanBigRock(Color in_kingColor) const
 //************************* Attack and Threat Detection Functions ********************//
 
 //@TODO Je suis sûr on peux gérer la boucle plus simplement
-bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound) const
+bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, std::vector<int>& in_vectPositionPieceFound, std::vector<int>& in_vectDirectionThatAttacks) const
 {
     if(! isValidPosition(in_iPosition))
     {
         return false;
     }
 
-    bool bCaseAttacked = isCaseAttackedByAnyColor(in_iPosition, in_vectPositionPieceFound);
+    bool bCaseAttacked = isCaseAttackedByAnyColor(in_iPosition, in_vectPositionPieceFound, in_vectDirectionThatAttacks);
     if(! bCaseAttacked) // If it is not attacked
     {
         return false;
@@ -602,16 +644,16 @@ bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, 
 }
 
 //@TODO Les vecteurs sont surements un problème
-bool Board::isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
+bool Board::isCaseAttackedByAnyColor(int in_iPosition, std::vector<int>& in_vectPositionPieceFound, std::vector<int>& in_vectDirectionThatAttacks) const
 {
     if(! isValidPosition(in_iPosition))
     {
         return false;
     }
 
-    findFirstPiecesOnEachKnightMovementsThatAttacksInitialPosition(in_iPosition, in_vectPositionPieceFound);
-    findFirstPiecesOnEachBishopMovementsThatAttacksInitialPosition(in_iPosition, in_vectPositionPieceFound);
-    findFirstPiecesOnEachRookMovementsThatAttacksInitialPosition(in_iPosition, in_vectPositionPieceFound);
+    findFirstPiecesOnEachKnightMovementsThatAttacksInitialPosition(in_iPosition, in_vectPositionPieceFound, in_vectDirectionThatAttacks);
+    findFirstPiecesOnEachBishopMovementsThatAttacksInitialPosition(in_iPosition, in_vectPositionPieceFound, in_vectDirectionThatAttacks);
+    findFirstPiecesOnEachRookMovementsThatAttacksInitialPosition(in_iPosition, in_vectPositionPieceFound, in_vectDirectionThatAttacks);
 
     return !in_vectPositionPieceFound.empty();
 }
@@ -729,7 +771,7 @@ Piece* Board::findFirstPieceOnDirection(int in_iPosition,int in_iDirection, int 
     return nullptr;
 }
 
-void Board::findFirstPiecesOnEachRookMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
+void Board::findFirstPiecesOnEachRookMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound, std::vector<int>& in_vectDirectionThatAttacks) const
 {
     if(! isValidPosition(in_iPosition))
     {
@@ -749,11 +791,12 @@ void Board::findFirstPiecesOnEachRookMovementsThatAttacksInitialPosition(int in_
         if(pFirstPieceFound != nullptr && iPieceFoundPosition != -1)
         {
             in_vectPositionPieceFound.push_back(iPieceFoundPosition);
+            in_vectDirectionThatAttacks.push_back(itabRookMoves[iIndiceMove]);
         }
     }
 }
 
-void Board::findFirstPiecesOnEachBishopMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
+void Board::findFirstPiecesOnEachBishopMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound, std::vector<int>& in_vectDirectionThatAttacks) const
 {
     if(! isValidPosition(in_iPosition))
     {
@@ -771,11 +814,12 @@ void Board::findFirstPiecesOnEachBishopMovementsThatAttacksInitialPosition(int i
         if(pFirstPieceFound != nullptr && iPieceFoundPosition != -1)
         {
             in_vectPositionPieceFound.push_back(iPieceFoundPosition);
+            in_vectDirectionThatAttacks.push_back(itabBishopMoves[iIndiceMove]);
         }
     }
 }
 
-void Board::findFirstPiecesOnEachKnightMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound) const
+void Board::findFirstPiecesOnEachKnightMovementsThatAttacksInitialPosition(int in_iPosition, std::vector<int>& in_vectPositionPieceFound, std::vector<int>& in_vectDirectionThatAttacks) const
 {
     if(! isValidPosition(in_iPosition))
     {
@@ -792,6 +836,7 @@ void Board::findFirstPiecesOnEachKnightMovementsThatAttacksInitialPosition(int i
         if(pFirstPieceFound != nullptr && iPieceFoundPosition != -1)
         {
             in_vectPositionPieceFound.push_back(iPieceFoundPosition);
+            in_vectDirectionThatAttacks.push_back(itabKnightMoves[iIndiceMove]);
         }
     }
 }
@@ -821,13 +866,13 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             // Normal moves
             int forwardMove = in_iPositionToSeeMoves + direction * 8;
             if (isValidPosition(forwardMove) && m_tabpiBoard[forwardMove] == nullptr) {
-                putNextMoveIfValid(forwardMove, pPieceToSeeMoves, in_vectPossibleMoves);
+                putNextMoveIfValid(in_iPositionToSeeMoves, forwardMove, pPieceToSeeMoves, in_vectPossibleMoves);
             }
 
             int twoSteps = in_iPositionToSeeMoves + (direction * 16);
             if (in_iPositionToSeeMoves/8 == startRow) {
                 if (isValidPosition(twoSteps) && m_tabpiBoard[forwardMove] == nullptr && m_tabpiBoard[twoSteps] == nullptr) {
-                    putNextMoveIfValid(twoSteps, pPieceToSeeMoves, in_vectPossibleMoves);
+                    putNextMoveIfValid(in_iPositionToSeeMoves, twoSteps, pPieceToSeeMoves, in_vectPossibleMoves);
                 }
             }
 
@@ -835,10 +880,10 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             int captureLeft = in_iPositionToSeeMoves + direction * 8 - 1;
             int captureRight = in_iPositionToSeeMoves + direction * 8 + 1;
             if (isValidPosition(captureLeft) && in_iPositionToSeeMoves % 8 != 0 && m_tabpiBoard[captureLeft] != nullptr && m_tabpiBoard[captureLeft]->getColor() != colPieceToSeeMoves) {
-                putNextMoveIfValid(captureLeft, pPieceToSeeMoves, in_vectPossibleMoves);
+                putNextMoveIfValid(in_iPositionToSeeMoves, captureLeft, pPieceToSeeMoves, in_vectPossibleMoves);
             }
             if (isValidPosition(captureRight) && in_iPositionToSeeMoves % 8 != 7 && m_tabpiBoard[captureRight] != nullptr && m_tabpiBoard[captureRight]->getColor() != colPieceToSeeMoves) {
-                putNextMoveIfValid(captureRight, pPieceToSeeMoves, in_vectPossibleMoves);
+                putNextMoveIfValid(in_iPositionToSeeMoves, captureRight, pPieceToSeeMoves, in_vectPossibleMoves);
             }
 
             int iPositionPawnEnPassant = m_ipositionEnPassant + (8 * direction * -1);
@@ -846,10 +891,10 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
             if(m_ipositionEnPassant!=-1 && pPiecePawnEnPassant != nullptr && pPiecePawnEnPassant->getColor() != colPieceToSeeMoves && pPiecePawnEnPassant->getTypePiece() == TypePieces::PAWN) // Verify that it is not a pawn of the same color
             {
                 if(captureLeft==m_ipositionEnPassant) {
-                    putNextMoveIfValid(captureLeft, pPieceToSeeMoves, in_vectPossibleMoves);
+                    putNextMoveIfValid(in_iPositionToSeeMoves, captureLeft, pPieceToSeeMoves, in_vectPossibleMoves);
                 }
                 if(captureRight == m_ipositionEnPassant) {
-                    putNextMoveIfValid(captureRight, pPieceToSeeMoves, in_vectPossibleMoves);
+                    putNextMoveIfValid(in_iPositionToSeeMoves, captureRight, pPieceToSeeMoves, in_vectPossibleMoves);
                 }
             }
             break;
@@ -868,10 +913,10 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                     }
 
                     if (m_tabpiBoard[nextPosition] == nullptr) {
-                        putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
+                        putNextMoveIfValid(in_iPositionToSeeMoves, nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                     } else {
                         if (m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
-                            putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
+                            putNextMoveIfValid(in_iPositionToSeeMoves, nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                         }
                         break;
                     }
@@ -888,7 +933,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
 
                 if (pPieceToSeeMoves->isNextPositionValid(knightMoves[i], in_iPositionToSeeMoves, nextPosition)) {
                     if (m_tabpiBoard[nextPosition] == nullptr || m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
-                        putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
+                        putNextMoveIfValid(in_iPositionToSeeMoves, nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                     }
                 }
             }
@@ -907,10 +952,10 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                     }
 
                     if (m_tabpiBoard[nextPosition] == nullptr) {
-                        putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
+                        putNextMoveIfValid(in_iPositionToSeeMoves, nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                     } else {
                         if (m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
-                            putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
+                            putNextMoveIfValid(in_iPositionToSeeMoves, nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                         }
                         break;
                     }
@@ -931,10 +976,10 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                     }
 
                     if (m_tabpiBoard[nextPosition] == nullptr) {
-                        putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
+                        putNextMoveIfValid(in_iPositionToSeeMoves, nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                     } else {
                         if (m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
-                            putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
+                            putNextMoveIfValid(in_iPositionToSeeMoves, nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                         }
                         break;
                     }
@@ -954,7 +999,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
 
                 if (pPieceToSeeMoves->isNextPositionValid(kingMoves[i], in_iPositionToSeeMoves, nextPosition)) {
                     if (m_tabpiBoard[nextPosition] == nullptr || m_tabpiBoard[nextPosition]->getColor() != colPieceToSeeMoves) {
-                        bool bValidMove = putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
+                        bool bValidMove = putNextMoveIfValid(in_iPositionToSeeMoves, nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                         if(bValidMove && kingMoves[i] == 1 && m_tabpiBoard[nextPosition] == nullptr) // To not repeat computation for the rock juste after
                         {
                             bLittleRockPossible = true;
@@ -978,7 +1023,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                 {
                     if (m_tabpiBoard[nextPosition] == nullptr)
                     {
-                        putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
+                        putNextMoveIfValid(in_iPositionToSeeMoves, nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                     }
                 }
             }
@@ -991,7 +1036,7 @@ void Board::possibleMovesForPiece(int in_iPositionToSeeMoves, std::vector<int>& 
                 {
                     if (m_tabpiBoard[nextPosition] == nullptr)
                     {
-                        putNextMoveIfValid(nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
+                        putNextMoveIfValid(in_iPositionToSeeMoves, nextPosition, pPieceToSeeMoves, in_vectPossibleMoves);
                     }
                 }
             }
@@ -1039,12 +1084,12 @@ void Board::getPieceMovementsPossible(int in_iPositionToFindMovement, int in_iDi
         {
             if (iColumnDifference == 0 && pPieceFound == nullptr) // Pour avancer de 2
             {
-                putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
+                putNextMoveIfValid(in_iPositionToFindMovement, iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
                 continue;
             }
             else if (iColumnDifference == 1 && pPieceFound != nullptr && pPieceFound->getColor() != colPieceToFindMovement && iNbMovement == 1)
             {
-                putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
+                putNextMoveIfValid(in_iPositionToFindMovement, iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
                 continue;
             }
             else
@@ -1055,7 +1100,8 @@ void Board::getPieceMovementsPossible(int in_iPositionToFindMovement, int in_iDi
         else if(typePieceToFindMovement == TypePieces::KING)
         {
             std::vector<int> uselessVectorOfPiecesFound;
-            bool bMovePutInCheck = isCaseAttackedByColor(iNextPosition, pPieceToFindMovement->getEnemyColor(), uselessVectorOfPiecesFound);
+            std::vector<int> in_vectDirectionThatAttacks;
+            bool bMovePutInCheck = isCaseAttackedByColor(iNextPosition, pPieceToFindMovement->getEnemyColor(), uselessVectorOfPiecesFound, in_vectDirectionThatAttacks);
             if(pPieceFound != nullptr && pPieceFound->getColor() != colPieceToFindMovement && iNbMovement == 1 && ! bMovePutInCheck) // If the is a piece he can eat, If that piece does not put the king in check
             {
                 in_vectPositionPossible.emplace_back(iNextPosition);
@@ -1088,11 +1134,11 @@ void Board::getPieceMovementsPossible(int in_iPositionToFindMovement, int in_iDi
 
             if (colPieceToFindMovement != colPieceFound && typePieceFound != TypePieces::KING) // We can't eat the same Color or eat a King
             {
-                putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
+                putNextMoveIfValid(in_iPositionToFindMovement, iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
             }
             break; // Stop since we hit a piece
         }
-        putNextMoveIfValid(iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
+        putNextMoveIfValid(in_iPositionToFindMovement, iNextPosition, pPieceToFindMovement, in_vectPositionPossible);
     }
 }
 
@@ -1143,31 +1189,41 @@ void Board::getAllPossibleMovementsForAPiece(int in_iPositionToFindMovement, std
 
 bool Board::arePositionsOnSameDiagonal(int in_iFirstPosition, int in_iSecondPosition, int& out_iDirectionDiagonale)
 {
-    int x1 = in_iFirstPosition % 8;        // Colonne de la première position
-    int y1 = in_iFirstPosition / 8;        // Ligne de la première position
-    int x2 = in_iSecondPosition % 8;        // Colonne de la deuxième position
-    int y2 = in_iSecondPosition / 8;        // Ligne de la deuxième position
+    int iColonne1 = in_iFirstPosition % 8;
+    int iLigne1 = in_iFirstPosition / 8;
+    int iColonne2 = in_iSecondPosition % 8;
+    int iLigne2 = in_iSecondPosition / 8;
 
     // Vérification des critères pour les diagonales
-    if (abs(x1 - x2) == abs(y1 - y2))
+    if (abs(iColonne1 - iColonne2) == abs(iLigne1 - iLigne2))
     {
-        out_iDirectionDiagonale = 9;
-        if (in_iFirstPosition > in_iSecondPosition) // Si on a par exemeple B1K, ça renoive -1
+        if(iColonne2 > iColonne1)
         {
-            out_iDirectionDiagonale = -9;
+            if(iLigne2 > iLigne1)
+            {
+                out_iDirectionDiagonale = 9;
+            }
+            else
+            {
+                out_iDirectionDiagonale = -7;
+            }
         }
+
+        else if(iColonne2 < iColonne1)
+        {
+            if(iLigne2 > iLigne1)
+            {
+                out_iDirectionDiagonale = 7;
+            }
+            else
+            {
+                out_iDirectionDiagonale = -9;
+            }
+        }
+
         return true;
     }
-    else if ((x1 + y1) == (x2 + y2))
-    {
-        out_iDirectionDiagonale = 7;
-        if (in_iFirstPosition > in_iSecondPosition) // Si on a par exemeple B1K, ça renoive -1
-        {
-            out_iDirectionDiagonale = -7;
-        }
-        return true;
-    }
-    out_iDirectionDiagonale = -1;
+    out_iDirectionDiagonale = -2;
     return false;
 }
 
@@ -1181,7 +1237,7 @@ bool Board::arePositionsOnSameLineOrColumn(int in_iFirstPosition, int in_iSecond
     if (iLigne1 == iLigne2)
     {
         out_iDirectionLine = 1;
-        if (in_iFirstPosition > in_iSecondPosition) // Si on a par exemeple B1K, ça renoive -1
+        if (iColonne1 > iColonne2) // Si on a par exemeple B1K, ça renoive -1
         {
             out_iDirectionLine = -1;
         }
@@ -1190,7 +1246,7 @@ bool Board::arePositionsOnSameLineOrColumn(int in_iFirstPosition, int in_iSecond
     else if (iColonne1 == iColonne2)
     {
         out_iDirectionLine = 8;
-        if (in_iFirstPosition > in_iSecondPosition) // Si on a par exemeple B1K, ça renoive -1
+        if (iLigne1 > iLigne2) // Si on a par exemeple B1K, ça renoive -1
         {
             out_iDirectionLine = -8;
         }
@@ -1200,34 +1256,319 @@ bool Board::arePositionsOnSameLineOrColumn(int in_iFirstPosition, int in_iSecond
     return false;
 }
 
-bool Board::doesPositionPutKingInCheck(int in_iPreviousPosition, int in_iPosition)
+bool Board::doesPositionDoNotPutKingInCheck(int in_iPreviousPosition, int in_iPosition, int out_itabPositionsThatPutsKingInCheck[2], int out_itabDirectionsThatPutsKingInCheck[2], bool in_bStopWhenKingCheckFirstTime)
 {
     //Prérequis: la pièce a déjà été joué
-    // Et la pièce qui bouge n'est pas un roi
 
     Piece* pPiece = getPieceAt(in_iPosition);
-    if(pPiece == nullptr && pPiece->getTypePiece() == TypePieces::KING)
+    if(pPiece == nullptr)
         return false;
 
     Color pieceColor = pPiece->getColor();
-    int iKingPosition = getKingPosition(pieceColor);
-
-    int iPreviousDirectionWithKing = -1;
-    arePositionsOnSameDiagonal(iKingPosition, in_iPreviousPosition, iPreviousDirectionWithKing);
-    if (in_iPreviousPosition == -1)
+    if(pPiece->getTypePiece() == TypePieces::KING) // SI c'est le roi, on vérifie qu'il n'est pas en échec
     {
-        arePositionsOnSameLineOrColumn(iKingPosition, in_iPreviousPosition, iPreviousDirectionWithKing);
+        std::vector<int> vectUseless;
+        std::vector<int> in_vectDirectionThatAttacks;
+        return ! isCaseAttackedByColor(in_iPosition, Piece::getEnemyColor(pieceColor), vectUseless, in_vectDirectionThatAttacks);
     }
 
-    if (in_iPreviousPosition == -2) // Si on fait un mouvement qui n'est pas dans la direction du roi
+    int iKingPosition = getKingPosition(pieceColor);
+
+    //Vérifie que la pièce est bien aligné avec le roi
+    /*int iDirectionBetweenKingAndPieceBeforeMove = -2;
+    arePositionsOnSameDiagonal(iKingPosition, in_iPreviousPosition, iDirectionBetweenKingAndPieceBeforeMove);
+    if (iDirectionBetweenKingAndPieceBeforeMove == -2)
     {
-        return ! isKingInCheck(pieceColor); // Si le roi est en échec et que le mouvement n'interfère pas, alors
+        arePositionsOnSameLineOrColumn(iKingPosition, in_iPreviousPosition, iDirectionBetweenKingAndPieceBeforeMove);
+    }
+
+    bool bKingNotInCheck = true;
+    if(iDirectionBetweenKingAndPieceBeforeMove != -2) // Si c'est aligné, il faut vérifier que le déplacement ne met pas le roi en échec
+    {
+        //Vérifie que le fait qu'il n'y ait plus rien à in_iPreviousPosition ne mette pas le roi en échec
+        int iPositionPieceFound = -1;
+        Piece* pPieceFound = findFirstPieceOnDirectionThatAttacksInitialPosition(iKingPosition, iDirectionBetweenKingAndPieceBeforeMove, 8, iPositionPieceFound);
+        if(pPieceFound != nullptr && pPieceFound->getColor() != pieceColor)
+        {
+            bKingNotInCheck = false;
+            out_itabPositionsThatPutsKingInCheck[0] = iPositionPieceFound;
+            out_itabDirectionsThatPutsKingInCheck[0] = - iDirectionBetweenKingAndPieceBeforeMove;
+            if(in_bStopWhenKingCheckFirstTime)
+            {
+                return false;
+            }
+        }
+    }*/
+
+    int iPositionAttackingPiece = -1;
+    int iDirectionBetweenKingAndPieceBeforeMove = -2;
+    bool bIsKingAttacked = doesDirectionAttackKingIfAlign(iKingPosition, in_iPreviousPosition, iPositionAttackingPiece, iDirectionBetweenKingAndPieceBeforeMove);
+
+    out_itabPositionsThatPutsKingInCheck[0] = iPositionAttackingPiece;
+    out_itabDirectionsThatPutsKingInCheck[0] = iDirectionBetweenKingAndPieceBeforeMove;
+    if(bIsKingAttacked && in_bStopWhenKingCheckFirstTime)
+    {
+        return false;
+    }
+
+    //Situation actuelle: Le mouvement ne met pas en échec le roi.
+    // On veut donc regarder si le roi était déjà mis en échec. Si c'est le cas, on veut vérifier que le mouvement coupe cette mise en échec
+    int iPositionPutKingInCheck = -1;
+    int iDirectionPutKingInCheck = -2;
+    bool bPositionCutKingInCheck = doesPositionCutKingInCheck(in_iPosition, iPositionPutKingInCheck, iDirectionPutKingInCheck);
+    out_itabPositionsThatPutsKingInCheck[1] = iPositionPutKingInCheck;
+    out_itabDirectionsThatPutsKingInCheck[1] = iDirectionPutKingInCheck;
+
+    bIsKingAttacked = bIsKingAttacked && bPositionCutKingInCheck;
+
+    return ! bIsKingAttacked;
+}
+
+bool Board::doesPositionDoNotPutEnemyKingInCheck(int in_iPreviousPosition, int in_iPosition, int out_itabPositionsThatPutsKingInCheck[2], int out_itabDirectionsThatPutsKingInCheck[2], bool in_bStopWhenKingCheckFirstTime)
+{
+    //Prérequis: la pièce a déjà été joué
+
+    Piece* pPiece = getPieceAt(in_iPosition);
+    if(pPiece == nullptr)
+        return false;
+
+    Color pieceColor = pPiece->getColor();
+    Color enemyColor = Piece::getEnemyColor(pieceColor);
+    int iKingPosition = getKingPosition(enemyColor);
+    if(pPiece->getTypePiece() == TypePieces::KING) // SI c'est le roi, on vérifie qu'il n'est pas en échec
+    {
+        std::vector<int> vectUseless;
+        std::vector<int> in_vectDirectionThatAttacks;
+        return ! isCaseAttackedByColor(iKingPosition, pieceColor, vectUseless, in_vectDirectionThatAttacks);
+    }
+
+    //Vérifie que la pièce est bien aligné avec le roi
+    /*int iDirectionBetweenKingAndPieceBeforeMove = -2;
+    arePositionsOnSameDiagonal(iKingPosition, in_iPreviousPosition, iDirectionBetweenKingAndPieceBeforeMove);
+    if (iDirectionBetweenKingAndPieceBeforeMove == -2)
+    {
+        arePositionsOnSameLineOrColumn(iKingPosition, in_iPreviousPosition, iDirectionBetweenKingAndPieceBeforeMove);
+    }
+
+    bool bKingNotInCheck = true;
+    if(iDirectionBetweenKingAndPieceBeforeMove != -2) // Si c'est aligné, il faut vérifier que le déplacement ne met pas le roi en échec
+    {
+        //Vérifie que le fait qu'il n'y ait plus rien à in_iPreviousPosition ne mette pas le roi en échec
+        int iPositionPieceFound = -1;
+        Piece* pPieceFound = findFirstPieceOnDirectionThatAttacksInitialPosition(iKingPosition, iDirectionBetweenKingAndPieceBeforeMove, 8, iPositionPieceFound);
+        if(pPieceFound != nullptr && pPieceFound->getColor() == pieceColor)
+        {
+            bKingNotInCheck = false;
+            out_itabPositionsThatPutsKingInCheck[0] = iPositionPieceFound;
+            out_itabDirectionsThatPutsKingInCheck[0] = - iDirectionBetweenKingAndPieceBeforeMove;
+            if(in_bStopWhenKingCheckFirstTime)
+            {
+                return false;
+            }
+        }
+    }*/
+    int iPositionAttackingPiece = -1;
+    int iDirectionBetweenKingAndPieceBeforeMove = -2;
+    bool bIsKingAttacked = doesDirectionAttackKingIfAlign(iKingPosition, in_iPreviousPosition, iPositionAttackingPiece, iDirectionBetweenKingAndPieceBeforeMove);
+
+    out_itabPositionsThatPutsKingInCheck[0] = iPositionAttackingPiece;
+    out_itabDirectionsThatPutsKingInCheck[0] = iDirectionBetweenKingAndPieceBeforeMove;
+    if(bIsKingAttacked && in_bStopWhenKingCheckFirstTime)
+    {
+        return false;
+    }
+
+    bIsKingAttacked = bIsKingAttacked || doesDirectionAttackKingIfAlign(iKingPosition, in_iPosition, iPositionAttackingPiece, iDirectionBetweenKingAndPieceBeforeMove);
+
+    if(bIsKingAttacked)
+    {
+        out_itabPositionsThatPutsKingInCheck[1] = iPositionAttackingPiece;
+        out_itabDirectionsThatPutsKingInCheck[1] = iDirectionBetweenKingAndPieceBeforeMove;
+        return false;
+    }
+    return true;
+    //Situation actuelle: Le mouvement ne met pas en échec le roi.
+    // On veut donc regarder si le roi était déjà mis en échec. Si c'est le cas, on veut vérifier que le mouvement coupe cette mise en échec
+    /*int iPositionPutKingInCheck = -1;
+    int iDirectionPutKingInCheck = -2;
+    bool bPositionCutKingInCheck = doesPositionCutKingInCheck(in_iPosition, iPositionPutKingInCheck, iDirectionPutKingInCheck);
+    out_itabPositionsThatPutsKingInCheck[1] = iPositionPutKingInCheck;
+    out_itabDirectionsThatPutsKingInCheck[1] = iDirectionPutKingInCheck;
+
+    bKingNotInCheck = bKingNotInCheck && bPositionCutKingInCheck;
+
+    return bKingNotInCheck;*/
+}
+
+bool Board::doesDirectionAttackKingIfAlign(int in_iKingPosition, int in_iPosition, int& out_iPositionThatPutsKingInCheck, int& out_iDirectionThatPutsKingInCheck)
+{
+    //Prérequis: la pièce a déjà été joué
+
+    Piece* pKingPiece = getPieceAt(in_iKingPosition);
+    if(pKingPiece == nullptr)
+    {
+        out_iPositionThatPutsKingInCheck = -1;
+        out_iDirectionThatPutsKingInCheck = -2;
+        return false;
+    }
+
+    Color enemyKingColor = Piece::getEnemyColor( pKingPiece->getColor());
+
+    //Vérifie que la pièce est bien aligné avec le roi
+    int iDirectionBetweenKingAndPieceBeforeMove = -2;
+    arePositionsOnSameDiagonal(in_iKingPosition, in_iPosition, iDirectionBetweenKingAndPieceBeforeMove);
+    if (iDirectionBetweenKingAndPieceBeforeMove == -2)
+    {
+        arePositionsOnSameLineOrColumn(in_iKingPosition, in_iPosition, iDirectionBetweenKingAndPieceBeforeMove);
+    }
+
+    if(iDirectionBetweenKingAndPieceBeforeMove != -2) // Si c'est aligné, il faut vérifier que le déplacement ne met pas le roi en échec
+    {
+        //Vérifie que le fait qu'il n'y ait plus rien à in_iPreviousPosition ne mette pas le roi en échec
+        int iPositionPieceFound = -1;
+        Piece* pPieceFound = findFirstPieceOnDirectionThatAttacksInitialPosition(in_iKingPosition, iDirectionBetweenKingAndPieceBeforeMove, 8, iPositionPieceFound);
+        if(pPieceFound != nullptr && pPieceFound->getColor() == enemyKingColor)
+        {
+            out_iPositionThatPutsKingInCheck = iPositionPieceFound;
+            out_iDirectionThatPutsKingInCheck = - iDirectionBetweenKingAndPieceBeforeMove;
+            return true;
+        }
+    }
+
+    out_iPositionThatPutsKingInCheck = -1;
+    out_iDirectionThatPutsKingInCheck = -2;
+    return false;
+}
+
+bool Board::doesPositionCutKingInCheck(int in_iPosition,  int& out_iPositionThatPutsKingInCheck, int& out_iDirectionThatPutsKingInCheck)
+{
+    //Prérequid: Le mouvement ne met pas en échec le roi.
+    // On veut donc regarder si le roi était déjà mis en échec. Si c'est le cas, on veut vérifier que le mouvement coupe cette mise en échec
+    //Prérequis: la pièce a déjà été bougé et est à la position in_iPosition et ce mouvement ne met pas le roi en échec
+    Piece* pPiece = getPieceAt(in_iPosition);
+    if(pPiece == nullptr)
+    {
+        return false;
+    }
+
+    Color pieceColor = pPiece->getColor();
+    if(pPiece->getTypePiece() == TypePieces::KING) // SI c'est le roi, on vérifie qu'il n'est pas en échec
+    {
+        std::vector<int> vectUseless;
+        std::vector<int> in_vectDirectionThatAttacks;
+        return ! isCaseAttackedByColor(in_iPosition, Piece::getEnemyColor(pieceColor), vectUseless, in_vectDirectionThatAttacks);
+    }
+
+    int iFirstAttackingPosition = -1;
+    int iSecondAttackingPosition = -1;
+    int iFirstAttackingDirection = -2;
+    int iSecondAttackingDirection = -2;
+    getPositionAttackingKing(pieceColor, iFirstAttackingPosition, iSecondAttackingPosition, iFirstAttackingDirection, iSecondAttackingDirection);
+    if(iFirstAttackingPosition != -1 && iSecondAttackingPosition == -1) // Si le roi est mis en échec par seulement une pièce. On vérifie donc si la pièce bougé est sur la trajectoire de l'échec
+    {
+        if(iFirstAttackingPosition == in_iPosition) // Si on mange
+        {
+            return true;
+        }
+
+        Piece* pAttackingPiece = getPieceAt(iFirstAttackingPosition);
+        // Le cavalier n'a pas été mangé (if d'au desesus) et cela veut dire qu'on n'a pas éliminé la menace. Le seul moyen aurait été de bouger le roi mais içi c'est pas le cas (voir début de la fonction)
+        if(pAttackingPiece != nullptr && pAttackingPiece->getTypePiece() == TypePieces::KNIGHT)
+        {
+            return false;
+        }
+
+        int iDirectionBetweenAttackingPieceAndPieceAfterMove = -2;
+        if(std::abs(iFirstAttackingDirection) == 9  || std::abs(iFirstAttackingDirection) == 7) // Diagonale
+        {
+            bool bIsOnSameDiagonal = arePositionsOnSameDiagonal(iFirstAttackingPosition, in_iPosition, iDirectionBetweenAttackingPieceAndPieceAfterMove);
+            if(bIsOnSameDiagonal && iDirectionBetweenAttackingPieceAndPieceAfterMove != iFirstAttackingDirection)
+            {
+                out_iPositionThatPutsKingInCheck = iFirstAttackingPosition;
+                out_iDirectionThatPutsKingInCheck = iDirectionBetweenAttackingPieceAndPieceAfterMove;
+                return false;
+            }
+        }
+
+        if(std::abs(iFirstAttackingDirection) == 1  || std::abs(iFirstAttackingDirection) == 8) // Line/Column
+        {
+            bool bIsOnSameDiagonal = arePositionsOnSameLineOrColumn(iFirstAttackingPosition, in_iPosition, iDirectionBetweenAttackingPieceAndPieceAfterMove);
+            if(bIsOnSameDiagonal && iDirectionBetweenAttackingPieceAndPieceAfterMove != iFirstAttackingDirection)
+            {
+                out_iPositionThatPutsKingInCheck = iFirstAttackingPosition;
+                out_iDirectionThatPutsKingInCheck = iDirectionBetweenAttackingPieceAndPieceAfterMove;
+                return false;
+            }
+        }
+    }
+    // Le roi est mis en échec par 2 pièces. Le seul moyen est de bouger le roi mais içi c'est pas le cas (voir début de la fonction)
+    else if (iFirstAttackingPosition != -1 && iSecondAttackingPosition != -1)
+    {
+        return false;
     }
 
     return true;
 }
 
-bool Board::putNextMoveIfValid(int in_iNextPosition, Piece* in_pPieceToMove, std::vector<int>& in_vectMoveToFill)
+bool Board::isPositionAttackingKing(Color in_kingColor, int in_iAttackingPosition) const
+{
+    if(in_kingColor == Color::WHITE)
+    {
+        if(m_iDirectionThatAttacksWhiteKing[0] == in_iAttackingPosition || m_iDirectionThatAttacksWhiteKing[1] == in_iAttackingPosition)
+        {
+            return true;
+        }
+    }
+    else if(in_kingColor == Color::BLACK)
+    {
+        if(m_iDirectionThatAttacksBlackKing[0] == in_iAttackingPosition || m_iDirectionThatAttacksBlackKing[1] == in_iAttackingPosition)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void Board::getPositionAttackingKing(Color in_kingColor, int& in_iFirstAttackingPosition, int& in_iSecondAttackingPosition, int& in_iFirstAttackingDirection, int& in_iSecondAttackingDirection) const
+{
+    if(in_kingColor == Color::WHITE)
+    {
+        in_iFirstAttackingPosition = m_iPositionThatAttacksWhiteKing[0];
+        in_iSecondAttackingPosition =  m_iPositionThatAttacksWhiteKing[1];
+        in_iFirstAttackingDirection = m_iDirectionThatAttacksWhiteKing[0];
+        in_iSecondAttackingDirection = m_iDirectionThatAttacksWhiteKing[1];
+    }
+    else if(in_kingColor == Color::BLACK)
+    {
+        in_iFirstAttackingPosition = m_iPositionThatAttacksBlackKing[0];
+        in_iSecondAttackingPosition =  m_iPositionThatAttacksBlackKing[1];
+        in_iFirstAttackingDirection = m_iDirectionThatAttacksBlackKing[0];
+        in_iSecondAttackingDirection = m_iDirectionThatAttacksBlackKing[1];
+    }
+}
+
+bool Board::isOnlyThisPositionAttackingKing(Color in_kingColor, int in_iAttackingPosition) const
+{
+    if(in_kingColor == Color::WHITE)
+    {
+        if((m_iDirectionThatAttacksWhiteKing[0] == in_iAttackingPosition && m_iDirectionThatAttacksWhiteKing[1] == -1) || (m_iDirectionThatAttacksWhiteKing[0] == -1 && m_iDirectionThatAttacksWhiteKing[1] == in_iAttackingPosition))
+        {
+            return true;
+        }
+    }
+    else if(in_kingColor == Color::BLACK)
+    {
+        if((m_iDirectionThatAttacksBlackKing[0] == in_iAttackingPosition && m_iDirectionThatAttacksBlackKing[1] == -1) || (m_iDirectionThatAttacksBlackKing[0] == -1 && m_iDirectionThatAttacksBlackKing[1] == in_iAttackingPosition))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Board::putNextMoveIfValid(int in_iPreviousPosition, int in_iNextPosition, Piece* in_pPieceToMove, std::vector<int>& in_vectMoveToFill)
 {
     if(! isValidPosition(in_iNextPosition) || in_pPieceToMove == nullptr)
     {
@@ -1236,6 +1577,7 @@ bool Board::putNextMoveIfValid(int in_iNextPosition, Piece* in_pPieceToMove, std
 
     Piece* pPieceOnNextMove = getPieceAt(in_iNextPosition);
     std::vector<int> uselessVectorOfPiecesFound;
+    std::vector<int> in_vectDirectionThatAttacks;
 
     if(pPieceOnNextMove != nullptr && pPieceOnNextMove->getTypePiece() == TypePieces::KING) // We can't eat a king
     {
@@ -1249,11 +1591,14 @@ bool Board::putNextMoveIfValid(int in_iNextPosition, Piece* in_pPieceToMove, std
     }
 
 
+    int itabAttackingPosition[2] = {-1, -1};
+    int itabAttackingDirection[2] = {-2, -2};
     bool bIsMoveValid = false;
 
     Color enemyColor = in_pPieceToMove->getEnemyColor();
     m_tabpiBoard[in_iNextPosition] = in_pPieceToMove;
-    if(!isCaseAttackedByColor(iKingPosition, enemyColor, uselessVectorOfPiecesFound))
+    if(!isCaseAttackedByColor(iKingPosition, enemyColor, uselessVectorOfPiecesFound, in_vectDirectionThatAttacks))
+    //if( doesPositionDoNotPutKingInCheck(in_iPreviousPosition, in_iNextPosition, itabAttackingPosition, itabAttackingDirection, true))
     {
         in_vectMoveToFill.emplace_back(in_iNextPosition);
         bIsMoveValid = true;
