@@ -1404,7 +1404,37 @@ TEST_F(BoardTest, TestarePositionsOnSameDiagonalLineOrColumn)
     EXPECT_EQ(iDirection, -2);
 }
 
+TEST_F(BoardTest, TestPositionAndDirectionOfPieceThatAttacksWhiteKing)
+{
+    board.clearBoard();
+    MainChessGame::setBoardFromFENStatic("rnbqkbnr/pp1ppppp/2p5/8/8/3P1N2/PPP1PPPP/RNBQKB1R b - - 0 1", &board);
 
+    board.movePiece("d8a5", Color::BLACK); //Dame noire qui met le roi blanc en échec
+    int itabPositionThatAttacksWhiteKing[2] = {-1, -1};
+    int itabDirectionThatAttacksWhiteKing[2] = {-2, -2};
+    int itabPositionThatAttacksBlackKing[2] = {-1, -1};
+    int itabDirectionThatAttacksBlackKing[2] = {-2, -2};
+    board.getPositionThatAttacksWhiteKing(itabPositionThatAttacksWhiteKing);
+    board.getDirectionThatAttacksWhiteKing(itabDirectionThatAttacksWhiteKing);
+    board.getPositionThatAttacksBlackKing(itabPositionThatAttacksBlackKing);
+    board.getDirectionThatAttacksBlackKing(itabDirectionThatAttacksBlackKing);
+
+
+    std::pair<int, int> possibleMoves[112];
+    int moveCount = 0;
+    board.listOfPossibleMoves(Color::WHITE, possibleMoves, moveCount);
+
+
+    int itabPositionThatAttacksWhiteKingValue[2] = {32, -1};
+    int itabDirectionThatAttacksWhiteKingValue[2] = {-7, -2};
+    int itabPositionThatAttacksBlackKingValue[2] = {-1, -1};
+    int itabDirectionThatAttacksBlackKingValue[2] = {-2, -2};
+    EXPECT_TRUE((itabPositionThatAttacksWhiteKing[0] == itabPositionThatAttacksWhiteKingValue[0]) && (itabPositionThatAttacksWhiteKing[1] == itabPositionThatAttacksWhiteKingValue[1]));
+    EXPECT_TRUE(itabPositionThatAttacksBlackKing[0] == itabPositionThatAttacksBlackKingValue[0] && itabPositionThatAttacksBlackKing[1] == itabPositionThatAttacksBlackKingValue[1]);
+    EXPECT_TRUE(itabDirectionThatAttacksWhiteKing[0] == itabDirectionThatAttacksWhiteKingValue[0] && itabDirectionThatAttacksWhiteKing[1] == itabDirectionThatAttacksWhiteKingValue[1]);
+    EXPECT_TRUE(itabDirectionThatAttacksBlackKing[0] == itabDirectionThatAttacksBlackKingValue[0] && itabDirectionThatAttacksBlackKing[1] == itabDirectionThatAttacksBlackKingValue[1]);
+    EXPECT_EQ(moveCount, 7);
+}
 
 
 

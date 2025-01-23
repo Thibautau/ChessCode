@@ -628,6 +628,25 @@ bool Board::isCaseAttackedByColor(int in_iPosition, Color in_colorToFindAttack, 
         return false;
     }
 
+    int iSize = in_vectPositionPieceFound.size();
+
+    std::vector<int> vectPositionPieceFound;
+    std::vector<int> vectDirectionPieceFound;
+
+    for(int i = 0; i < iSize; i++)
+    {
+        Piece* pPieceFound = getPieceAt(in_vectPositionPieceFound[i]);
+        if(pPieceFound != nullptr && pPieceFound->getColor() == in_colorToFindAttack)
+        {
+            vectPositionPieceFound.emplace_back(in_vectPositionPieceFound[i]);
+            vectDirectionPieceFound.emplace_back(in_vectDirectionThatAttacks[i]);
+        }
+    }
+    in_vectPositionPieceFound.clear();
+    in_vectDirectionThatAttacks.clear();
+    in_vectPositionPieceFound.insert(in_vectPositionPieceFound.end(), vectPositionPieceFound.begin(), vectPositionPieceFound.end());
+    in_vectDirectionThatAttacks.insert(in_vectDirectionThatAttacks.end(), vectDirectionPieceFound.begin(), vectDirectionPieceFound.end());
+
     for (int iPositionPieceFound: in_vectPositionPieceFound)
     {
         Piece* pPieceFound = getPieceAt(iPositionPieceFound);
@@ -1316,8 +1335,26 @@ bool Board::doesPositionDoNotPutKingInCheck(int in_iPreviousPosition, int in_iPo
     int iPositionPutKingInCheck = -1;
     int iDirectionPutKingInCheck = -2;
     bool bPositionCutKingInCheck = doesPositionCutKingInCheck(in_iPosition, iPositionPutKingInCheck, iDirectionPutKingInCheck);
-    out_itabPositionsThatPutsKingInCheck[1] = iPositionPutKingInCheck;
-    out_itabDirectionsThatPutsKingInCheck[1] = iDirectionPutKingInCheck;
+
+    if(out_itabPositionsThatPutsKingInCheck[0] == -1 && out_itabDirectionsThatPutsKingInCheck[0] == -2)
+    {
+        out_itabPositionsThatPutsKingInCheck[0] = iPositionPutKingInCheck;
+        out_itabDirectionsThatPutsKingInCheck[0] = iDirectionPutKingInCheck;
+    }
+    else
+    {
+        out_itabPositionsThatPutsKingInCheck[1] = iPositionPutKingInCheck;
+        out_itabDirectionsThatPutsKingInCheck[1] = iDirectionPutKingInCheck;
+    }
+    //out_itabPositionsThatPutsKingInCheck[1] = iPositionPutKingInCheck;
+    //out_itabDirectionsThatPutsKingInCheck[1] = iDirectionPutKingInCheck;
+
+    bool bIsKingCheck = isKingInCheck(pieceColor);
+
+    if(bIsKingCheck && !bPositionCutKingInCheck) // SI on est en échec et qu'on ne coupe pas le mouvement
+    {
+        return false;
+    }
 
     bIsKingAttacked = bIsKingAttacked && bPositionCutKingInCheck;
 
@@ -1382,11 +1419,19 @@ bool Board::doesPositionDoNotPutEnemyKingInCheck(int in_iPreviousPosition, int i
 
     if(bIsKingAttacked)
     {
-        out_itabPositionsThatPutsKingInCheck[1] = iPositionAttackingPiece;
-        out_itabDirectionsThatPutsKingInCheck[1] = iDirectionBetweenKingAndPieceBeforeMove;
+        if(out_itabPositionsThatPutsKingInCheck[0] == -1 && out_itabDirectionsThatPutsKingInCheck[0] == -2)
+        {
+            out_itabPositionsThatPutsKingInCheck[0] = iPositionAttackingPiece;
+            out_itabDirectionsThatPutsKingInCheck[0] = iDirectionBetweenKingAndPieceBeforeMove;
+        }
+        else
+        {
+            out_itabPositionsThatPutsKingInCheck[1] = iPositionAttackingPiece;
+            out_itabDirectionsThatPutsKingInCheck[1] = iDirectionBetweenKingAndPieceBeforeMove;
+        }
         return false;
     }
-    return true;
+    return !isKingInCheck(enemyColor);
     //Situation actuelle: Le mouvement ne met pas en échec le roi.
     // On veut donc regarder si le roi était déjà mis en échec. Si c'est le cas, on veut vérifier que le mouvement coupe cette mise en échec
     /*int iPositionPutKingInCheck = -1;
@@ -1482,10 +1527,10 @@ bool Board::doesPositionCutKingInCheck(int in_iPosition,  int& out_iPositionThat
         if(std::abs(iFirstAttackingDirection) == 9  || std::abs(iFirstAttackingDirection) == 7) // Diagonale
         {
             bool bIsOnSameDiagonal = arePositionsOnSameDiagonal(iFirstAttackingPosition, in_iPosition, iDirectionBetweenAttackingPieceAndPieceAfterMove);
-            if(bIsOnSameDiagonal && iDirectionBetweenAttackingPieceAndPieceAfterMove != iFirstAttackingDirection)
+            if(bIsOnSameDiagonal && iDirectionBetweenAttackingPieceAndPieceAfterMove != iFirstAttackingDirection || !bIsOnSameDiagonal) //TODO ? || !bIsOnSameDiagonal fait crash
             {
                 out_iPositionThatPutsKingInCheck = iFirstAttackingPosition;
-                out_iDirectionThatPutsKingInCheck = iDirectionBetweenAttackingPieceAndPieceAfterMove;
+                out_iDirectionThatPutsKingInCheck = iFirstAttackingDirection;
                 return false;
             }
         }
@@ -1493,10 +1538,10 @@ bool Board::doesPositionCutKingInCheck(int in_iPosition,  int& out_iPositionThat
         if(std::abs(iFirstAttackingDirection) == 1  || std::abs(iFirstAttackingDirection) == 8) // Line/Column
         {
             bool bIsOnSameDiagonal = arePositionsOnSameLineOrColumn(iFirstAttackingPosition, in_iPosition, iDirectionBetweenAttackingPieceAndPieceAfterMove);
-            if(bIsOnSameDiagonal && iDirectionBetweenAttackingPieceAndPieceAfterMove != iFirstAttackingDirection)
+            if(bIsOnSameDiagonal && iDirectionBetweenAttackingPieceAndPieceAfterMove != iFirstAttackingDirection || !bIsOnSameDiagonal ) //TODO ? || !bIsOnSameDiagonal fait crash
             {
                 out_iPositionThatPutsKingInCheck = iFirstAttackingPosition;
-                out_iDirectionThatPutsKingInCheck = iDirectionBetweenAttackingPieceAndPieceAfterMove;
+                out_iDirectionThatPutsKingInCheck = iFirstAttackingDirection;
                 return false;
             }
         }
@@ -1597,9 +1642,10 @@ bool Board::putNextMoveIfValid(int in_iPreviousPosition, int in_iNextPosition, P
 
     Color enemyColor = in_pPieceToMove->getEnemyColor();
     m_tabpiBoard[in_iNextPosition] = in_pPieceToMove;
-    if(!isCaseAttackedByColor(iKingPosition, enemyColor, uselessVectorOfPiecesFound, in_vectDirectionThatAttacks))
-    //if( doesPositionDoNotPutKingInCheck(in_iPreviousPosition, in_iNextPosition, itabAttackingPosition, itabAttackingDirection, true))
+    //if(!isCaseAttackedByColor(iKingPosition, enemyColor, uselessVectorOfPiecesFound, in_vectDirectionThatAttacks))
+    if( doesPositionDoNotPutKingInCheck(in_iPreviousPosition, in_iNextPosition, itabAttackingPosition, itabAttackingDirection, true))
     {
+        doesPositionDoNotPutKingInCheck(in_iPreviousPosition, in_iNextPosition, itabAttackingPosition, itabAttackingDirection, true);
         in_vectMoveToFill.emplace_back(in_iNextPosition);
         bIsMoveValid = true;
     }
@@ -1656,7 +1702,8 @@ void Board::listOfPossibleMoves(Color in_colPlayer, std::pair<int, int> out_move
 }
 
 
-bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion,int enPassantPos, int in_itabCastlingRights[4], bool in_bIsWhiteKingChecked, bool in_bIsBlackKingChecked, int in_iWhiteKingPosition, int in_iBlackKingPosition) {
+bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion,int enPassantPos, int in_itabCastlingRights[4], bool in_bIsWhiteKingChecked, bool in_bIsBlackKingChecked, int in_iWhiteKingPosition, int in_iBlackKingPosition,
+    int in_iPositionThatAttacksWhiteKing[2], int in_iPositionThatAttacksBlackKing[2], int in_iDirectionThatAttacksWhiteKing[2], int in_iDirectionThatAttacksBlackKing[2]) {
     Piece* movingPiece = getPieceAt(in_iEndPosition);
     if(movingPiece == nullptr) {
         return false;
@@ -1705,7 +1752,6 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
         pRookToMove = m_tabpiBoard[iPositionToGetAndDeleteRook];
         m_tabpiBoard[iPositionToGetAndDeleteRook] = nullptr;
         m_tabpiBoard[iInitialRookPosition] = pRookToMove;
-
     }
 
     if(in_itabCastlingRights != nullptr)
@@ -1720,6 +1766,30 @@ bool Board::undoMove(int in_iStartPosition, int in_iEndPosition, Piece* captured
     m_isBlackKingChecked = in_bIsBlackKingChecked;
     m_iWhiteKingPosition = in_iWhiteKingPosition;
     m_iBlackKingPosition = in_iBlackKingPosition;
+
+    if(in_iPositionThatAttacksWhiteKing != nullptr)
+    {
+        m_iPositionThatAttacksWhiteKing[0] = in_iPositionThatAttacksWhiteKing[0];
+        m_iPositionThatAttacksWhiteKing[1] = in_iPositionThatAttacksWhiteKing[1];
+    }
+
+    if(in_iPositionThatAttacksBlackKing != nullptr)
+    {
+        m_iPositionThatAttacksBlackKing[0] = in_iPositionThatAttacksBlackKing[0];
+        m_iPositionThatAttacksBlackKing[1] = in_iPositionThatAttacksBlackKing[1];
+    }
+
+    if(in_iDirectionThatAttacksWhiteKing != nullptr)
+    {
+        m_iDirectionThatAttacksWhiteKing[0] = in_iDirectionThatAttacksWhiteKing[0];
+        m_iDirectionThatAttacksWhiteKing[1] = in_iDirectionThatAttacksWhiteKing[1];
+    }
+
+    if(in_iDirectionThatAttacksBlackKing != nullptr)
+    {
+        m_iDirectionThatAttacksBlackKing[0] = in_iDirectionThatAttacksBlackKing[0];
+        m_iDirectionThatAttacksBlackKing[1] = in_iDirectionThatAttacksBlackKing[1];
+    }
 
 
     if(promotion) {
@@ -1781,6 +1851,31 @@ void Board::getEnemyPawnNextToEnPassantPawn(int out_iPositionPawnNextToEnPassant
         out_iPositionPawnNextToEnPassant[0] = -1;
         out_iPositionPawnNextToEnPassant[1] = -1;
     }
+}
+
+
+void Board::getPositionThatAttacksWhiteKing(int out_itabToFill[2]) const
+{
+    out_itabToFill[0] = m_iPositionThatAttacksWhiteKing[0];
+    out_itabToFill[1] = m_iPositionThatAttacksWhiteKing[1];
+}
+
+void Board::getDirectionThatAttacksWhiteKing(int out_itabToFill[2]) const
+{
+    out_itabToFill[0] = m_iDirectionThatAttacksWhiteKing[0];
+    out_itabToFill[1] = m_iDirectionThatAttacksWhiteKing[1];
+}
+
+void Board::getPositionThatAttacksBlackKing(int out_itabToFill[2]) const
+{
+    out_itabToFill[0] = m_iPositionThatAttacksBlackKing[0];
+    out_itabToFill[1] = m_iPositionThatAttacksBlackKing[1];
+}
+
+void Board::getDirectionThatAttacksBlackKing(int out_itabToFill[2]) const
+{
+    out_itabToFill[0] = m_iDirectionThatAttacksBlackKing[0];
+    out_itabToFill[1] = m_iDirectionThatAttacksBlackKing[1];
 }
 
 //************************************************************************************//

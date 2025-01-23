@@ -493,7 +493,8 @@ public:
     *                     la valeur par défaut de -1 sera utilisée.
     * @return `true` si le mouvement a été annulé avec succès, `false` en cas d'erreur.
     */
-    bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece,bool promotion=false,int enPassantPos=-1, int in_itabCastlingRights[4] = nullptr, bool in_bIsWhiteKingChecked = false, bool in_bIsBlackKingChecked = false, int in_iWhiteKingPosition = -1, int in_iBlackKingPosition = -1);
+    bool undoMove(int in_iStartPosition, int in_iEndPosition, Piece* capturedPiece, bool promotion=false,int enPassantPos=-1, int in_itabCastlingRights[4] = nullptr, bool in_bIsWhiteKingChecked = false, bool in_bIsBlackKingChecked = false, int in_iWhiteKingPosition = -1, int in_iBlackKingPosition = -1,
+    int in_iPositionThatAttacksWhiteKing[2] = nullptr, int in_iPositionThatAttacksBlackKing[2] = nullptr, int in_iDirectionThatAttacksWhiteKing[2] = nullptr, int in_iDirectionThatAttacksBlackKing[2] = nullptr);
 
     //Evaluation and Heuristic Functions
     /**
@@ -815,6 +816,11 @@ public:
     void setPreviousMoveTargetPosition(int m_i_previous_move_target_position) {
         m_iPreviousMoveTargetPosition = m_i_previous_move_target_position;
     }
+
+    void getPositionThatAttacksWhiteKing(int out_itabToFill[2]) const;
+    void getDirectionThatAttacksWhiteKing(int out_itabToFill[2]) const;
+    void getPositionThatAttacksBlackKing(int out_itabToFill[2]) const;
+    void getDirectionThatAttacksBlackKing(int out_itabToFill[2]) const;
 };
 
 #endif //BOARD_H

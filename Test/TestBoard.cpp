@@ -75,7 +75,7 @@ TEST(TestBoard, IsMoveValid) {
 TEST(TestBoard, isBlackKingCheckmated) {
     Board* board = new Board();
     board->initializeBoard();
-    board->movePiece("e2e4",Color::WHITE);// pion blanc e2->e4
+    board->movePiece("e2e4",Color::WHITE);// pion blanc e2->e40
     board->movePiece("f1c4",Color::WHITE);// fou blanc f1->c4
     board->movePiece("d1h5",Color::WHITE);// dame blanche d1->h5
     board->movePiece("h5f7",Color::WHITE);// dame blanche capture pion f7
