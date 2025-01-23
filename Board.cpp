@@ -1645,7 +1645,7 @@ bool Board::putNextMoveIfValid(int in_iPreviousPosition, int in_iNextPosition, P
     //if(!isCaseAttackedByColor(iKingPosition, enemyColor, uselessVectorOfPiecesFound, in_vectDirectionThatAttacks))
     if( doesPositionDoNotPutKingInCheck(in_iPreviousPosition, in_iNextPosition, itabAttackingPosition, itabAttackingDirection, true))
     {
-        doesPositionDoNotPutKingInCheck(in_iPreviousPosition, in_iNextPosition, itabAttackingPosition, itabAttackingDirection, true);
+        //doesPositionDoNotPutKingInCheck(in_iPreviousPosition, in_iNextPosition, itabAttackingPosition, itabAttackingDirection, true);
         in_vectMoveToFill.emplace_back(in_iNextPosition);
         bIsMoveValid = true;
     }

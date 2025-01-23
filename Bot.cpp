@@ -481,9 +481,14 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
 
 
     // Tri des coups en fonction de leur évaluation
-    std::ranges::stable_sort(possibleMoves, possibleMoves + moveCount, std::greater<>{}, [&](const std::pair<int, int>& move) {
+    /*std::ranges::stable_sort(possibleMoves, possibleMoves + moveCount, std::greater<>{}, [&](const std::pair<int, int>& move) {
         return board.evaluateMove(move, m_color);
+    });*/
+    std::ranges::stable_sort(possibleMoves, possibleMoves + moveCount,
+    [&](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+        return board.evaluateMove(a, m_color) > board.evaluateMove(b, m_color);
     });
+
 
     //Mise en echec et mat ou PAT
     if (moveCount == 0) {
