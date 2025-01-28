@@ -312,16 +312,12 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
     auto start = std::chrono::high_resolution_clock::now();
 
     // Obtenir les mouvements possibles
-    //std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);
-    std::vector<std::pair<int, int>> possibleMoves;
-    std::pair<int, int> tabProtectingAndAttackingPositions[64];
-    int tabEvaluationOfPositions[64];
-    int iBoardEvaluation = board.evaluate(m_color, possibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions);
+    std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);
 
     std::ranges::stable_sort(possibleMoves.begin(), possibleMoves.end(), [&](const std::pair<int, int>& move1, const std::pair<int, int>& move2) {
-            //return board.evaluateMove(move1, m_color) > board.evaluateMove(move2, m_color);
-            return board.evaluateForNextMove(m_color, iBoardEvaluation,move1.first, move1.second, possibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions)
-                > board.evaluateForNextMove(m_color, iBoardEvaluation, move2.first, move2.second, possibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions);
+            return board.evaluateMove(move1, m_color) > board.evaluateMove(move2, m_color);
+            //return board.evaluateForNextMove(m_color, iBoardEvaluation,move1.first, move1.second, possibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions)
+              //  > board.evaluateForNextMove(m_color, iBoardEvaluation, move2.first, move2.second, possibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions);
         });
 
     if (possibleMoves.empty()) {
@@ -497,19 +493,11 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
         return board.evaluateMove(move, m_color);
     });*/
 
-    std::pair<int, int> tabProtectingAndAttackingPositions[64];
-    std::vector<std::pair<int, int>> vectListOfPossibleMoves;
-    int tabEvaluationOfPositions[64];
-    int iBoardEvaluation = board.evaluate(currentColor, vectListOfPossibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions);
-    for (size_t i = 0; i < vectListOfPossibleMoves.size() && i < 128; ++i) {
-        possibleMoves[i] = vectListOfPossibleMoves[i];
-    }
-
     std::ranges::stable_sort(possibleMoves, possibleMoves + moveCount,
     [&](const std::pair<int, int>& move1, const std::pair<int, int>& move2) {
-        //return board.evaluateMove(a, m_color) > board.evaluateMove(b, m_color);
-        return board.evaluateForNextMove(currentColor, iBoardEvaluation, move1.first, move1.second, vectListOfPossibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions)
-            > board.evaluateForNextMove(currentColor, iBoardEvaluation, move2.first, move2.second, vectListOfPossibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions);
+        return board.evaluateMove(move1, m_color) > board.evaluateMove(move2, m_color);
+        //return board.evaluateForNextMove(currentColor, iBoardEvaluation, move1.first, move1.second, vectListOfPossibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions)
+          //  > board.evaluateForNextMove(currentColor, iBoardEvaluation, move2.first, move2.second, vectListOfPossibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions);
     });
 
 
