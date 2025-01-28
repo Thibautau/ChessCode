@@ -281,7 +281,7 @@ public:
     * @param enPassantPos Pointeur pour stocker la position en passant, si applicable.
     * @return Vrai si le déplacement est réussi, faux si le déplacement est invalide.
     */
-    bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE, Piece** piece = nullptr,TypePieces promotionType = TypePieces::NONE, int* enPassantPos = nullptr);
+    bool movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer = Color::WHITE, Piece** piece = nullptr,TypePieces promotionType = TypePieces::NONE, int* enPassantPos = nullptr, bool in_bVerifyIfMovementPossible = true);
 
     //Checking and Validation Functions
     /**
@@ -511,10 +511,22 @@ public:
     bool isAttackedByPawn(int position, Color opponentColor);
     int evaluateSimple(Color in_colPlayer);
     int evaluateTest(Color in_colPlayer);
-    int evaluate(Color in_colPlayer);
+    int evaluateForNextMove(Color in_colPlayer, int in_iBoardEvaluation, int in_iPosition, int in_iNextPosition, std::vector<std::pair<int, int>> &
+                            in_vectListOfPossibleMoves, std::pair<int, int> out_tabProtectionsAndAttacks[], int out_tabEvaluationOfPosition[]);
+    int evaluate(Color in_colPlayer, std::vector<std::pair<int, int>> &out_vectListOfPossibleMoves, std::pair<int, int>
+                 out_tabProtectionsAndAttacks[], int in_tabEvaluationOfPosition[]);
+    int evaluatePiecePosition(Color in_colPlayer, int in_iPiecePosition, int in_iNbPieceItIsProtectedBy, int in_iNbPiecesItIsAttackedBy, int in_iNbPossibleMovesForPosition);
     int GetSquareValue(Piece* piece, int pos);
-    bool isCenterSquare(int index);
+    static bool isCenterSquare(int index);
     bool isInitialPosition(Piece* piece, int index);
+
+    int countThreatsAndProtections(Color in_colorToCountProtections,
+                                   std::vector<std::pair<int, int>> &out_vectProtectingMoves,
+                                   std::vector<std::pair<int, int>> &out_vectAttackingMoves);
+
+    bool possibleThreatsAndProtectionsForPiece(int in_iPiecePositionToSeeMoves, std::vector<int> &out_vectPossibleMoves, std::pair<int, int> tabProtectionsAndAttacks
+                                               []);
+
     int countProtections(Piece* piece, int pos);
     int countThreats(Piece* piece, int pos);
     bool isMultipleAttack(Piece* piece, int pos);

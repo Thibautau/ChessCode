@@ -245,7 +245,7 @@ bool Board::movePiece(Color in_colPlayer, const std::string& move, Piece** piece
     return movePiece(iStartPosition, iEndPosition, in_colPlayer, piece, promotionType, enPassantPos);
 }
 
-bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer,Piece** piece, TypePieces promotionType, int* enPassantPos)
+bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPlayer,Piece** piece, TypePieces promotionType, int* enPassantPos, bool in_bVerifyIfMovementPossible)
 {
     Piece* pPiece = getPieceAt(in_iStartPosition);
 
@@ -269,8 +269,10 @@ bool Board::movePiece(int in_iStartPosition, int in_iEndPosition, Color in_colPl
     }
 
     //If movement isn't possible we stop the move
-    if (!isMovementPossible(in_iStartPosition, in_iEndPosition)) {
-        return false;
+    if (in_bVerifyIfMovementPossible)
+    {
+        if(!isMovementPossible(in_iStartPosition, in_iEndPosition))
+            return false;
     }
 
     { // We reset those indexs because we want to update those values with this move
@@ -2037,69 +2039,48 @@ int Board::GetSquareValue(Piece* piece, int pos) {
 
 
 
-int Board::evaluate(Color in_colPlayer) {
+int Board::evaluate(Color in_colPlayer, std::vector<std::pair<int, int>>& out_vectListOfPossibleMoves, std::pair<int, int> out_tabProtectionsAndAttacks[64], int out_tabEvaluationOfPosition[64]) // The first occurence is the protectionCounter and the second is the attackingCounter.
+{
+
     int score = 0;
 
-    // Récupérer une fois la position du roi adverse
-    int opponentKingPosition = getOpponentKingPosition(in_colPlayer);
+    std::vector<int> vectPossibleMoves;
 
-    for (int i = 0; i < 64; ++i) {
-        Piece* piece = m_tabpiBoard[i];
+    for (int iPosition = 0; iPosition < 64; ++iPosition)
+    {
+        Piece* piece = m_tabpiBoard[iPosition];
         if (piece != nullptr) {
-            int pieceScore = getPieceValue(piece->getTypePiece()) * 10;
-
-            // 1. Contrôle du centre
-            if (isCenterSquare(i)) {
-                pieceScore += (piece->getColor() == in_colPlayer) ? 500 : -500; // Réduire la valeur du contrôle du centre
-            }
-
-            // 2. Malus pour les pièces restées en position initiale
-            if (isInitialPosition(piece, i)) {
-                pieceScore -= 100; // Augmenter la pénalité pour les pièces en position initiale
-            }
+            vectPossibleMoves.clear();
 
             // 3. Isolation et menace
-            int protections = countProtections(piece, i);
-            int threats = countThreats(piece, i);
-            if (threats > protections) {
-                pieceScore -= getPieceValue(piece->getTypePiece()) * 4; // Augmenter la pénalité pour les pièces menacées
-            } else {
-                pieceScore += protections * 30; // Bonus accru pour les protections
+            bool bValidVerification = possibleThreatsAndProtectionsForPiece(iPosition, vectPossibleMoves, out_tabProtectionsAndAttacks);
+            if(! bValidVerification)
+            {
+                std::cerr << "Error: possibleThreatsAndProtectionsForPiece FAILED for position: " << iPosition << "). in Board::evaluate." << std::endl;
             }
+            if(piece->getColor() == in_colPlayer)
+            {
+                for(int iPossiblePosition: vectPossibleMoves)
+                {
+                    out_vectListOfPossibleMoves.emplace_back(iPosition, iPossiblePosition);
+                }
+            }
+        }
+    }
 
-            // 4. Mobilité
-            pieceScore += getPieceMobility(piece, i) * 2; // Augmenter l'importance de la mobilité
+    for (int iPosition = 0; iPosition < 64; ++iPosition)
+    {
+        Piece* piece = m_tabpiBoard[iPosition];
+        if (piece != nullptr)
+        {
+            std::pair<int, int> pairProtectAndAttackCount = out_tabProtectionsAndAttacks[iPosition];
+            int iNbPieceItProtects = pairProtectAndAttackCount.first;
+            int iNbPieceItIsAttackedBy = pairProtectAndAttackCount.second;
+            int iNbPossibleMoves = out_vectListOfPossibleMoves.size();
 
-            // 5. Bonus pour les attaques, fourchettes et tropisme vers le roi
-            if (isMultipleAttack(piece, i)) {
-                pieceScore += 100; // Réduire les bonus pour les fourchettes
-            }
-            else if (isSingleAttack(piece, i)) {
-                pieceScore += 50; // Réduire les bonus pour les attaques simples
-            }
-
-            // 6. Tropisme vers le roi
-            if (isTowardsOpponentKing(piece, i, opponentKingPosition)) {
-                pieceScore += 200; // Réduire l'importance du tropisme vers le roi
-            }
-
-            // 7. Sécurité du roi
-            if (piece->getTypePiece() == TypePieces::KING) {
-                pieceScore += evaluateKingSafety(piece->getColor()) * 2; // Réduire le bonus pour la sécurité du roi
-            }
-
-            // 8. Sacrifices imprudents : si une pièce est sacrifiée sans avantage stratégique
-            if (threats > protections && getPieceValue(piece->getTypePiece()) >= 3) {
-                pieceScore -= 5000; // Pénalité pour sacrifier des pièces importantes sans gain stratégique
-            }
-
-            // Ajustement final en fonction de la couleur
-            if (piece->getColor() == in_colPlayer) {
-                score += pieceScore;
-            }
-            else {
-                score -= pieceScore;
-            }
+            int iScore = evaluatePiecePosition(in_colPlayer, iPosition, iNbPieceItProtects, iNbPieceItIsAttackedBy, iNbPossibleMoves);
+            out_tabEvaluationOfPosition[iPosition] = iScore;
+            score += iScore;
         }
     }
 
@@ -2108,9 +2089,184 @@ int Board::evaluate(Color in_colPlayer) {
         score += 30; // Augmenter le bonus pour la possibilité de roque
     }*/
 
-    // 9. Ajouter la mobilité totale pour le joueur
-    score += evaluateMobility(in_colPlayer) * 2; // Augmenter l'importance de la mobilité globale
+    return score;
+}
 
+int Board::evaluatePiecePosition(Color in_colPlayer, int in_iPiecePosition, int in_iNbPieceItIsProtectedBy, int in_iNbPiecesItIsAttackedBy, int in_iNbPossibleMovesForPosition)
+{
+    Piece* pPieceFound = getPieceAt(in_iPiecePosition);
+    if(pPieceFound == nullptr)
+    {
+        return 0;
+    }
+
+    Color colorPiece = pPieceFound->getColor();
+
+    int iScore = 0;
+
+    if (pPieceFound != nullptr)
+    {
+        int iPieceValue = getPieceValue(pPieceFound->getTypePiece());
+
+        int pieceScore = iPieceValue * 10;
+
+        // 1. Contrôle du centre
+        if (isCenterSquare(in_iPiecePosition))
+        {
+            pieceScore += (pPieceFound->getColor() == in_colPlayer) ? 500 : -500; // Réduire la valeur du contrôle du centre
+        }
+
+        // 2. Malus pour les pièces restées en position initiale
+        if (isInitialPosition(pPieceFound, in_iPiecePosition))
+        {
+            pieceScore -= 100; // Augmenter la pénalité pour les pièces en position initiale
+        }
+
+        if (in_iNbPiecesItIsAttackedBy > in_iNbPieceItIsProtectedBy)
+        {
+            pieceScore -= iPieceValue * 4; // Augmenter la pénalité pour les pièces menacées
+        }
+        else
+        {
+            pieceScore += in_iNbPieceItIsProtectedBy * 30; // Bonus accru pour les protections
+        }
+
+        // 4. Mobilité
+        pieceScore += in_iNbPossibleMovesForPosition * 2; // Augmenter l'importance de la mobilité
+
+        // 5. Bonus pour les attaques, fourchettes et tropisme vers le roi
+        if(in_iNbPiecesItIsAttackedBy > 1)
+        {
+            pieceScore += 100; // Réduire les bonus pour les fourchettes
+        }
+        else if (in_iNbPiecesItIsAttackedBy == 1)
+        {
+            pieceScore += 50; // Réduire les bonus pour les attaques simples
+        }
+
+        // 6. Tropisme vers le roi
+        /*if (isTowardsOpponentKing(piece, iPosition, opponentKingPosition)) {
+            pieceScore += 200; // Réduire l'importance du tropisme vers le roi
+        }*/
+
+        // 7. Sécurité du roi
+        if (pPieceFound->getTypePiece() == TypePieces::KING) {
+            //pieceScore += evaluateKingSafety(piece->getColor()) * 2; // Réduire le bonus pour la sécurité du roi
+        }
+
+        // 8. Sacrifices imprudents : si une pièce est sacrifiée sans avantage stratégique
+        if (in_iNbPiecesItIsAttackedBy > in_iNbPieceItIsProtectedBy && iPieceValue >= 3) {
+            pieceScore -= 5000; // Pénalité pour sacrifier des pièces importantes sans gain stratégique
+        }
+
+        // Ajustement final en fonction de la couleur
+        if (pPieceFound->getColor() == in_colPlayer) {
+            iScore += pieceScore;
+        }
+        else {
+            iScore -= pieceScore;
+        }
+
+        // 8. Encourager le roque pour la sécurité du roi
+        /*if (canCastle(in_colPlayer)) {
+            score += 30; // Augmenter le bonus pour la possibilité de roque
+        }*/
+    }
+
+    return iScore;
+}
+
+int Board::evaluateForNextMove(Color in_colPlayer, int in_iBoardEvaluation, int in_iPosition, int in_iNextPosition, std::vector<std::pair<int, int>>& in_vectListOfPossibleMoves, std::pair<int, int> out_tabProtectionsAndAttacks[64], int in_tabEvaluationOfPosition[64])
+{
+    //Etat actuel du plateau
+    int enPassantPos = getEnPassantPosition();
+    int itabCastlingRights[4] = { -1, -1, -1, -1 };
+    getCastlingStateAsTableau(itabCastlingRights);
+    bool bisWhiteKingCheked = isWhiteKingCheck();
+    bool bisBlackKingCheked = isBlackKingCheck();
+    int iWhiteKingPosition = getKingPosition(Color::WHITE);
+    int iBlackKingPosition = getKingPosition(Color::BLACK);
+    int iPreviousInitialPosition = getPreviousMoveInitialPosition();
+    int iPreviousTargetPosition = getPreviousMoveTargetPosition();
+    int itabPositionThatAttacksWhiteKing[2] = {-1, -1};
+    int itabDirectionThatAttacksWhiteKing[2] = {-2, -2};
+    int itabPositionThatAttacksBlackKing[2] = {-1, -1};
+    int itabDirectionThatAttacksBlackKing[2] = {-2, -2};
+    getPositionThatAttacksWhiteKing(itabPositionThatAttacksWhiteKing);
+    getDirectionThatAttacksWhiteKing(itabDirectionThatAttacksWhiteKing);
+    getPositionThatAttacksBlackKing(itabPositionThatAttacksBlackKing);
+    getDirectionThatAttacksBlackKing(itabDirectionThatAttacksBlackKing);
+
+    int iNbProtectionBeforeMove = out_tabProtectionsAndAttacks[in_iPosition].first; // The first occurence is the protectionCounter and the second is the attackingCounter.
+    int iNbAttacksBeforeMove = out_tabProtectionsAndAttacks[in_iPosition].second;
+    int iNbProtectionAtTarget = out_tabProtectionsAndAttacks[in_iNextPosition].first;
+    int iNbAttacksAtTarget = out_tabProtectionsAndAttacks[in_iNextPosition].second;
+    out_tabProtectionsAndAttacks[in_iPosition].first = 0;
+    out_tabProtectionsAndAttacks[in_iPosition].second = 0;
+    out_tabProtectionsAndAttacks[in_iNextPosition].first = 0;
+    out_tabProtectionsAndAttacks[in_iNextPosition].second = 0;
+
+    Piece* capturedPiece = nullptr;
+    bool bCanMove = movePiece(in_iPosition, in_iNextPosition, in_colPlayer, &capturedPiece, TypePieces::QUEEN, nullptr, false);
+    if(! bCanMove) {
+        movePiece(in_iPosition, in_iNextPosition, in_colPlayer, &capturedPiece, TypePieces::QUEEN, nullptr, false);
+        std::cerr << "Error: MOVE FAILED" << in_iPosition << " " << in_iNextPosition << "). in Board::evaluateForNextMove." << std::endl;
+        return 0;
+    }
+
+    int score = in_iBoardEvaluation - in_tabEvaluationOfPosition[in_iPosition];
+
+    std::vector<int> vectAttackingPositions;
+    std::vector<int> vectAttackingDirections;
+
+    bool bIsPositionAttacked = isCaseAttackedByAnyColor(in_iNextPosition, vectAttackingPositions, vectAttackingDirections);
+    int iNbPiecesAttackingPositions = vectAttackingPositions.size();
+
+    for(int iPosition: vectAttackingPositions)
+    {
+        Piece* pPieceFound = getPieceAt(iPosition);
+        Color pieceColor = pPieceFound->getColor();
+
+        if(pieceColor == in_colPlayer)
+        {
+            out_tabProtectionsAndAttacks[in_iNextPosition].first++;
+        }
+        else
+        {
+            out_tabProtectionsAndAttacks[in_iNextPosition].second++;
+        }
+    }
+
+    Piece* pPieceAfterMove = getPieceAt(in_iNextPosition);
+
+    if (pPieceAfterMove != nullptr)
+    {
+        std::pair<int, int> pairProtectAndAttackCount = out_tabProtectionsAndAttacks[in_iNextPosition];
+        int iNbPieceItProtects = pairProtectAndAttackCount.first;
+        int iNbPieceItIsAttackedBy = pairProtectAndAttackCount.second;
+        int iNbPossibleMoves = in_vectListOfPossibleMoves.size();
+
+        int iScore = evaluatePiecePosition(in_colPlayer, in_iNextPosition, iNbPieceItProtects, iNbPieceItIsAttackedBy, iNbPossibleMoves);
+        score += iScore;
+    }
+
+
+
+    bool bCanUndo = undoMove(in_iPosition, in_iNextPosition, capturedPiece, isPromotionMove(in_iPosition, in_iNextPosition, in_colPlayer), enPassantPos, itabCastlingRights, bisWhiteKingCheked
+                , bisBlackKingCheked, iWhiteKingPosition, iBlackKingPosition, itabPositionThatAttacksWhiteKing, itabPositionThatAttacksBlackKing
+                , itabDirectionThatAttacksWhiteKing, itabDirectionThatAttacksBlackKing);
+    if(! bCanUndo) {
+        std::cerr << "Error: UNDOMOVE FAILED" << in_iPosition << " " << in_iNextPosition << "). in Board::evaluateForNextMove." << std::endl;
+        return 0;
+    }
+
+    out_tabProtectionsAndAttacks[in_iNextPosition].first = iNbProtectionAtTarget;
+    out_tabProtectionsAndAttacks[in_iNextPosition].second = iNbAttacksAtTarget;
+    out_tabProtectionsAndAttacks[in_iPosition].first = iNbProtectionBeforeMove;
+    out_tabProtectionsAndAttacks[in_iPosition].second = iNbAttacksBeforeMove;
+
+    m_iPreviousMoveInitialPosition = iPreviousInitialPosition;
+    m_iPreviousMoveTargetPosition = iPreviousTargetPosition;
     return score;
 }
 
@@ -2118,7 +2274,7 @@ int Board::evaluate(Color in_colPlayer) {
 bool Board::isCenterSquare(int index) {
     // Indices des cases centrales dans un tableau 8x8
     const std::set<int> centerSquares = {27, 28, 35, 36};
-    return centerSquares.find(index) != centerSquares.end();
+    return centerSquares.contains(index);
 }
 
 bool Board::isInitialPosition(Piece* piece, int index) {
@@ -2151,6 +2307,48 @@ bool Board::isInitialPosition(Piece* piece, int index) {
     }
 
     return false;
+}
+
+int Board::countThreatsAndProtections(Color in_colorToCountProtections, std::vector<std::pair<int, int>>& out_vectProtectingMoves, std::vector<std::pair<int, int>>& out_vectAttackingMoves)
+{
+    return 0;
+}
+
+bool Board::possibleThreatsAndProtectionsForPiece(int in_iPiecePositionToSeeMoves, std::vector<int>& out_vectPossibleMoves, std::pair<int, int> tabProtectionsAndAttacks[64])
+{
+    if(! isValidPosition(in_iPiecePositionToSeeMoves))
+    {
+        return false;
+    }
+
+    Piece* pPieceToSeeMoves = getPieceAt(in_iPiecePositionToSeeMoves);
+    if(pPieceToSeeMoves == nullptr)
+    {
+        return false;
+    }
+
+    Color currentColor = pPieceToSeeMoves->getColor();
+    Color enemyColor = Piece::getEnemyColor(currentColor);
+
+    std::vector<int> vect_validMoves;
+    possibleMovesForPiece(in_iPiecePositionToSeeMoves, vect_validMoves);
+    for (int iTargetPosition : vect_validMoves)
+    {
+        Piece* pPieceFound = getPieceAt(iTargetPosition);
+        if(pPieceFound != nullptr)
+        {
+            if(pPieceFound->getColor() == currentColor) // Si c'est une pièce allié
+            {
+                tabProtectionsAndAttacks[iTargetPosition].first++;
+            }
+            else // Si c'est une pièce ennemie
+            {
+                tabProtectionsAndAttacks[iTargetPosition].second++;
+            }
+        }
+        out_vectPossibleMoves.emplace_back(iTargetPosition);
+    }
+    return true;
 }
 
 int Board::countProtections(Piece* piece, int pos) {

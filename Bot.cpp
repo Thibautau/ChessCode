@@ -312,15 +312,27 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
     auto start = std::chrono::high_resolution_clock::now();
 
     // Obtenir les mouvements possibles
-    std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);
+    //std::vector<std::pair<int, int>> possibleMoves = board.listOfPossibleMoves(m_color);
+    std::vector<std::pair<int, int>> possibleMoves;
+    std::pair<int, int> tabProtectingAndAttackingPositions[64];
+    int tabEvaluationOfPositions[64];
+    int iBoardEvaluation = board.evaluate(m_color, possibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions);
+
+    std::ranges::stable_sort(possibleMoves.begin(), possibleMoves.end(), [&](const std::pair<int, int>& move1, const std::pair<int, int>& move2) {
+            //return board.evaluateMove(move1, m_color) > board.evaluateMove(move2, m_color);
+            return board.evaluateForNextMove(m_color, iBoardEvaluation,move1.first, move1.second, possibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions)
+                > board.evaluateForNextMove(m_color, iBoardEvaluation, move2.first, move2.second, possibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions);
+        });
+
     if (possibleMoves.empty()) {
         return;
     }
 
     // Trier les mouvements en utilisant l'évaluation optimisée
-    std::ranges::stable_sort(possibleMoves.begin(), possibleMoves.end(), [&](const std::pair<int, int>& move1, const std::pair<int, int>& move2) {
-        return board.evaluateMove(move1, m_color) > board.evaluateMove(move2, m_color);
-    });
+    /*std::ranges::stable_sort(possibleMoves.begin(), possibleMoves.end(), [&](const std::pair<int, int>& move1, const std::pair<int, int>& move2) {
+        //return board.evaluateMove(move1, m_color) > board.evaluateMove(move2, m_color);
+        return board.evaluateForNextMove(m_color, move1.first, move1.second) > board.evaluateForNextMove(m_color, move2.first, move2.second);
+    });*/
 
     // Variables de promotion
     const char* promotionTypes = nullptr;
@@ -469,7 +481,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
 
     // Détermination de la couleur à maximiser ou minimiser
     Color currentColor = estMaximisant ? m_color : (m_color == Color::WHITE ? Color::BLACK : Color::WHITE);
-    std::pair<int, int> possibleMoves[128];
+    std::pair<int, int> possibleMoves[128] = {};
     int moveCount = 0;
 
     if(depth > m_diff_between_depth) {
@@ -484,9 +496,20 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
     /*std::ranges::stable_sort(possibleMoves, possibleMoves + moveCount, std::greater<>{}, [&](const std::pair<int, int>& move) {
         return board.evaluateMove(move, m_color);
     });*/
+
+    std::pair<int, int> tabProtectingAndAttackingPositions[64];
+    std::vector<std::pair<int, int>> vectListOfPossibleMoves;
+    int tabEvaluationOfPositions[64];
+    int iBoardEvaluation = board.evaluate(currentColor, vectListOfPossibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions);
+    for (size_t i = 0; i < vectListOfPossibleMoves.size() && i < 128; ++i) {
+        possibleMoves[i] = vectListOfPossibleMoves[i];
+    }
+
     std::ranges::stable_sort(possibleMoves, possibleMoves + moveCount,
-    [&](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-        return board.evaluateMove(a, m_color) > board.evaluateMove(b, m_color);
+    [&](const std::pair<int, int>& move1, const std::pair<int, int>& move2) {
+        //return board.evaluateMove(a, m_color) > board.evaluateMove(b, m_color);
+        return board.evaluateForNextMove(currentColor, iBoardEvaluation, move1.first, move1.second, vectListOfPossibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions)
+            > board.evaluateForNextMove(currentColor, iBoardEvaluation, move2.first, move2.second, vectListOfPossibleMoves, tabProtectingAndAttackingPositions, tabEvaluationOfPositions);
     });
 
 

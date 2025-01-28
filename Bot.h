@@ -41,7 +41,6 @@ private:
     int m_max_depth = 4;
     int m_diff_between_depth = 0;
 
-
 public:
     static int nodeCount;
     //Si on a déjà parcouru un node alors on n'incrémente pas le compteur
