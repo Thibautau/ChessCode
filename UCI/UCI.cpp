@@ -12,14 +12,14 @@ GameMode UCI::m_gameMode = GameMode::JVB;
 std::atomic<bool> UCI::m_stop = false;
 int UCI::m_movetime = -1;
 std::chrono::time_point<std::chrono::high_resolution_clock> UCI::m_startTime = std::chrono::high_resolution_clock::now();
-bool UCI::m_bUseMovetime = false;
+bool UCI::m_bUseMovetime = true;
 
 UCI::UCI()
 {
     m_mainChessGame = new MainChessGame(m_gameMode);
     m_debugMode = false;
     m_stop = false;
-    m_bUseMovetime = false;
+    m_bUseMovetime = true;
 }
 
 void UCI::uciCommunication()
@@ -64,10 +64,6 @@ void UCI::uciCommunication()
         {
             std::cout << "[DEBUG] Command: stop" << std::endl;
             inputStop();
-        }
-        else if (sInput.find("setoptions") == 0)
-        {
-            //break; // Quitte la boucle si la commande "quit" est reçue
         }
         else if (sInput.find("register") == 0)
         {
@@ -151,7 +147,7 @@ void UCI::inputPosition(std::string &in_sInput) const {
 
 void UCI::inputGo(std::string &in_sInput) {
     int depth = 4;
-    int movetime = 8000;
+    int movetime = -1;
     m_startTime = std::chrono::high_resolution_clock::now();
     std::istringstream iss(in_sInput);
     std::string token;
@@ -185,7 +181,6 @@ void UCI::inputStop() {
 std::string UCI::findBestMove(int depth, int movetime) {
     std::string bestMove;
     std::cout << "Movetime:" << movetime << std::endl;
-    auto start_time = std::chrono::high_resolution_clock::now();
     for(int currentDepth = 1; currentDepth <= depth; ++currentDepth) {
         if(m_stop || timeIsUp()) {
             break;
