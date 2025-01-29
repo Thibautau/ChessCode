@@ -150,7 +150,7 @@ void UCI::inputPosition(std::string &in_sInput) const {
 }
 
 void UCI::inputGo(std::string &in_sInput) {
-    int depth = 6;
+    int depth = 4;
     int movetime = 8000;
     m_startTime = std::chrono::high_resolution_clock::now();
     std::istringstream iss(in_sInput);
