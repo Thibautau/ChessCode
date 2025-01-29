@@ -101,8 +101,8 @@ add_executable(runTestZobrist
         Type.h
         Zobrist.cpp
         Zobrist.h
-        MainChessgame.cpp
-        MainChessgame.h
+        MainChessGame.cpp
+        MainChessGame.h
         PlayerHuman.cpp
         Player.h
 )
