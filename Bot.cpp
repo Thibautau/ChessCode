@@ -374,7 +374,7 @@ void Bot::choisir_meilleur_coupv2(Board& board, int profondeur_max, std::pair<in
             }
 
             // Jouer le coup
-            bool bCanMove = board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType));
+            bool bCanMove = board.movePiece(move.first, move.second, m_color, &capturedPiece, Piece::charToPieceType(promoType), nullptr, false);
 #pragma region DEBUG
             if (m_bWriteLog) {
                 std::string logMessage = "Plateau à la profondeur :\n" + board.getBoardAsString() + "\n";
@@ -560,7 +560,7 @@ int Bot::alphaBetaWithMemory(Board& board, int depth, int alpha, int beta, bool 
             }
 
             // Jouer le coup
-            bool bCanMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType));
+            bool bCanMove = board.movePiece(move.first, move.second, currentColor, &capturedPiece, Piece::charToPieceType(promoType), nullptr, false);
 #pragma region DEBUG
             if (m_bWriteLog) {
                 std::string logMessage = "Plateau à la profondeur " + std::to_string(depth) + " :\n" + board.getBoardAsString() + "\n";
